@@ -9,7 +9,9 @@ export default function CurrentSong({ currentSong }) {
           <FontAwesome name="play" className="mr-2" />
           {currentSong.filename}
         </h4>
-        <p className="mb-0">since {new Date(currentSong.playingSince).toLocaleTimeString()}</p>
+        <p className="mb-0">
+          since <span suppressHydrationWarning>{new Date(currentSong.playingSince).toLocaleTimeString()}</span>
+        </p>
       </Alert>
     )
   );
