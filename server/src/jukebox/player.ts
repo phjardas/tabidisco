@@ -1,19 +1,22 @@
 import { EventEmitter } from 'events';
 
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
+import { Song, Playback, LogLevel } from './api';
 
-export interface Song {
-  filename: string;
+export interface IPlayer {
+  on: {
+    (type: 'end', listener: (event: { song: Song; force: boolean }) => void): void;
+    (type: 'log', listener: (level: LogLevel, message: string, ...args: any[]) => void): void;
+  };
 }
 
-export class Player extends EventEmitter {
-  private song?: Song;
+export class Player extends EventEmitter implements IPlayer {
+  private song?: Playback;
 
   get playing(): boolean {
     return !!this.song;
   }
 
-  get currentSong(): Song | undefined {
+  get currentSong(): Playback | undefined {
     return this.song;
   }
 
@@ -25,14 +28,14 @@ export class Player extends EventEmitter {
   async play(song: Song): Promise<any> {
     await this.stop();
     this.log('info', 'playing', song);
-    this.song = song;
-    this.emit('play', { song });
+    this.song = { ...song, playingSince: new Date() };
+    this.emit('play', { song: this.song });
 
     setTimeout(() => {
-      if (this.song === song) {
-        this.log('info', 'finished', song);
+      if (this.song.tokenId === song.tokenId) {
+        this.log('info', 'finished', this.song);
         this.song = undefined;
-        this.emit('stop', { song, force: false });
+        this.emit('stop', { song: this.song, force: false });
       }
     }, 5000);
   }
