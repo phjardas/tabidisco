@@ -1,15 +1,27 @@
-import { Navbar, NavbarBrand } from 'reactstrap';
+import Head from 'next/head';
+import { Container, Navbar, NavbarBrand } from 'reactstrap';
 
+import FontAwesome from './FontAwesome';
 import '../styles.scss';
 
-export default ({ children }) => (
-  <React.Fragment>
-    <Navbar color="primary" dark>
-      <div className="container">
-        <NavbarBrand href="/">Tabi-Disco</NavbarBrand>
-      </div>
-    </Navbar>
+export default function Layout({ children }) {
+  return (
+    <React.Fragment>
+      <Head>
+        <script src="https://use.fontawesome.com/releases/v5.0.6/js/solid.js" crossOrigin="anonymous" />
+        <script src="https://use.fontawesome.com/releases/v5.0.6/js/fontawesome.js" crossOrigin="anonymous" />
+      </Head>
 
-    <div>{children}</div>
-  </React.Fragment>
-);
+      <Navbar color="primary" dark>
+        <Container>
+          <NavbarBrand href="/">
+            <FontAwesome name="music" className="mr-2" />
+            Tabi-Disco
+          </NavbarBrand>
+        </Container>
+      </Navbar>
+
+      {children}
+    </React.Fragment>
+  );
+}
