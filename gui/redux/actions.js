@@ -54,3 +54,14 @@ export function synchronize() {
 export function playSong(tokenId) {
   return async dispatch => io.emit('play', tokenId);
 }
+
+export function uploadSong(tokenId, file) {
+  return async dispatch => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    await api.put(`/songs/${tokenId}`, formData, {
+      headers: { 'content-type': 'multipart/form-data' },
+    });
+  };
+}

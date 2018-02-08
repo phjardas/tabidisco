@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from 'reactstrap';
 
-import { withRedux, loadSongs, getCurrentSong, synchronize, playSong } from '../redux';
+import { withRedux, loadSongs, getCurrentSong, synchronize, playSong, uploadSong } from '../redux';
 import Layout from '../components/Layout';
 import Dashboard from '../components/Dashboard';
 
@@ -16,7 +16,12 @@ class Home extends React.Component {
 
     return (
       <Layout>
-        <Dashboard songs={songs} currentSong={currentSong} play={tokenId => dispatch(playSong(tokenId))} />
+        <Dashboard
+          songs={songs}
+          currentSong={currentSong}
+          play={tokenId => dispatch(playSong(tokenId))}
+          uploadSong={({ tokenId, file }) => dispatch(uploadSong(tokenId, file))}
+        />
       </Layout>
     );
   }
