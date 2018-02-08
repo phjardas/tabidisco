@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "es6",
+    "sourceMap": true,
+    "declaration": true,
+    "outDir": "dist",
+    "sourceRoot": "./src",
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}
