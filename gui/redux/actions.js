@@ -1,7 +1,7 @@
 import axios from 'axios';
 import SocketIO from 'socket.io-client';
 
-import { PLAY, STOP, SONGS_LOADED } from './types';
+import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED } from './types';
 
 // FIXME make API URL configurable
 const apiUrl = 'http://localhost:3001';
@@ -47,12 +47,25 @@ export function synchronize() {
     if (io) {
       io.on('play', event => dispatch({ type: PLAY, payload: event }));
       io.on('stop', event => dispatch({ type: STOP, payload: event }));
+      io.on('song_added', event => dispatch({ type: SONG_ADDED, payload: event }));
+      io.on('song_modified', event => dispatch({ type: SONG_MODIFIED, payload: event }));
+      io.on('song_deleted', event => dispatch({ type: SONG_DELETED, payload: event }));
     }
   };
 }
 
 export function playSong(tokenId) {
-  return async dispatch => io.emit('play', tokenId);
+  return async dispatch => api.post('/play', { tokenId });
+}
+
+export function stopSong() {
+  return async dispatch => api.post('/stop');
+}
+
+export function deleteSong(tokenId) {
+  return async dispatch => {
+    await api.delete(`/songs/${tokenId}`);
+  };
 }
 
 export function uploadSong(tokenId, file) {

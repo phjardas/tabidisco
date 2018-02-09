@@ -1,55 +1,46 @@
-import { EventEmitter } from 'events';
+import { Observable, BehaviorSubject } from 'rxjs';
 
-import { Song, Playback, LogLevel } from './api';
+import { Song, Playback, Player, PlayerEvent, PlayEvent, StopEvent } from './api';
+import { EventsSupport } from './events';
 
-export interface IPlayer {
-  on: {
-    (type: 'end', listener: (event: { song: Song; force: boolean }) => void): void;
-    (type: 'log', listener: (level: LogLevel, message: string, ...args: any[]) => void): void;
-  };
-}
-
-export class Player extends EventEmitter implements IPlayer {
+export class PlayerImpl extends EventsSupport<PlayerEvent> implements Player {
   private song?: Playback;
-
-  get playing(): boolean {
-    return !!this.song;
-  }
-
-  get currentSong(): Playback | undefined {
-    return this.song;
-  }
+  private readonly _currentSong = new BehaviorSubject<Playback>(null);
+  readonly currentSong: Observable<Playback> = this._currentSong.asObservable();
 
   /**
    * Play the given song.
    *
    * @returns a promise that will resolve when the song has started.
    */
-  async play(song: Song): Promise<any> {
-    await this.stop();
+  play(song: Song): Observable<Playback> {
+    this.stop();
     this.log('info', 'playing', song);
-    this.song = { ...song, playingSince: new Date() };
-    this.emit('play', { song: this.song });
+    this.setSong({ ...song, playingSince: new Date() });
+    this.emit(new PlayEvent(this.song));
 
     setTimeout(() => {
       if (this.song.tokenId === song.tokenId) {
         this.log('info', 'finished', this.song);
-        this.song = undefined;
-        this.emit('stop', { song: this.song, force: false });
+        this.setSong();
+        this.emit(new StopEvent(this.song, false));
       }
     }, 5000);
+
+    return Observable.of(this.song);
   }
 
   stop() {
-    if (this.playing) {
+    if (this.song) {
       const song = this.song;
       this.log('info', 'stopping', song);
-      this.song = undefined;
-      this.emit('stop', { song, force: true });
+      this.setSong();
+      this.emit(new StopEvent(this.song, true));
     }
   }
 
-  private log(level: LogLevel, ...args: any[]) {
-    this.emit('log', level, ...args);
+  private setSong(song?: Playback): void {
+    this.song = song;
+    this._currentSong.next(song);
   }
 }

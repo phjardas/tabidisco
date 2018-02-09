@@ -3,7 +3,7 @@ export default function FontAwesome({ name, className, ...props }) {
 
   return (
     <span suppressHydrationWarning>
-      <i className={className} {...props} />
+      <i className={className} title={name} {...props} />
     </span>
   );
 }

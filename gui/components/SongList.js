@@ -1,7 +1,7 @@
-import { ListGroup, ListGroupItem, ListGroupItemHeading, ListGroupItemText, Alert } from 'reactstrap';
+import { Button, ButtonGroup, ListGroup, ListGroupItem, ListGroupItemHeading, Alert } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
-export default function Library({ songs, currentSong, play }) {
+export default function Library({ songs, currentSong, play, deleteSong }) {
   const sortedSongs = Object.keys(songs)
     .map(id => songs[id])
     .sort((a, b) => a.filename.localeCompare(b.filename));
@@ -11,28 +11,21 @@ export default function Library({ songs, currentSong, play }) {
       {sortedSongs.map(song => (
         <ListGroupItem
           key={song.tokenId}
-          action
           active={currentSong && currentSong.tokenId === song.tokenId}
-          style={{ cursor: 'pointer' }}
-          onClick={e => {
-            e.preventDefault();
-            play(song.tokenId);
-          }}
+          className="d-flex justify-content-between align-items-center"
         >
-          <ListGroupItemHeading>
+          <ListGroupItemHeading className="mb-0">
             {currentSong && currentSong.tokenId === song.tokenId && <FontAwesome name="play" className="mr-2" />}
             {song.filename}
           </ListGroupItemHeading>
-          <ListGroupItemText className="mb-0">
-            <dl className="row">
-              <dt className="col-3">ID</dt>
-              <dd className="col-9">{song.tokenId}</dd>
-              <dt className="col-3">Type</dt>
-              <dd className="col-9">{song.type}</dd>
-              <dt className="col-3">Size</dt>
-              <dd className="col-9">{song.size}</dd>
-            </dl>
-          </ListGroupItemText>
+          <ButtonGroup>
+            <Button color="primary" onClick={() => play(song.tokenId)}>
+              play
+            </Button>
+            <Button color="danger" outline onClick={() => deleteSong(song.tokenId)}>
+              delete
+            </Button>
+          </ButtonGroup>
         </ListGroupItem>
       ))}
     </ListGroup>

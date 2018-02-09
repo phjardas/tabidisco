@@ -1,39 +1,23 @@
-import { EventEmitter } from 'events';
+import { Observable } from 'rxjs';
 
-import { Library, Playback, LogLevel } from './api';
-import { Player } from './player';
+import { Library, Jukebox, Playback, Player, JukeboxEvent } from './api';
+import { EventsSupport } from './events';
 
-export interface IJukebox {
-  on: {
-    (type: 'log', listener: (level: LogLevel, message: string, ...args: any[]) => void): void;
-  };
-}
+export class JukeboxImpl extends EventsSupport<JukeboxEvent> implements Jukebox {
+  readonly currentSong: Observable<Playback>;
 
-export class Jukebox extends EventEmitter implements IJukebox {
-  private readonly player = new Player();
-
-  constructor(private readonly library: Library) {
+  constructor(private readonly player: Player, private readonly library: Library) {
     super();
-    this.player.on('log', (level, message, ...args) => this.log(level, `[player] ${message}`, ...args));
-    this.player.on('play', evt => this.emit('play', evt));
-    this.player.on('stop', evt => this.emit('stop', evt));
+    this.currentSong = player.currentSong;
+    this.player.events.subscribe(this.emit.bind(this));
   }
 
-  get currentSong(): Playback {
-    return this.player.currentSong;
-  }
-
-  async playSong(tokenId: string): Promise<any> {
-    const song = await this.library.getSong(tokenId);
-    if (!song) throw new Error(`Song not found: ${tokenId}`);
-    await this.player.play(song);
+  playSong(tokenId: string): Observable<Playback> {
+    console.log('play:', tokenId);
+    return this.library.getSong(tokenId).flatMap(song => this.player.play(song));
   }
 
   stop() {
     this.player.stop();
-  }
-
-  private log(level: LogLevel, message: string, ...args: any[]) {
-    this.emit('log', level, `[jukebox] ${message}`, ...args);
   }
 }
