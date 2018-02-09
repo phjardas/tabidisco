@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ListGroup, ListGroupItem, ListGroupItemHeading, Alert } from 'reactstrap';
+import { Button, ButtonGroup, ListGroup, ListGroupItem, ListGroupItemHeading, Alert, ListGroupItemText } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
 export default function Library({ songs, currentSong, play, deleteSong }) {
@@ -14,10 +14,17 @@ export default function Library({ songs, currentSong, play, deleteSong }) {
           active={currentSong && currentSong.tokenId === song.tokenId}
           className="d-flex justify-content-between align-items-center"
         >
-          <ListGroupItemHeading className="mb-0">
-            {currentSong && currentSong.tokenId === song.tokenId && <FontAwesome name="play" className="mr-2" />}
-            {song.filename}
-          </ListGroupItemHeading>
+          <div>
+            <h5>
+              {currentSong && currentSong.tokenId === song.tokenId && <FontAwesome name="play" className="mr-2" />}
+              {song.title || song.filename}
+            </h5>
+            <p className="mb-0">
+              {song.artist || <em className="text-muted">unknown artist</em>}
+              <br />
+              <small class="text-muted">{song.tokenId}</small>
+            </p>
+          </div>
           <ButtonGroup>
             <Button color="primary" onClick={() => play(song.tokenId)}>
               play

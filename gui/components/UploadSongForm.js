@@ -6,6 +6,7 @@ export default class UploadSongForm extends React.Component {
 
   render() {
     const { uploadSong } = this.props;
+    const { tokenId, file } = this.state;
 
     return (
       <Form
@@ -18,7 +19,7 @@ export default class UploadSongForm extends React.Component {
           <Col xs={12} md={6} lg={5}>
             <FormGroup>
               <Label for="tokenId">Token ID</Label>
-              <Input id="tokenId" required onChange={e => this.setState({ tokenId: e.target.value })} />
+              <Input id="tokenId" required value={tokenId} onChange={e => this.setState({ tokenId: e.target.value })} />
             </FormGroup>
           </Col>
           <Col xs={12} md={5}>
@@ -33,7 +34,7 @@ export default class UploadSongForm extends React.Component {
                   onChange={e => this.setState({ file: e.target.files[0] })}
                 />
                 <label className="custom-file-label" htmlFor="file">
-                  Choose file
+                  {file ? file.name : 'Choose file'}
                 </label>
               </div>
             </FormGroup>

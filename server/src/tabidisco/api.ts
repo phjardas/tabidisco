@@ -1,7 +1,13 @@
 import { Observable } from 'rxjs';
 import { Event, LogEvent, Events } from '../events';
 
-export interface Song {
+export interface SongTags {
+  title?: string;
+  artist?: string;
+  album?: string;
+}
+
+export interface Song extends SongTags {
   readonly tokenId: string;
   readonly file: string;
   readonly filename: string;
