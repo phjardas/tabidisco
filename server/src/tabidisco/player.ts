@@ -1,7 +1,7 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { Song, Playback, Player, PlayerEvent, PlayEvent, StopEvent } from './api';
-import { EventsSupport } from './events';
+import { EventsSupport } from '../events';
 
 export class PlayerImpl extends EventsSupport<PlayerEvent> implements Player {
   private song?: Playback;

@@ -1,14 +1,14 @@
 import { Observable } from 'rxjs';
 
-import { Song, Jukebox, Library, Playback, EventsSupport } from '../jukebox';
-import { TabiDisco, TabiDiscoEvent } from './api';
+import { Song, Player, Library, Playback, TabiDisco, TabiDiscoEvent } from './api';
+import { EventsSupport } from '../events';
 import { PiAdapter } from '../pi';
 
 export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements TabiDisco {
   events: Observable<TabiDiscoEvent>;
-  constructor(private readonly library: Library, private readonly jukebox: Jukebox, private readonly pi: PiAdapter) {
+  constructor(private readonly library: Library, private readonly player: Player, private readonly pi: PiAdapter) {
     super();
-    jukebox.events.subscribe(this.emit.bind(this));
+    player.events.subscribe(this.emit.bind(this));
     library.events.subscribe(this.emit.bind(this));
     pi.events.subscribe(this.emit.bind(this));
   }
@@ -18,15 +18,15 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
   }
 
   get currentSong() {
-    return this.jukebox.currentSong;
+    return this.player.currentSong;
   }
 
   playSong(tokenId: string): Observable<Playback> {
-    return this.jukebox.playSong(tokenId);
+    return this.library.getSong(tokenId).flatMap(song => this.player.play(song));
   }
 
   stop(): void {
-    this.jukebox.stop();
+    this.player.stop();
   }
 
   setSong(tokenId: string, filename: string, buffer: Buffer): Observable<Song> {

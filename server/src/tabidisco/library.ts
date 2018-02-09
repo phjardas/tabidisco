@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { Library, Song, LibraryEvent, SongAdded, SongModified, SongDeleted } from './api';
-import { EventsSupport } from './events';
+import { EventsSupport } from '../events';
 
 type SongMap = { [tokenId: string]: Song };
 

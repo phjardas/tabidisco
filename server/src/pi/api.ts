@@ -1,4 +1,4 @@
-import { Events, LogEvent } from '../jukebox/events';
+import { Events, LogEvent } from '../events';
 
 export type PiEvent = LogEvent;
 
