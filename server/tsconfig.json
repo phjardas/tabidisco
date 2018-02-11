@@ -8,6 +8,7 @@
     "sourceRoot": "./src",
     "noImplicitAny": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "types": ["./types"]
   }
 }

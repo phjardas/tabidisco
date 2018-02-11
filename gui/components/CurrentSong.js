@@ -1,17 +1,22 @@
-import { Alert } from 'reactstrap';
+import { Alert, Button } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
-export default function CurrentSong({ currentSong }) {
+export default function CurrentSong({ currentSong, stopSong }) {
   return (
     currentSong && (
-      <Alert color="info">
-        <h4 className="alert-heading">
-          <FontAwesome name="play" className="mr-2" />
-          {currentSong.filename}
-        </h4>
-        <p className="mb-0">
-          since <span suppressHydrationWarning>{new Date(currentSong.playingSince).toLocaleTimeString()}</span>
-        </p>
+      <Alert color="info" className="d-flex justify-content-between align-items-center">
+        <div>
+          <h4 className="alert-heading">
+            <FontAwesome name="play" className="mr-2" />
+            {currentSong.filename}
+          </h4>
+          <span suppressHydrationWarning>since {new Date(currentSong.playingSince).toLocaleTimeString()}</span>
+        </div>
+        <div>
+          <Button color="primary" onClick={stopSong()}>
+            stop
+          </Button>
+        </div>
       </Alert>
     )
   );
