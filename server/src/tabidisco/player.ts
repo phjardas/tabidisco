@@ -1,54 +1,54 @@
-import { Observable, BehaviorSubject } from 'rxjs';
-import Mp3Player = require('player');
+import * as fs from 'fs';
+import { Observable, Observer, Subject } from 'rxjs';
+import { Decoder } from 'lame';
+import * as Speaker from 'speaker';
 
-import { Song, Playback, Player, PlayerEvent, PlayEvent, StopEvent } from './api';
-import { EventsSupport } from '../events';
+import { Player, Play, SongStartedEvent, SongFinishedEvent } from './api';
 
-export class PlayerImpl extends EventsSupport<PlayerEvent> implements Player {
-  private player?: Mp3Player;
-  private song?: Playback;
-  private readonly _currentSong = new BehaviorSubject<Playback>(null);
-  readonly currentSong: Observable<Playback> = this._currentSong.asObservable();
+class PlayImpl implements Play {
+  readonly events = new Subject<SongStartedEvent | SongFinishedEvent>();
+  private speaker: any;
 
-  constructor() {
-    super();
+  constructor(format: any, private stream: any) {
+    this.speaker = new Speaker(format);
+    this.speaker.on('close', () => {
+      this.events.next(new SongFinishedEvent());
+      this.events.complete();
+    });
   }
 
-  /**
-   * Play the given song.
-   *
-   * @returns a promise that will resolve when the song has started.
-   */
-  play(song: Song): Observable<Playback> {
-    this.stop();
-    this.log('info', '[player] playing', song);
-    this.player = new Mp3Player(song.file);
-    this.player.on('playend', () => this.stopped());
-    this.player.on('error', err => this.log('warn', '[player] error playing song %s:', song.file, err));
-    this.player.play();
-    this.setSong({ ...song, playingSince: new Date() });
-    this.emit(new PlayEvent(this.song));
-
-    return Observable.of(this.song);
+  start() {
+    this.stream.pipe(this.speaker);
+    this.events.next(new SongStartedEvent());
   }
 
   stop() {
-    if (this.song) {
-      this.player.stop();
-      this.player = undefined;
-      this.stopped();
-    }
-  }
+    return Observable.create((obs: Observer<any>) => {
+      this.speaker.on('close', () => {
+        obs.next(null);
+        obs.complete();
+      });
 
-  private stopped() {
-    this.log('info', '[player] stopped', this.song);
-    const song = this.song;
-    this.setSong();
-    this.emit(new StopEvent(song, true));
+      this.stream.unpipe();
+      this.speaker.end();
+    });
   }
+}
 
-  private setSong(song?: Playback): void {
-    this.song = song;
-    this._currentSong.next(song);
+export class PlayerImpl implements Player {
+  play(file: string): Observable<Play> {
+    const stream = fs.createReadStream(file);
+    const lame = new Decoder();
+
+    return Observable.create((obs: Observer<Play>) =>
+      stream
+        .pipe(lame)
+        .once('format', function(format: any) {
+          const play = new PlayImpl(format, this);
+          obs.next(play);
+          play.start();
+        })
+        .on('error', (err: Error) => obs.error(err))
+    );
   }
 }

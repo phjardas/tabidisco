@@ -43,6 +43,23 @@ export interface Library extends Events<LibraryEvent> {
   deleteSong(tokenId: string): Observable<any>;
 }
 
+export class SongStartedEvent {
+  constructor() {}
+}
+
+export class SongFinishedEvent {
+  constructor() {}
+}
+
+export interface Play {
+  events: Observable<SongStartedEvent | SongFinishedEvent>;
+  stop(): Observable<any>;
+}
+
+export interface Player {
+  play(file: string): Observable<Play>;
+}
+
 export class PlayEvent implements Event {
   readonly type = 'play';
   constructor(readonly song: Playback) {}
@@ -50,18 +67,10 @@ export class PlayEvent implements Event {
 
 export class StopEvent implements Event {
   readonly type = 'stop';
-  constructor(readonly song: Playback, readonly force: boolean) {}
+  constructor(readonly song: Playback) {}
 }
 
-export type PlayerEvent = PlayEvent | StopEvent | LogEvent;
-
-export interface Player extends Events<PlayerEvent> {
-  readonly currentSong: Observable<Playback>;
-  play(song: Song): Observable<Playback>;
-  stop(): void;
-}
-
-export type TabiDiscoEvent = PlayerEvent | LibraryEvent | LogEvent;
+export type TabiDiscoEvent = LibraryEvent | PlayEvent | StopEvent | LogEvent;
 
 export interface TabiDisco extends Events<TabiDiscoEvent> {
   readonly songs: Observable<Song[]>;
@@ -69,5 +78,5 @@ export interface TabiDisco extends Events<TabiDiscoEvent> {
   setSong(tokenId: string, filename: string, buffer: Buffer): Observable<Song>;
   deleteSong(tokenId: string): Observable<any>;
   playSong(tokenId: string): Observable<Playback>;
-  stop(): void;
+  stop(): Observable<any>;
 }

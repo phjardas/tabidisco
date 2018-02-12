@@ -21,10 +21,7 @@ app.delete('/songs/:id', (req, res, next) => tabidisco.deleteSong(req.params.id)
 app.get('/current', (_, res, next) => tabidisco.currentSong.first().subscribe(song => res.json({ song }), next));
 
 app.post('/play', (req, res, next) => tabidisco.playSong(req.body.tokenId).subscribe(song => res.json({ song }), next));
-app.post('/stop', (_, res) => {
-  tabidisco.stop();
-  res.status(204).end();
-});
+app.post('/stop', (_, res) => tabidisco.stop().subscribe(() => res.status(204).end()));
 
 const upload = multer();
 app.put('/songs/:tokenId', upload.single('file'), (req, res, next) => {
