@@ -14,7 +14,7 @@ export default function CurrentSong({ currentSong, stopSong }) {
         </div>
         <div>
           <Button color="primary" onClick={stopSong()}>
-            stop
+            <FontAwesome name="stop" />
           </Button>
         </div>
       </Alert>

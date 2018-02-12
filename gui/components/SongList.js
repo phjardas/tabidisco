@@ -25,15 +25,19 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
             </div>
             {active ? (
               <Button color="primary" onClick={stopSong}>
-                stop
+                <FontAwesome name="stop" />
               </Button>
             ) : (
               <ButtonGroup>
                 <Button color="primary" onClick={() => play(song.tokenId)}>
-                  play
+                  <FontAwesome name="play" />
                 </Button>
-                <Button color="danger" outline onClick={() => deleteSong(song.tokenId)}>
-                  delete
+                <Button
+                  color="danger"
+                  outline
+                  onClick={() => confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
+                >
+                  <FontAwesome name="trash" />
                 </Button>
               </ButtonGroup>
             )}
