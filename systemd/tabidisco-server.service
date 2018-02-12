@@ -1,0 +1,15 @@
+[Unit]
+Description=Tabidisco Server
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/home/pi/tabi-disco/server
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tabidisco-server
+Environment=NODE_ENV=production PORT=3001
+
+[Install]
+WantedBy=multi-user.target
