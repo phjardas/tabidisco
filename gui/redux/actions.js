@@ -4,7 +4,7 @@ import SocketIO from 'socket.io-client';
 import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED } from './types';
 
 // FIXME make API URL configurable
-const apiUrl = 'http://localhost:3001';
+const apiUrl = typeof window !== 'undefined' ? location.href.replace(3000, 3001) : 'http://localhost:3001';
 const wsUrl = apiUrl.replace(/^http/, 'ws');
 
 const api = axios.create({
