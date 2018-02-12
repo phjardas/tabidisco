@@ -22,7 +22,7 @@ class Home extends React.Component {
           play={tokenId => dispatch(playSong(tokenId))}
           deleteSong={tokenId => dispatch(deleteSong(tokenId))}
           uploadSong={({ tokenId, file }) => dispatch(uploadSong(tokenId, file))}
-          stopSong={stopSong}
+          stopSong={() => dispatch(stopSong())}
         />
       </Layout>
     );
