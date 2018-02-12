@@ -1,10 +1,9 @@
-import { Observable, Observer } from 'rxjs';
-import * as fs from 'fs';
+import { Observable } from 'rxjs';
 import * as path from 'path';
 
 import { readFile, writeFile, deleteFile } from './io';
 import { parseTags } from './mp3';
-import { Library, Song, SongTags, LibraryEvent, SongAdded, SongModified, SongDeleted } from './api';
+import { Library, Song, LibraryEvent, SongAdded, SongModified, SongDeleted } from './api';
 import { EventsSupport } from '../events';
 
 type SongMap = { [tokenId: string]: Song };

@@ -24,7 +24,7 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
   constructor(private readonly library: Library, private readonly player: Player, private readonly pi: PiAdapter) {
     super();
     library.events.subscribe(this.emit.bind(this));
-    pi.events.subscribe(this.emit.bind(this));
+    this.pi.events.subscribe(this.emit.bind(this));
   }
 
   get songs() {
@@ -54,7 +54,7 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
         return play.events
           .filter(e => e instanceof SongStartedEvent)
           .first()
-          .map(e => ({ playingSince: new Date(), ...song }))
+          .map(() => ({ playingSince: new Date(), ...song }))
           .do(p => this._currentSong.next(p));
       });
   }
