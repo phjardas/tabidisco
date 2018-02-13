@@ -1,4 +1,4 @@
-import { Observable, Observer, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 import {
   Song,
