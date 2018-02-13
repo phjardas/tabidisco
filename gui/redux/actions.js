@@ -1,5 +1,6 @@
 import axios from 'axios';
 import SocketIO from 'socket.io-client';
+import { actions as notifActions } from 'redux-notifications';
 
 import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED } from './types';
 
@@ -15,6 +16,18 @@ let io;
 
 if (typeof window !== 'undefined') {
   io = SocketIO(wsUrl);
+}
+
+export function pressButton(button) {
+  return async dispatch => {
+    try {
+      const { data } = await api.post(`/button/${button}`);
+      dispatch(notifActions.notifSend({ message: 'Button press succeeded.', kind: 'info', dismissAfter: 2000 }));
+    } catch (err) {
+      const { data } = err.response;
+      dispatch(notifActions.notifSend({ message: `Error pressing ${button} button: ${data.message}`, kind: 'error', dismissAfter: 5000 }));
+    }
+  };
 }
 
 export function loadSongs() {
@@ -73,8 +86,14 @@ export function uploadSong(tokenId, file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    await api.put(`/songs/${tokenId}`, formData, {
-      headers: { 'content-type': 'multipart/form-data' },
-    });
+    try {
+      await api.put(`/songs/${tokenId}`, formData, {
+        headers: { 'content-type': 'multipart/form-data' },
+      });
+      dispatch(notifActions.notifSend({ message: 'Song uploaded.', kind: 'info', dismissAfter: 2000 }));
+    } catch (err) {
+      const { data } = err.response;
+      dispatch(notifActions.notifSend({ message: `Song upload failed: ${data.message}`, kind: 'error', dismissAfter: 5000 }));
+    }
   };
 }

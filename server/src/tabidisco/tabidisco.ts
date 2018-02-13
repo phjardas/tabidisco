@@ -1,4 +1,4 @@
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, Observer, BehaviorSubject } from 'rxjs';
 
 import {
   Song,
@@ -14,7 +14,7 @@ import {
   SongFinishedEvent,
 } from './api';
 import { EventsSupport } from '../events';
-import { PiAdapter } from '../pi';
+import { PiAdapter, ButtonPressed, ButtonId } from '../pi';
 
 export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements TabiDisco {
   private play?: Play;
@@ -24,7 +24,11 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
   constructor(private readonly library: Library, private readonly player: Player, private readonly pi: PiAdapter) {
     super();
     library.events.subscribe(this.emit.bind(this));
-    this.pi.events.subscribe(this.emit.bind(this));
+    pi.events.subscribe(this.emit.bind(this));
+    pi.events
+      .filter(e => e instanceof ButtonPressed)
+      .flatMap((btn: ButtonPressed) => this.onButton(btn.button))
+      .subscribe(() => {}, err => this.log('error', '[tabidisco] error pressing button:', err));
   }
 
   get songs() {
@@ -73,5 +77,24 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
 
   deleteSong(tokenId: string): Observable<any> {
     return this.library.deleteSong(tokenId);
+  }
+
+  readToken(): Observable<string> {
+    return this.pi.readToken();
+  }
+
+  onButton(button: ButtonId): Observable<any> {
+    console.log('button pressed: %s', button);
+
+    switch (button) {
+      case 'play':
+        return this.readToken().flatMap(tokenId => this.playSong(tokenId));
+
+      case 'stop':
+        return this.stop();
+
+      default:
+        return Observable.throw(new Error(`Unrecognized button type: ${button}`));
+    }
   }
 }

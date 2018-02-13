@@ -1,10 +1,13 @@
 import Head from 'next/head';
-import { Container, Navbar, NavbarBrand } from 'reactstrap';
+import { connect } from 'react-redux';
+import { Container, Alert, Button, ButtonGroup, Navbar, NavbarBrand } from 'reactstrap';
+import { Notifs } from 'redux-notifications';
 
+import { pressButton } from '../redux';
 import FontAwesome from './FontAwesome';
 import '../styles.scss';
 
-export default function Layout({ children }) {
+function Layout({ children, dispatch }) {
   return (
     <React.Fragment>
       <Head>
@@ -14,15 +17,27 @@ export default function Layout({ children }) {
       </Head>
 
       <Navbar color="primary" dark>
-        <Container>
+        <Container className="d-flex justify-content-between">
           <NavbarBrand href="/">
             <FontAwesome name="music" className="mr-2" />
             Tabi-Disco
           </NavbarBrand>
+          <div className="ml-auto">
+            <Button color="success" style={{ borderRadius: '50%' }} onClick={() => dispatch(pressButton('play'))}>
+              <FontAwesome name="play" />
+            </Button>
+            <Button color="danger" style={{ borderRadius: '50%', marginLeft: '.5rem' }} onClick={() => dispatch(pressButton('stop'))}>
+              <FontAwesome name="stop" />
+            </Button>
+          </div>
         </Container>
       </Navbar>
 
       {children}
+
+      <Notifs CustomComponent={({ kind, message }) => <Alert color={kind === 'error' ? 'danger' : kind}>{message}</Alert>} />
     </React.Fragment>
   );
 }
+
+export default connect()(Layout);

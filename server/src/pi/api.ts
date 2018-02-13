@@ -1,5 +1,16 @@
-import { Events, LogEvent } from '../events';
+import { Observable } from 'rxjs';
 
-export type PiEvent = LogEvent;
+import { Events, LogEvent, Event } from '../events';
 
-export interface PiAdapter extends Events<PiEvent> {}
+export type ButtonId = 'play' | 'stop';
+
+export class ButtonPressed implements Event {
+  readonly type = 'button_pressed';
+  constructor(readonly button: ButtonId) {}
+}
+
+export type PiEvent = ButtonPressed | LogEvent;
+
+export interface PiAdapter extends Events<PiEvent> {
+  readToken(): Observable<string>;
+}

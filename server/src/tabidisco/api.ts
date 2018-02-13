@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { Event, LogEvent, Events } from '../events';
+import { PiEvent, ButtonId } from '../pi';
 
 export interface SongTags {
   title?: string;
@@ -70,7 +71,7 @@ export class StopEvent implements Event {
   constructor(readonly song: Playback) {}
 }
 
-export type TabiDiscoEvent = LibraryEvent | PlayEvent | StopEvent | LogEvent;
+export type TabiDiscoEvent = LibraryEvent | PlayEvent | StopEvent | PiEvent | LogEvent;
 
 export interface TabiDisco extends Events<TabiDiscoEvent> {
   readonly songs: Observable<Song[]>;
@@ -79,4 +80,6 @@ export interface TabiDisco extends Events<TabiDiscoEvent> {
   deleteSong(tokenId: string): Observable<any>;
   playSong(tokenId: string): Observable<Playback>;
   stop(): Observable<any>;
+  readToken(): Observable<string>;
+  onButton(button: ButtonId): Observable<any>;
 }
