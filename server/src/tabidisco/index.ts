@@ -10,5 +10,3 @@ const pi = new MockPiAdapter();
 
 export * from './api';
 export const tabidisco: TabiDisco = new TabiDiscoImpl(library, player, pi);
-
-tabidisco.events.subscribe(event => console.log('[%s]', event.type, JSON.stringify(event)));

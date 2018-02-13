@@ -2,10 +2,10 @@ import axios from 'axios';
 import SocketIO from 'socket.io-client';
 import { actions as notifActions } from 'redux-notifications';
 
-import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED } from './types';
+import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT, EVENTS_LOADED } from './types';
 
 // FIXME make API URL configurable
-const apiUrl = typeof window !== 'undefined' ? location.href.replace(3000, 3001) : 'http://localhost:3001';
+const apiUrl = typeof window !== 'undefined' ? location.origin.replace(3000, 3001) : 'http://localhost:3001';
 const wsUrl = apiUrl.replace(/^http/, 'ws');
 
 const api = axios.create({
@@ -58,11 +58,21 @@ export function getCurrentSong() {
 export function synchronize() {
   return dispatch => {
     if (io) {
-      io.on('play', event => dispatch({ type: PLAY, payload: event }));
-      io.on('stop', event => dispatch({ type: STOP, payload: event }));
-      io.on('song_added', event => dispatch({ type: SONG_ADDED, payload: event }));
-      io.on('song_modified', event => dispatch({ type: SONG_MODIFIED, payload: event }));
-      io.on('song_deleted', event => dispatch({ type: SONG_DELETED, payload: event }));
+      io.on('event', event => {
+        dispatch({ type: EVENT, payload: event });
+        switch (event.type) {
+          case 'play':
+            return dispatch({ type: PLAY, payload: event });
+          case 'stop':
+            return dispatch({ type: STOP, payload: event });
+          case 'song_added':
+            return dispatch({ type: SONG_ADDED, payload: event });
+          case 'song_modified':
+            return dispatch({ type: SONG_MODIFIED, payload: event });
+          case 'song_deleted':
+            return dispatch({ type: SONG_DELETED, payload: event });
+        }
+      });
     }
   };
 }
@@ -95,5 +105,13 @@ export function uploadSong(file) {
       const { data } = err.response;
       dispatch(notifActions.notifSend({ message: `Song upload failed: ${data.message}`, kind: 'error', dismissAfter: 5000 }));
     }
+  };
+}
+
+export function loadEvents() {
+  return async dispatch => {
+    console.log('loading events');
+    const { data } = await api.get('/events');
+    dispatch({ type: EVENTS_LOADED, payload: data });
   };
 }

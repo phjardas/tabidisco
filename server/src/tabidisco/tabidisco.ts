@@ -84,8 +84,6 @@ export class TabiDiscoImpl extends EventsSupport<TabiDiscoEvent> implements Tabi
   }
 
   onButton(button: ButtonId): Observable<any> {
-    console.log('button pressed: %s', button);
-
     switch (button) {
       case 'play':
         return this.readToken().flatMap(tokenId => this.playSong(tokenId));
