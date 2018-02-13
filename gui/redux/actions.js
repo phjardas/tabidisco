@@ -81,13 +81,13 @@ export function deleteSong(tokenId) {
   };
 }
 
-export function uploadSong(tokenId, file) {
+export function uploadSong(file) {
   return async dispatch => {
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      await api.put(`/songs/${tokenId}`, formData, {
+      await api.post(`/songs`, formData, {
         headers: { 'content-type': 'multipart/form-data' },
       });
       dispatch(notifActions.notifSend({ message: 'Song uploaded.', kind: 'info', dismissAfter: 2000 }));

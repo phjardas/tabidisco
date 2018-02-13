@@ -21,7 +21,7 @@ class Home extends React.Component {
           currentSong={currentSong}
           play={tokenId => dispatch(playSong(tokenId))}
           deleteSong={tokenId => dispatch(deleteSong(tokenId))}
-          uploadSong={({ tokenId, file }) => dispatch(uploadSong(tokenId, file))}
+          uploadSong={file => dispatch(uploadSong(file))}
           stopSong={() => dispatch(stopSong())}
         />
       </Layout>

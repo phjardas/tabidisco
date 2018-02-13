@@ -20,6 +20,7 @@ app.get('/songs', (_, res, next) => tabidisco.songs.first().subscribe(songs => r
 app.delete('/songs/:id', (req, res, next) => tabidisco.deleteSong(req.params.id).subscribe(() => res.status(204).end(), next));
 
 app.get('/current', (_, res, next) => tabidisco.currentSong.first().subscribe(song => res.json({ song }), next));
+app.get('/token', (_, res, next) => tabidisco.readToken().subscribe(token => res.json({ token }), next));
 
 app.post('/play', (req, res, next) => tabidisco.playSong(req.body.tokenId).subscribe(song => res.json({ song }), next));
 app.post('/stop', (_, res) => tabidisco.stop().subscribe(() => res.status(204).end()));
@@ -27,14 +28,12 @@ app.post('/stop', (_, res) => tabidisco.stop().subscribe(() => res.status(204).e
 app.post('/button/:type', (req, res, next) => tabidisco.onButton(req.params.type).subscribe(val => res.send(val), next));
 
 const upload = multer();
-app.put('/songs/:tokenId', upload.single('file'), (req, res, next) => {
-  try {
-    const { tokenId } = req.params;
-    const { file } = req;
-    tabidisco.setSong(tokenId, file.originalname, file.buffer).subscribe(song => res.send(song), next);
-  } catch (err) {
-    next(err);
-  }
+app.post('/songs', upload.single('file'), (req, res, next) => {
+  const { file } = req;
+  tabidisco
+    .readToken()
+    .flatMap(tokenId => tabidisco.setSong(tokenId, file.originalname, file.buffer))
+    .subscribe(song => res.send(song), next);
 });
 
 app.use((err: any, _: Request, res: Response, __: NextFunction) => {

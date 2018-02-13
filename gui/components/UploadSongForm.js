@@ -1,50 +1,43 @@
 import React from 'react';
-import { Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
+import { Button, Form, FormGroup, Input, Row, Col } from 'reactstrap';
 
 export default class UploadSongForm extends React.Component {
-  state = { tokenId: '', file: null };
+  state = { file: null };
 
   render() {
     const { uploadSong } = this.props;
-    const { tokenId, file } = this.state;
+    const { file } = this.state;
 
     return (
       <Form
         onSubmit={e => {
           e.preventDefault();
-          uploadSong({ tokenId: this.state.tokenId, file: this.state.file });
+          uploadSong(file);
         }}
       >
-        <Row>
-          <Col xs={12} md={6} lg={5}>
-            <FormGroup>
-              <Label for="tokenId">Token ID</Label>
-              <Input id="tokenId" required value={tokenId} onChange={e => this.setState({ tokenId: e.target.value })} />
-            </FormGroup>
-          </Col>
-          <Col xs={12} md={5}>
-            <FormGroup>
-              <Label for="file">File</Label>
-              <div className="custom-file">
-                <Input
-                  type="file"
-                  id="file"
-                  required
-                  className="custom-file-input"
-                  onChange={e => this.setState({ file: e.target.files[0] })}
-                />
-                <label className="custom-file-label" htmlFor="file">
-                  {file ? file.name : 'Choose file'}
-                </label>
-              </div>
-            </FormGroup>
-          </Col>
-          <Col xs={12} lg={2} className="pt-lg-4">
-            <Button type="submit" color="primary" className="mt-lg-2">
-              Upload song
-            </Button>
-          </Col>
-        </Row>
+        <p>Place a token on the reader and upload an MP3 file.</p>
+        <FormGroup>
+          <div className="custom-file">
+            <Input
+              type="file"
+              id="file"
+              required
+              className="custom-file-input"
+              onChange={e =>
+                this.setState({
+                  file: e.target.files[0],
+                })
+              }
+            />
+            <label className="custom-file-label" htmlFor="file">
+              {file ? file.name : 'Choose file'}
+            </label>
+          </div>
+        </FormGroup>
+
+        <Button type="submit" color="primary" disabled={!file} className="mt-lg-2">
+          Upload song
+        </Button>
       </Form>
     );
   }
