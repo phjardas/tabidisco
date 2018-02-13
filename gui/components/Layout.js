@@ -8,6 +8,7 @@ export default function Layout({ children }) {
   return (
     <React.Fragment>
       <Head>
+        <title>Tabi-Disco</title>
         {process.env.NODE_ENV === 'production' && <link rel="stylesheet" href={`_next/static/style.css`} />}
         <script src="https://use.fontawesome.com/releases/v5.0.6/js/solid.js" crossOrigin="anonymous" />
         <script src="https://use.fontawesome.com/releases/v5.0.6/js/fontawesome.js" crossOrigin="anonymous" />
