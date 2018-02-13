@@ -29,6 +29,7 @@ export default class UploadSongForm extends React.Component {
                 <Input
                   type="file"
                   id="file"
+                  accept=".mp3"
                   required
                   className="custom-file-input"
                   onChange={e => this.setState({ file: e.target.files[0] })}
