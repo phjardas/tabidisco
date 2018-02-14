@@ -1,6 +1,6 @@
 # Tabi-Disco
 
-Jukebox for children, powered by Raspberry Pi.
+Jukebox for kids, powered by Raspberry Pi.
 
 ## Setup
 
@@ -20,21 +20,22 @@ Start the server at the default port 3001:
 Start the GUI at the default port 3000:
 
 ```
-(cd gui && npm run dev)
+(cd gui && npm start)
 ```
 
 Open http://localhost:3000/
 
-## Building
+## Installing on your Raspberry Pi
+
+Install node.js and git on your Pi.
+
+Clone this repository and install it:
 
 ```
-(cd server && npm run build)
-(cd gui && npm run build)
+cd
+git clone https://github.com/phjardas/tabi-disco.git
+cd tabi-disco
+./deploy.sh
 ```
 
-## Production
-
-```
-(cd server && npm start)&
-(cd gui && npm start)&
-```
+This will install a systemd service that will start the application on system boot on port 3000.
