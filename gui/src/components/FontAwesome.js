@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function FontAwesome({ name, className, ...props }) {
+export default function FontAwesome({ name, spinner, className, ...props }) {
   className = `fas fa-${name} ${className || ''}`;
 
   return (
-    <span suppressHydrationWarning>
+    <span>
       <i className={className} title={name} {...props} />
     </span>
   );

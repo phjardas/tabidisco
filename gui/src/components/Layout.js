@@ -8,10 +8,10 @@ import { pressButton } from '../redux';
 import FontAwesome from './FontAwesome';
 import CurrentSong from './CurrentSong';
 
-const Layout = ({ children, currentSong, dispatch }) => (
+const Layout = ({ children, currentSong, token, dispatch }) => (
   <React.Fragment>
     <Navbar color="primary" dark>
-      <Container className="d-flex justify-content-between">
+      <Container className="d-flex">
         <NavbarBrand to="/" tag={RRLink}>
           <FontAwesome name="music" className="mr-2" />
           Tabi-Disco

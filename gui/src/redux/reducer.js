@@ -1,7 +1,17 @@
 import { combineReducers } from 'redux';
 import { reducer as notifs } from 'redux-notifications';
 
-import { SONG_STARTED, SONG_FINISHED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT } from './types';
+import {
+  SONG_STARTED,
+  SONG_FINISHED,
+  SONG_ADDED,
+  SONG_MODIFIED,
+  SONG_DELETED,
+  EVENT,
+  READ_TOKEN,
+  READ_TOKEN_SUCCESS,
+  READ_TOKEN_ERROR,
+} from './types';
 
 function deleteProperty(obj, key) {
   const ret = { ...obj };
@@ -49,4 +59,18 @@ const events = (state = {}, action) => {
   }
 };
 
-export const reducer = combineReducers({ songs, currentSong, events, notifs });
+const token = (state = {}, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case READ_TOKEN:
+      return { pending: true };
+    case READ_TOKEN_SUCCESS:
+      return payload;
+    case READ_TOKEN_ERROR:
+      return { error: payload };
+    default:
+      return state;
+  }
+};
+
+export const reducer = combineReducers({ songs, currentSong, events, notifs, token });

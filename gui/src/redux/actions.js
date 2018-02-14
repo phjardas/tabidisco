@@ -1,7 +1,17 @@
 import SocketIO from 'socket.io-client';
 import { actions as notifActions } from 'redux-notifications';
 
-import { SONG_STARTED, SONG_FINISHED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT } from './types';
+import {
+  SONG_STARTED,
+  SONG_FINISHED,
+  SONG_ADDED,
+  SONG_MODIFIED,
+  SONG_DELETED,
+  EVENT,
+  READ_TOKEN,
+  READ_TOKEN_SUCCESS,
+  READ_TOKEN_ERROR,
+} from './types';
 
 // FIXME make API URL configurable
 const apiUrl = process.env.NODE_ENV === 'production' ? window.location.origin : window.location.origin.replace('3000', '3001');
@@ -21,6 +31,10 @@ function request(action) {
     io.on('reply', listener);
     io.emit('request', { action, requestId });
   });
+}
+
+export function readToken(button) {
+  return () => io.emit('action', { type: 'read_token' });
 }
 
 export function pressButton(button) {
@@ -60,6 +74,12 @@ export function synchronize() {
         }
 
         switch (action.type) {
+          case 'read_token':
+            return dispatch({ type: READ_TOKEN });
+          case 'read_token.success':
+            return dispatch({ type: READ_TOKEN_SUCCESS, payload: action.payload });
+          case 'read_token.error':
+            return dispatch({ type: READ_TOKEN_ERROR, payload: action.error });
           case 'song_started':
             return dispatch({ type: SONG_STARTED, payload: action.payload });
           case 'song_finished':
