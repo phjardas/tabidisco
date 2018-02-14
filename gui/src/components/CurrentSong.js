@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button, Container, Navbar } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 

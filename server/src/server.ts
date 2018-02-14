@@ -1,32 +1,12 @@
 import * as express from 'express';
-import { Request, Response, NextFunction } from 'express';
 import { Server } from 'http';
-import { ReplaySubject, BehaviorSubject } from 'rxjs';
 import * as socket from 'socket.io';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
-import * as multer from 'multer';
 
-import { tabidisco } from './tabidisco';
-import { Event, LogEvent } from './events';
-
-interface ServerEvent {
-  timestamp: Date;
-  id: string;
-  [key: string]: any;
-}
-
-const log = new ReplaySubject<ServerEvent>(100);
-const events = new BehaviorSubject<ServerEvent[]>([]);
-log.scan((a, b) => [...a, b], []).subscribe(e => events.next(e.reverse()));
-
-let nextEventId = 1;
-function addLog(event: Event) {
-  log.next({ ...event, timestamp: new Date(), id: (nextEventId++).toString() });
-}
-log.subscribe(event => console.log('[%s]', event.type, JSON.stringify(event)));
-tabidisco.events.subscribe(addLog);
+import { bus } from './app';
+import { Event } from './bus';
 
 const app = express();
 app.use(helmet());
@@ -35,39 +15,33 @@ app.use(bodyParser.json());
 
 const http = new Server(app);
 
-app.get('/songs', (_, res, next) => tabidisco.songs.first().subscribe(songs => res.json({ songs }), next));
-app.delete('/songs/:id', (req, res, next) => tabidisco.deleteSong(req.params.id).subscribe(() => res.status(204).end(), next));
-
-app.get('/current', (_, res, next) => tabidisco.currentSong.first().subscribe(song => res.json({ song }), next));
-app.get('/token', (_, res, next) => tabidisco.readToken().subscribe(token => res.json({ token }), next));
-
-app.post('/play', (req, res, next) => tabidisco.playSong(req.body.tokenId).subscribe(song => res.json({ song }), next));
-app.post('/stop', (_, res) => tabidisco.stop().subscribe(() => res.status(204).end()));
-
-app.post('/button/:type', (req, res, next) => tabidisco.onButton(req.params.type).subscribe(val => res.send(val), next));
-
-app.get('/events', (_, res, next) => events.first().subscribe(events => res.json({ events }), next));
-
-const upload = multer();
-app.post('/songs', upload.single('file'), (req, res, next) => {
-  const { file } = req;
-  tabidisco
-    .readToken()
-    .flatMap(tokenId => tabidisco.setSong(tokenId, file.originalname, file.buffer))
-    .subscribe(song => res.send(song), next);
-});
-
-app.use((err: any, _: Request, res: Response, __: NextFunction) => {
-  res.status(500).send({
-    error: true,
-    message: err.message,
-    code: err.code || undefined,
-    stack: err.stack,
-  });
-});
-
 const io = socket(http);
-log.subscribe(event => io.sockets.emit('event', event));
+io.on('connection', socket => {
+  bus.dispatch({ type: 'client_connected', payload: { id: socket.id } });
+  socket.on('disconnect', () => bus.dispatch({ type: 'client_disconnected', payload: { id: socket.id } }));
+  socket.on('action', action => bus.dispatch(action));
+  socket.on('request', ({ action, requestId }) =>
+    bus.request({ ...action, private: socket.id }).subscribe(reply => socket.emit('reply', { requestId, reply }))
+  );
+  bus.events.filter(event => event.action && event.action.private === socket.id).subscribe(event => publishEvent(socket, event));
+});
 
-const port = process.env.PORT || 3001;
-http.listen(port, () => addLog(new LogEvent('info', 'listening on %d', port)));
+bus.events.subscribe(event => {
+  if (event.action && event.action.private) return;
+  publishEvent(io, event);
+});
+
+const port = process.env.PORT || 3000;
+http.listen(port, () => console.info('listening on %d', port));
+
+function publishEvent(target: any, event: Event) {
+  if (event.error) {
+    event = { ...event, error: { message: event.error.message } };
+  }
+
+  if (event.action && event.action.error) {
+    event = { ...event, action: { ...event.action, error: { message: event.action.error.message } } };
+  }
+
+  target.emit('event', event);
+}

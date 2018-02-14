@@ -3,7 +3,7 @@ Description=Tabidisco GUI
 After=tabidisco-server
 
 [Service]
-ExecStart=/usr/bin/npm start
+ExecStart=/usr/bin/npm run serve
 WorkingDirectory=/home/pi/tabi-disco/gui
 Restart=always
 RestartSec=10

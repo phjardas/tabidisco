@@ -1,18 +1,19 @@
 import { Observable } from 'rxjs';
 import * as path from 'path';
 
+import { Log, LogFactory } from './../log';
 import { readFile, writeFile, deleteFile } from './io';
 import { parseTags } from './mp3';
-import { Library, Song, LibraryEvent, SongAdded, SongModified, SongDeleted } from './api';
-import { EventsSupport } from '../events';
+import { Song, Library } from './api';
 
 type SongMap = { [tokenId: string]: Song };
 
-export class FileLibrary extends EventsSupport<LibraryEvent> implements Library {
+export class FileLibrary implements Library {
+  private log: Log;
   private readonly dbFile: string;
 
-  constructor(private readonly dbDir: string) {
-    super();
+  constructor(logFactory: LogFactory, private readonly dbDir: string) {
+    this.log = logFactory.getLog('library');
     this.dbFile = path.resolve(dbDir, 'songs.json');
   }
 
@@ -21,6 +22,7 @@ export class FileLibrary extends EventsSupport<LibraryEvent> implements Library 
   }
 
   getSong(tokenId: string): Observable<Song> {
+    this.log.info('loading song %s', tokenId);
     return this.load().map(songs => {
       const song = songs[tokenId];
       if (!song) throw new Error(`Song not found: ${tokenId}`);
@@ -28,8 +30,8 @@ export class FileLibrary extends EventsSupport<LibraryEvent> implements Library 
     });
   }
 
-  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<Song> {
-    this.log('info', '[library] setting song %s', tokenId);
+  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
+    this.log.info('setting song %s', tokenId);
     const suffix = filename.replace(/^.+\.([^.]+)$/, '$1');
     const fullFile = path.resolve(this.dbDir, `${tokenId}.${suffix}`);
 
@@ -37,31 +39,29 @@ export class FileLibrary extends EventsSupport<LibraryEvent> implements Library 
       .flatMap(() => Observable.combineLatest(this.load(), parseTags(fullFile)))
       .flatMap(([songs, tags]) => {
         const song = { tokenId, file: fullFile, type: suffix, size: buffer.byteLength, filename, ...tags };
-        const existing = songs[tokenId];
+        const oldSong = songs[tokenId];
 
-        return this.save({ ...songs, [tokenId]: song })
-          .map(() => {
-            if (existing) {
-              this.log('info', '[library] updated song %s', tokenId);
-              this.emit(new SongModified(song, existing));
-            } else {
-              this.log('info', '[library] added song %s', tokenId);
-              this.emit(new SongAdded(song));
-            }
-          })
-          .map(() => song);
+        return this.save({ ...songs, [tokenId]: song }).map(() => {
+          if (oldSong) {
+            this.log.info('updated song %s', tokenId);
+            return { song, oldSong };
+          } else {
+            this.log.info('added song %s', tokenId);
+            return { song };
+          }
+        });
       });
   }
 
-  deleteSong(tokenId: string): Observable<any> {
+  deleteSong(tokenId: string): Observable<{ oldSong?: Song }> {
     return this.load().flatMap(songs => {
       const song = songs[tokenId];
       if (!song) return Observable.empty();
 
-      this.log('info', '[library] deleting song %s', tokenId);
+      this.log.info('deleting song %s', tokenId);
       return deleteFile(song.file).mergeMap(() => {
         delete songs[tokenId];
-        return this.save(songs).do(() => this.emit(new SongDeleted(song)));
+        return this.save(songs).map(() => ({ oldSong: song }));
       });
     });
   }

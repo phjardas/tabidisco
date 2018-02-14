@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function FontAwesome({ name, className, ...props }) {
   className = `fas fa-${name} ${className || ''}`;
 

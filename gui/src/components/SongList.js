@@ -1,4 +1,5 @@
-import { Button, ButtonGroup, Alert, Table } from 'reactstrap';
+import React from 'react';
+import { Button, Alert, Table } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
 export default function Library({ songs, currentSong, play, deleteSong, stopSong }) {
@@ -39,7 +40,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   color="danger"
                   outline
                   size="sm"
-                  onClick={() => confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
+                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
                 >
                   <FontAwesome name="trash" />
                 </Button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Form, FormGroup, Input, Row, Col } from 'reactstrap';
+import { Button, Form, FormGroup, Input } from 'reactstrap';
 
 export default class UploadSongForm extends React.Component {
   state = { file: null };

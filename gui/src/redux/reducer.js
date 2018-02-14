@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import { reducer as notifs } from 'redux-notifications';
 
-import { PLAY, STOP, SONGS_LOADED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT, EVENTS_LOADED } from './types';
+import { SONG_STARTED, SONG_FINISHED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT } from './types';
 
 function deleteProperty(obj, key) {
   const ret = { ...obj };
@@ -12,15 +12,12 @@ function deleteProperty(obj, key) {
 const songs = (state = {}, action) => {
   const { type, payload } = action;
   switch (type) {
-    case SONGS_LOADED:
-      return payload.songs.reduce((a, b) => ({ ...a, [b.tokenId]: b }), {});
-
     case SONG_ADDED:
     case SONG_MODIFIED:
       return { ...state, [payload.song.tokenId]: payload.song };
 
     case SONG_DELETED:
-      return deleteProperty(state, payload.song.tokenId);
+      return deleteProperty(state, payload.oldSong.tokenId);
 
     default:
       return state;
@@ -30,10 +27,10 @@ const songs = (state = {}, action) => {
 const currentSong = (state = null, action) => {
   const { type, payload } = action;
   switch (type) {
-    case PLAY:
+    case SONG_STARTED:
       return payload.song;
 
-    case STOP:
+    case SONG_FINISHED:
       return null;
 
     default:
@@ -44,9 +41,6 @@ const currentSong = (state = null, action) => {
 const events = (state = {}, action) => {
   const { type, payload } = action;
   switch (type) {
-    case EVENTS_LOADED:
-      return payload.events.reduce((a, b) => ({ ...a, [b.id]: b }), {});
-
     case EVENT:
       return { ...state, [payload.id]: payload };
 
