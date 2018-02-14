@@ -1,6 +1,6 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Bus, Effect, ActionData } from './bus';
-import { Log, LogFactory } from './log';
+import { LogFactory } from './log';
 import createLib, { Player, Library, PiAdapter, Song, Play } from './lib';
 
 interface PlayingSong {
@@ -9,7 +9,6 @@ interface PlayingSong {
 }
 
 export class App {
-  private readonly log: Log;
   private readonly player: Player;
   private readonly library: Library;
   private readonly pi: PiAdapter;
@@ -100,8 +99,6 @@ export class App {
 
   constructor(bus: Bus) {
     const logFactory = new LogFactory(bus);
-    this.log = logFactory.getLog('app');
-
     const lib = createLib(logFactory);
     this.pi = lib.pi;
     this.library = lib.library;
