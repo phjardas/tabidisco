@@ -14,6 +14,8 @@ function Layout({ children, currentSong, dispatch }) {
     <React.Fragment>
       <Head>
         <title>Tabi-Disco</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {process.env.NODE_ENV === 'production' && <link rel="stylesheet" href={`_next/static/style.css`} />}
         <script src="https://use.fontawesome.com/releases/v5.0.6/js/solid.js" crossOrigin="anonymous" />
         <script src="https://use.fontawesome.com/releases/v5.0.6/js/fontawesome.js" crossOrigin="anonymous" />
