@@ -4,7 +4,7 @@ import { actions as notifActions } from 'redux-notifications';
 import { SONG_STARTED, SONG_FINISHED, SONG_ADDED, SONG_MODIFIED, SONG_DELETED, EVENT } from './types';
 
 // FIXME make API URL configurable
-const apiUrl = window.location.origin.replace('3000', '3001');
+const apiUrl = process.env.NODE_ENV === 'production' ? window.location.origin : window.location.origin.replace('3000', '3001');
 let io = SocketIO(apiUrl);
 
 function request(action) {

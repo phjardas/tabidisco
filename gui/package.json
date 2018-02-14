@@ -18,7 +18,6 @@
     "redux-notifications": "^4.0.1",
     "redux-saga": "^0.16.0",
     "redux-thunk": "^2.2.0",
-    "serve": "^6.4.9",
     "socket.io-client": "^2.0.4"
   },
   "scripts": {
@@ -28,7 +27,6 @@
     "build-js": "react-scripts build",
     "build-css": "node-sass-chokidar src/ --include-path ./node_modules -o src/",
     "watch-css": "npm run build-css && npm run build-css -- --watch --recursive",
-    "serve": "serve -s build -p 3000",
     "precommit": "lint-staged",
     "fixme": "fixme *.ts"
   },

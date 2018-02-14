@@ -1,5 +1,5 @@
 [Unit]
-Description=Tabidisco Server
+Description=Tabi-Disco
 
 [Service]
 ExecStart=/usr/bin/npm start
@@ -8,8 +8,8 @@ Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=tabidisco-server
-Environment=NODE_ENV=production PORT=3001
+SyslogIdentifier=tabidisco
+Environment=NODE_ENV=production PORT=3000
 
 [Install]
 WantedBy=multi-user.target

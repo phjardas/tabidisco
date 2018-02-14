@@ -12,6 +12,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: true }));
 app.use(bodyParser.json());
+app.use(express.static(`${__dirname}/../../gui/build`));
 
 const http = new Server(app);
 
@@ -31,7 +32,7 @@ bus.events.subscribe(event => {
   publishEvent(io, event);
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 http.listen(port, () => console.info('listening on %d', port));
 
 function publishEvent(target: any, event: Event) {
