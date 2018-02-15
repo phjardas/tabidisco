@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "nodemon --watch src --ext ts --exec npx ts-node src/server.ts",
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --ext ts --exec npx ts-node src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
@@ -14,8 +14,10 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "helmet": "^3.10.0",
+    "inversify": "^4.10.0",
     "lame": "^1.2.4",
     "mp3-parser": "^0.3.0",
+    "reflect-metadata": "^0.1.12",
     "rxjs": "^5.5.6",
     "socket.io": "^2.0.4",
     "speaker": "^0.4.0"

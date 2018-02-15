@@ -1,3 +1,4 @@
+import { injectable, inject } from 'inversify';
 import { Observable } from 'rxjs';
 import * as path from 'path';
 
@@ -5,14 +6,18 @@ import { Log, LogFactory } from './../log';
 import { readFile, writeFile, deleteFile } from './io';
 import { parseTags } from './mp3';
 import { Song, Library } from './api';
+import { Types } from '../di';
+
+const dbDir = path.resolve(__dirname, '../../db');
 
 type SongMap = { [tokenId: string]: Song };
 
+@injectable()
 export class FileLibrary implements Library {
   private log: Log;
   private readonly dbFile: string;
 
-  constructor(logFactory: LogFactory, private readonly dbDir: string) {
+  constructor(@inject(Types.LogFactory) logFactory: LogFactory) {
     this.log = logFactory.getLog('library');
     this.dbFile = path.resolve(dbDir, 'songs.json');
   }
@@ -33,7 +38,7 @@ export class FileLibrary implements Library {
   setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
     this.log.info('setting song %s', tokenId);
     const suffix = filename.replace(/^.+\.([^.]+)$/, '$1');
-    const fullFile = path.resolve(this.dbDir, `${tokenId}.${suffix}`);
+    const fullFile = path.resolve(dbDir, `${tokenId}.${suffix}`);
 
     return writeFile(fullFile, buffer)
       .flatMap(() => Observable.combineLatest(this.load(), parseTags(fullFile)))

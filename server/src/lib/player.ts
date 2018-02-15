@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 import * as fs from 'fs';
 import { Observable, Observer, Subject } from 'rxjs';
 import { Decoder } from 'lame';
@@ -35,6 +36,7 @@ class PlayImpl implements Play {
   }
 }
 
+@injectable()
 export class PlayerImpl implements Player {
   play(file: string): Observable<Play> {
     const stream = fs.createReadStream(file);

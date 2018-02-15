@@ -1,4 +1,6 @@
-import { Bus } from './bus';
+import { injectable, inject } from 'inversify';
+import { Bus } from './lib';
+import { Types } from './di';
 
 export type LogFn = (message: string, ...args: any[]) => void;
 
@@ -29,8 +31,13 @@ class ModuleLog implements Log {
   }
 }
 
-export class LogFactory {
-  constructor(private bus: Bus) {}
+export interface LogFactory {
+  getLog(module: string): Log;
+}
+
+@injectable()
+export class LogFactoryImpl implements LogFactory {
+  constructor(@inject(Types.Bus) private bus: Bus) {}
 
   getLog(module: string): Log {
     const emit = (level: string, message: string, args: any[]) => this.bus.emit({ type: 'log', module, level, message, args });

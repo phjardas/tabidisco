@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 import { Subject, Observable, Observer } from 'rxjs';
 
 export interface ActionData<T = {}> {
@@ -65,7 +66,14 @@ export interface EffectContext {
 
 export type Effect = (context: EffectContext) => Observable<ActionData<any>>;
 
-export class Bus implements EffectContext {
+export interface Bus extends EffectContext {
+  readonly events: Observable<Event>;
+  dispatch(action: ActionData<any>): string;
+  effect(effect: Effect): void;
+}
+
+@injectable()
+export class BusImpl implements Bus, EffectContext {
   private readonly _actions = new Subject<Action<any>>();
   private readonly _events = new Subject<Event>();
   readonly actions: Observable<Action<any>> = this._actions.asObservable();

@@ -1,7 +1,9 @@
 import { Observable, Observer, Subject } from 'rxjs';
+import { injectable, inject } from 'inversify';
 
 import { LogFactory, Log } from './../../log';
 import { PiAdapter, ButtonId } from './api';
+import { Types } from '../../di';
 
 function randomToken() {
   const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
@@ -13,12 +15,13 @@ function randomToken() {
   return s;
 }
 
+@injectable()
 export class MockPiAdapter implements PiAdapter {
   private readonly log: Log;
   private readonly _buttons = new Subject<ButtonId>();
   readonly buttons = this._buttons.asObservable();
 
-  constructor(logFactory: LogFactory) {
+  constructor(@inject(Types.LogFactory) logFactory: LogFactory) {
     this.log = logFactory.getLog('pi');
   }
 
