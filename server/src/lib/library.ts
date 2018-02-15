@@ -8,7 +8,7 @@ import { parseTags } from './mp3';
 import { Song, Library } from './api';
 import { Types } from '../di';
 
-const dbDir = path.resolve(__dirname, '../../db');
+const dbDir = process.env.DB_PATH || 'db';
 
 type SongMap = { [tokenId: string]: Song };
 

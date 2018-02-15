@@ -36,7 +36,7 @@ A web frontend allows you to control the machine with virtual buttons (for testi
 
 ### Architecture
 
-The server component is written in node.js following the reactive paradigm using [RxJs](https://reactivex.io/rxjs) and [inversify](https://github.com/inversify).
+The server component is written in [TypeScript](https://www.typescriptlang.org/) following the [reactive paradigm](https://en.wikipedia.org/wiki/Reactive_programming) using [RxJs](https://reactivex.io/rxjs) and [inversify](https://github.com/inversify).
 
 The GUI is written in [React](https://reactjs.org/) with [Redux](https://redux.js.org/) and [Bootstrap](https://getbootstrap.com).
 
