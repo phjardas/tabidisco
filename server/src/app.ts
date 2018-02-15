@@ -116,13 +116,4 @@ export class App {
 }
 
 export const bus = new Bus();
-bus.actions.subscribe(action => console.log('[action] %j', action));
-bus.events.subscribe(event => {
-  if (event.type === 'log') {
-    (console as any)[event.level](`[${event.module}] ${event.message}`, ...event.args);
-  } else {
-    console.log('[event] %j', event);
-  }
-});
-
 export const app = new App(bus);

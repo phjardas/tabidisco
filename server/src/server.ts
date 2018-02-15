@@ -6,7 +6,7 @@ import * as cors from 'cors';
 import * as helmet from 'helmet';
 
 import { bus } from './app';
-import { Event } from './bus';
+import { applyBusLogging, prepareEventForLogging } from './bus-logger';
 
 const app = express();
 app.use(helmet());
@@ -24,25 +24,17 @@ io.on('connection', socket => {
   socket.on('request', ({ action, requestId }) =>
     bus.request({ ...action, private: socket.id }).subscribe(reply => socket.emit('reply', { requestId, reply }))
   );
-  bus.events.filter(event => event.action && event.action.private === socket.id).subscribe(event => publishEvent(socket, event));
+  bus.events
+    .filter(event => event.action && event.action.private === socket.id)
+    .subscribe(event => socket.emit('event', prepareEventForLogging(event)));
 });
 
 bus.events.subscribe(event => {
   if (event.action && event.action.private) return;
-  publishEvent(io, event);
+  io.emit('event', prepareEventForLogging(event));
 });
+
+applyBusLogging(bus);
 
 const port = process.env.PORT || 3001;
 http.listen(port, () => console.info('listening on %d', port));
-
-function publishEvent(target: any, event: Event) {
-  if (event.error) {
-    event = { ...event, error: { message: event.error.message } };
-  }
-
-  if (event.action && event.action.error) {
-    event = { ...event, action: { ...event.action, error: { message: event.action.error.message } } };
-  }
-
-  target.emit('event', event);
-}
