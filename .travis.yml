@@ -5,6 +5,12 @@ cache:
   directories:
   - gui/node_modules
   - server/node_modules
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y libasound2-dev
+install:
+- (cd server && npm install)
+- (cd gui && npm install)
 script:
-- cd server && npm install && npm run build
-- cd gui && npm install && npm run build
+- (cd server && npm run build)
+- (cd gui && npm run build)
