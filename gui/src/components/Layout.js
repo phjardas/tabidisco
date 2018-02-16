@@ -6,9 +6,10 @@ import { Notifs } from 'redux-notifications';
 
 import { pressButton } from '../redux';
 import FontAwesome from './FontAwesome';
+import ConnectionState from './ConnectionState';
 import CurrentSong from './CurrentSong';
 
-const Layout = ({ children, currentSong, token, dispatch }) => (
+const Layout = ({ connectionState, children, currentSong, token, dispatch }) => (
   <React.Fragment>
     <Navbar color="primary" dark>
       <Container className="d-flex">
@@ -34,6 +35,8 @@ const Layout = ({ children, currentSong, token, dispatch }) => (
       </Container>
     </Navbar>
 
+    <ConnectionState state={connectionState} />
+
     {children}
 
     <CurrentSong currentSong={currentSong} stopSong={() => dispatch(pressButton('stop'))} />
@@ -41,4 +44,4 @@ const Layout = ({ children, currentSong, token, dispatch }) => (
   </React.Fragment>
 );
 
-export default connect(state => ({ currentSong: state.currentSong }))(Layout);
+export default connect(state => ({ connectionState: state.connection.state, currentSong: state.currentSong }))(Layout);

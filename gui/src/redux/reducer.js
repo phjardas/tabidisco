@@ -2,6 +2,9 @@ import { combineReducers } from 'redux';
 import { reducer as notifs } from 'redux-notifications';
 
 import {
+  CONNECTED,
+  RECONNECTING,
+  DISCONNECTED,
   SONG_STARTED,
   SONG_FINISHED,
   SONG_ADDED,
@@ -18,6 +21,20 @@ function deleteProperty(obj, key) {
   delete ret[key];
   return ret;
 }
+
+const connection = (state = { state: 'connecting' }, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case CONNECTED:
+      return { ...payload, state: 'connected' };
+    case RECONNECTING:
+      return { state: 'reconnecting' };
+    case DISCONNECTED:
+      return { state: 'disconnected' };
+    default:
+      return state;
+  }
+};
 
 const songs = (state = {}, action) => {
   const { type, payload } = action;
@@ -73,4 +90,4 @@ const token = (state = {}, action) => {
   }
 };
 
-export const reducer = combineReducers({ songs, currentSong, events, notifs, token });
+export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token });

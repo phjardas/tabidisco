@@ -2,6 +2,9 @@ import SocketIO from 'socket.io-client';
 import { actions as notifActions } from 'redux-notifications';
 
 import {
+  CONNECTED,
+  DISCONNECTED,
+  RECONNECTING,
   SONG_STARTED,
   SONG_FINISHED,
   SONG_ADDED,
@@ -50,12 +53,12 @@ export function loadSongs() {
 
 export function getCurrentSong() {
   return async dispatch => {
-    const { song } = await request({ type: 'current_song' });
+    const current = await request({ type: 'current_song' });
     dispatch(
-      song
+      current
         ? {
             type: SONG_STARTED,
-            payload: { song },
+            payload: current,
           }
         : { type: SONG_FINISHED }
     );
@@ -64,6 +67,10 @@ export function getCurrentSong() {
 
 export function synchronize() {
   return dispatch => {
+    io.on('connect', () => dispatch({ type: CONNECTED, payload: { socketId: io.id } }));
+    io.on('reconnecting', evt => dispatch({ type: RECONNECTING }));
+    io.on('disconnect', evt => dispatch({ type: DISCONNECTED }));
+
     io.on('event', event => {
       dispatch({ type: EVENT, payload: event });
 

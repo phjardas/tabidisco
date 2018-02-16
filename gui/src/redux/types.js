@@ -1,3 +1,7 @@
+export const CONNECTED = 'connected';
+export const RECONNECTING = 'reconnecting';
+export const DISCONNECTED = 'disconnected';
+
 export const SONG_STARTED = 'song.started';
 export const SONG_FINISHED = 'song.finished';
 
