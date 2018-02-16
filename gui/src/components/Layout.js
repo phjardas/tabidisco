@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Container, Alert, Button, Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
+import { Container, Alert, Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
 import { Notifs } from 'redux-notifications';
 
-import { pressButton } from '../redux';
+import { pressButton, setPower, cancelShutdownTimer } from '../redux';
 import FontAwesome from './FontAwesome';
+import Buttons from './Buttons';
 import ConnectionState from './ConnectionState';
 import CurrentSong from './CurrentSong';
 
-const Layout = ({ connectionState, children, currentSong, token, dispatch }) => (
+const Layout = ({ connectionState, children, currentSong, token, power, dispatch }) => (
   <React.Fragment>
     <Navbar color="primary" dark>
       <Container className="d-flex">
@@ -25,12 +26,12 @@ const Layout = ({ connectionState, children, currentSong, token, dispatch }) => 
           </NavItem>
         </Nav>
         <div className="ml-auto">
-          <Button color="success" style={{ borderRadius: '50%' }} onClick={() => dispatch(pressButton('play'))}>
-            <FontAwesome name="play" />
-          </Button>
-          <Button color="danger" style={{ borderRadius: '50%', marginLeft: '.5rem' }} onClick={() => dispatch(pressButton('stop'))}>
-            <FontAwesome name="stop" />
-          </Button>
+          <Buttons
+            power={power}
+            setPower={powered => dispatch(setPower(powered))}
+            cancelShutdownTimer={() => dispatch(cancelShutdownTimer())}
+            pressButton={button => dispatch(pressButton(button))}
+          />
         </div>
       </Container>
     </Navbar>
@@ -44,4 +45,4 @@ const Layout = ({ connectionState, children, currentSong, token, dispatch }) => 
   </React.Fragment>
 );
 
-export default connect(state => ({ connectionState: state.connection.state, currentSong: state.currentSong }))(Layout);
+export default connect(state => ({ connectionState: state.connection.state, currentSong: state.currentSong, power: state.power }))(Layout);

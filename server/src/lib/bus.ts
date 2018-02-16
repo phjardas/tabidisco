@@ -64,6 +64,7 @@ export interface EventEmitter {
 
 export interface EffectContext {
   readonly actions: Observable<Action<any>>;
+  readonly events: Observable<Event>;
   dispatch(action: ActionData<any>): void;
   emit(event: EventData): void;
   request<T>(action: ActionData<any>): Observable<T>;
@@ -129,6 +130,7 @@ export class BusImpl implements Bus, EffectContext {
   effect(effect: Effect): void {
     const context: EffectContext = {
       actions: this.actions,
+      events: this.events,
       dispatch: this.dispatch.bind(this),
       emit: this.emit.bind(this),
       request: this.request.bind(this),
@@ -139,6 +141,7 @@ export class BusImpl implements Bus, EffectContext {
         console.log('Error executing effect:', err);
         return Observable.empty();
       })
+      .filter(a => !!a)
       .subscribe(this.dispatch.bind(this));
   }
 

@@ -8,11 +8,15 @@ import { Player, PlayerSymbol } from '../player';
 export class PlaySongEffect implements EffectFactory {
   constructor(@inject(LibrarySymbol) private readonly library: Library, @inject(PlayerSymbol) private readonly player: Player) {}
 
-  private playSong: Effect = ({ actions }) => {
+  private playSong: Effect = ({ actions, request }) => {
     return actions.filter(a => a.type === 'play_song').mergeMap(action =>
       this.library
         .getSong(action.payload.token)
-        .mergeMap(song => this.player.play(song).map(() => action.replySuccess(song)))
+        .mergeMap(song =>
+          request({ type: 'power_on' })
+            .mergeMap(() => this.player.play(song))
+            .map(() => action.replySuccess(song))
+        )
         .catch(error => [action.replyError(error)])
     );
   };

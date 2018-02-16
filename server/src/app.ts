@@ -8,6 +8,7 @@ import { Tabidisco, TabidiscoImpl, TabidiscoSymbol } from './lib/tabidisco';
 import { Server, ServerImpl, ServerSymbol } from './server';
 import { LogFactory, LogFactorySymbol, LogFactoryImpl } from './log';
 import { effects, EffectsSymbol } from './lib/effects';
+import { ShutdownTimer, ShutdownTimerImpl, ShutdownTimerSymbol } from './lib/shutdown';
 
 export const container = new Container();
 container
@@ -21,6 +22,10 @@ container
   .to(PlayerImpl)
   .inSingletonScope();
 container.bind<PiAdapter>(PiAdapterSymbol).to(MockPiAdapter);
+container
+  .bind<ShutdownTimer>(ShutdownTimerSymbol)
+  .to(ShutdownTimerImpl)
+  .inSingletonScope();
 container.bind<Tabidisco>(TabidiscoSymbol).to(TabidiscoImpl);
 container.bind<Server>(ServerSymbol).to(ServerImpl);
 

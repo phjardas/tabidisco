@@ -1,4 +1,4 @@
-import { Bus, Event } from './lib';
+import { Bus, Event } from './lib/bus';
 
 export function applyBusLogging(bus: Bus) {
   bus.actions.subscribe(action => console.log('[action] %j', prepareActionForLogging(action)));

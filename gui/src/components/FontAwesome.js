@@ -5,7 +5,7 @@ export default function FontAwesome({ name, spinner, className, ...props }) {
 
   return (
     <span>
-      <i className={className} title={name} {...props} />
+      <i className={className} {...props} />
     </span>
   );
 }

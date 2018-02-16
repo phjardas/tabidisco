@@ -14,6 +14,12 @@ import {
   READ_TOKEN,
   READ_TOKEN_SUCCESS,
   READ_TOKEN_ERROR,
+  SHUTDOWN_TIMER_STARTED,
+  SHUTDOWN_TIMER_CANCELED,
+  POWER_ON_START,
+  POWER_ON_SUCCESS,
+  POWER_OFF_START,
+  POWER_OFF_SUCCESS,
 } from './types';
 
 function deleteProperty(obj, key) {
@@ -90,4 +96,25 @@ const token = (state = {}, action) => {
   }
 };
 
-export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token });
+const power = (state = { shutdownTimer: null, state: 'off' }, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case SHUTDOWN_TIMER_STARTED:
+      return { ...state, shutdownTimer: payload };
+    case SHUTDOWN_TIMER_CANCELED:
+      return { ...state, shutdownTimer: null };
+    case POWER_ON_START:
+      return { ...state, state: 'powering_up' };
+    case POWER_ON_SUCCESS:
+      return { ...state, state: 'on' };
+    case POWER_OFF_START:
+      return { ...state, state: 'powering_down', shutdownTimer: null };
+    case POWER_OFF_SUCCESS:
+      return { ...state, state: 'off', shutdownTimer: null };
+
+    default:
+      return state;
+  }
+};
+
+export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token, power });

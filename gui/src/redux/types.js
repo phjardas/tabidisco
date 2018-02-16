@@ -14,3 +14,11 @@ export const EVENT = 'event';
 export const READ_TOKEN = 'token.read';
 export const READ_TOKEN_SUCCESS = 'token.read.success';
 export const READ_TOKEN_ERROR = 'token.read.error';
+
+export const SHUTDOWN_TIMER_STARTED = 'shutdown.timer.started';
+export const SHUTDOWN_TIMER_CANCELED = 'shutdown.timer.canceled';
+
+export const POWER_ON_START = 'power.on.start';
+export const POWER_ON_SUCCESS = 'power.on.success';
+export const POWER_OFF_START = 'power.off.start';
+export const POWER_OFF_SUCCESS = 'power.off.success';

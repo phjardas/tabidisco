@@ -14,6 +14,12 @@ import {
   READ_TOKEN,
   READ_TOKEN_SUCCESS,
   READ_TOKEN_ERROR,
+  SHUTDOWN_TIMER_STARTED,
+  SHUTDOWN_TIMER_CANCELED,
+  POWER_ON_START,
+  POWER_ON_SUCCESS,
+  POWER_OFF_START,
+  POWER_OFF_SUCCESS,
 } from './types';
 
 // FIXME make API URL configurable
@@ -95,6 +101,18 @@ export function synchronize() {
             return dispatch({ type: SONG_MODIFIED, payload: action.payload });
           case 'song_deleted':
             return dispatch({ type: SONG_DELETED, payload: action.payload });
+          case 'set_shutdown_timer.success':
+            return dispatch({ type: SHUTDOWN_TIMER_STARTED, payload: action.payload });
+          case 'cancel_shutdown_timer.success':
+            return dispatch({ type: SHUTDOWN_TIMER_CANCELED });
+          case 'power_on':
+            return dispatch({ type: POWER_ON_START });
+          case 'power_on.success':
+            return dispatch({ type: POWER_ON_SUCCESS });
+          case 'power_off':
+            return dispatch({ type: POWER_OFF_START });
+          case 'power_off.success':
+            return dispatch({ type: POWER_OFF_SUCCESS });
           default:
         }
       } else if (event.type === 'song_started') {
@@ -126,4 +144,19 @@ export function uploadSong(file) {
 
     reader.readAsArrayBuffer(file);
   };
+}
+
+export function getPowerState() {
+  return async dispatch => {
+    const { powered } = await request({ type: 'get_power' });
+    dispatch({ type: `power.${powered ? 'on' : 'off'}.success` });
+  };
+}
+
+export function setPower(powered) {
+  return () => io.emit('action', { type: `power_${powered ? 'on' : 'off'}` });
+}
+
+export function cancelShutdownTimer(powered) {
+  return () => io.emit('action', { type: 'cancel_shutdown_timer' });
 }

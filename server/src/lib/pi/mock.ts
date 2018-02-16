@@ -18,6 +18,7 @@ function randomToken() {
 export class MockPiAdapter implements PiAdapter {
   private readonly log: Log;
   private readonly _buttons = new Subject<ButtonId>();
+  powered = false;
   readonly buttons = this._buttons.asObservable();
 
   constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
@@ -34,7 +35,7 @@ export class MockPiAdapter implements PiAdapter {
           obs.error(new Error('No token found'));
         } else {
           const token = randomToken();
-          this.log.info('token resolved: %s', token);
+          this.log.info(`token resolved: ${token}`);
           obs.next(token);
           obs.complete();
         }
@@ -43,6 +44,11 @@ export class MockPiAdapter implements PiAdapter {
   }
 
   setPower(power: boolean) {
-    this.log.info('turning power %s', power ? 'on' : 'off');
+    if (power !== this.powered) {
+      this.log.info(`turning power ${power ? 'on' : 'off'}`);
+      this.powered = power;
+    }
+
+    return Observable.of(null);
   }
 }
