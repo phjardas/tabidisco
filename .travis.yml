@@ -14,4 +14,4 @@ install:
 - (cd gui && npm install)
 script:
 - (cd server && npm run build)
-- (cd gui && npm run build)
+- (cd gui && npm test -- --coverage && npm run build)

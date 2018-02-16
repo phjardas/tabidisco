@@ -27,19 +27,24 @@
     "build-js": "react-scripts build",
     "build-css": "node-sass-chokidar src/ --include-path ./node_modules -o src/",
     "watch-css": "npm run build-css && npm run build-css -- --watch --recursive",
+    "test": "react-scripts test",
     "precommit": "lint-staged",
     "fixme": "fixme *.ts"
   },
   "devDependencies": {
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "fixme": "^0.4.4",
     "husky": "^0.14.3",
+    "jest-enzyme": "^4.2.0",
     "lint-staged": "^6.1.0",
-    "prettier": "^1.10.2"
+    "prettier": "^1.10.2",
+    "react-test-renderer": "^16.2.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "src/**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+  },
+  "jest": {
+    "collectCoverageFrom": ["src/**/*.{js,jsx}", "!**/__tests__/**/*"]
   }
 }

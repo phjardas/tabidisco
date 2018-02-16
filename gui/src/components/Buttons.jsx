@@ -7,7 +7,6 @@ import PowerState from './PowerState';
 export default function Buttons({ power, setPower, cancelShutdownTimer, pressButton }) {
   return (
     <React.Fragment>
-      {' '}
       <PowerState power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} />
       <Button
         color="success"
