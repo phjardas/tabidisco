@@ -2,13 +2,21 @@ import { injectable, inject } from 'inversify';
 import { Observable } from 'rxjs';
 import * as path from 'path';
 
-import { Log, LogFactory } from './../log';
+import { Log, LogFactory, LogFactorySymbol } from './../log';
 import { readFile, writeFile, deleteFile } from './io';
 import { parseTags } from './mp3';
-import { Song, Library } from './api';
-import { Types } from '../di';
+import { Song } from './api';
 
 const dbDir = process.env.DB_PATH || 'db';
+
+export interface Library {
+  readonly songs: Observable<Song[]>;
+  getSong(tokenId: string): Observable<Song>;
+  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }>;
+  deleteSong(tokenId: string): Observable<{ oldSong?: Song }>;
+}
+
+export const LibrarySymbol = Symbol.for('Library');
 
 type SongMap = { [tokenId: string]: Song };
 
@@ -17,7 +25,7 @@ export class FileLibrary implements Library {
   private log: Log;
   private readonly dbFile: string;
 
-  constructor(@inject(Types.LogFactory) logFactory: LogFactory) {
+  constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
     this.log = logFactory.getLog('library');
     this.dbFile = path.resolve(dbDir, 'songs.json');
   }

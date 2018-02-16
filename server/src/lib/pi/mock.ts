@@ -1,9 +1,8 @@
 import { Observable, Observer, Subject } from 'rxjs';
 import { injectable, inject } from 'inversify';
 
-import { LogFactory, Log } from './../../log';
+import { LogFactory, Log, LogFactorySymbol } from './../../log';
 import { PiAdapter, ButtonId } from './api';
-import { Types } from '../../di';
 
 function randomToken() {
   const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
@@ -21,7 +20,7 @@ export class MockPiAdapter implements PiAdapter {
   private readonly _buttons = new Subject<ButtonId>();
   readonly buttons = this._buttons.asObservable();
 
-  constructor(@inject(Types.LogFactory) logFactory: LogFactory) {
+  constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
     this.log = logFactory.getLog('pi');
   }
 
@@ -41,5 +40,9 @@ export class MockPiAdapter implements PiAdapter {
         }
       }, 1000);
     });
+  }
+
+  setPower(power: boolean) {
+    this.log.info('turning power %s', power ? 'on' : 'off');
   }
 }

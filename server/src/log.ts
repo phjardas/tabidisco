@@ -1,6 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { Bus } from './lib';
-import { Types } from './di';
+import { Bus, BusSymbol } from './lib/bus';
 
 export type LogFn = (message: string, ...args: any[]) => void;
 
@@ -35,9 +34,11 @@ export interface LogFactory {
   getLog(module: string): Log;
 }
 
+export const LogFactorySymbol = Symbol.for('LogFactory');
+
 @injectable()
 export class LogFactoryImpl implements LogFactory {
-  constructor(@inject(Types.Bus) private bus: Bus) {}
+  constructor(@inject(BusSymbol) private bus: Bus) {}
 
   getLog(module: string): Log {
     const emit = (level: string, message: string, args: any[]) => this.bus.emit({ type: 'log', module, level, message, args });

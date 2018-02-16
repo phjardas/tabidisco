@@ -4,7 +4,24 @@ import { Observable, Observer, Subject } from 'rxjs';
 import { Decoder } from 'lame';
 import * as Speaker from 'speaker';
 
-import { Player, Play, SongStartedEvent, SongFinishedEvent } from './api';
+export class SongStartedEvent {
+  readonly type = 'song_started';
+}
+
+export class SongFinishedEvent {
+  readonly type = 'song_finished';
+}
+
+export interface Play {
+  events: Observable<SongStartedEvent | SongFinishedEvent>;
+  stop(): Observable<any>;
+}
+
+export interface Player {
+  play(file: string): Observable<Play>;
+}
+
+export const PlayerSymbol = Symbol.for('Player');
 
 class PlayImpl implements Play {
   readonly events = new Subject<SongStartedEvent | SongFinishedEvent>();

@@ -6,19 +6,20 @@ import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 
-import { Types } from './di';
-import { Tabidisco } from './lib';
+import { Tabidisco, TabidiscoSymbol } from './lib/tabidisco';
 import { applyBusLogging, prepareEventForLogging } from './bus-logger';
 
 export interface Server {
   start(port: number): void;
 }
 
+export const ServerSymbol = Symbol.for('Server');
+
 @injectable()
 export class ServerImpl implements Server {
   private readonly httpServer: http.Server;
 
-  constructor(@inject(Types.Tabidisco) tabidisco: Tabidisco) {
+  constructor(@inject(TabidiscoSymbol) tabidisco: Tabidisco) {
     const bus = tabidisco.bus;
 
     const app = express();
