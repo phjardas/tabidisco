@@ -58,6 +58,10 @@ export class Event implements EventData {
   }
 }
 
+export interface EventEmitter {
+  readonly events: Observable<EventData>;
+}
+
 export interface EffectContext {
   readonly actions: Observable<Action<any>>;
   dispatch(action: ActionData<any>): void;
@@ -75,6 +79,7 @@ export interface Bus extends EffectContext {
   readonly events: Observable<Event>;
   dispatch(action: ActionData<any>): string;
   effect(effect: Effect): void;
+  attach(emitter: EventEmitter): void;
 }
 
 export const BusSymbol = Symbol.for('Bus');
@@ -135,5 +140,9 @@ export class BusImpl implements Bus, EffectContext {
         return Observable.empty();
       })
       .subscribe(this.dispatch.bind(this));
+  }
+
+  attach(emitter: EventEmitter) {
+    emitter.events.subscribe(evt => this.emit(evt));
   }
 }

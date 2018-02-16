@@ -76,6 +76,8 @@ export function synchronize() {
 
       if (event.type === 'action') {
         const { action } = event;
+        console.log('Action %s:', action.type, action.payload);
+
         if (action.type.endsWith('.error')) {
           dispatch(notifActions.notifSend({ kind: 'error', message: action.error.message, dismissAfter: 5000 }));
         }
@@ -87,10 +89,6 @@ export function synchronize() {
             return dispatch({ type: READ_TOKEN_SUCCESS, payload: action.payload });
           case 'read_token.error':
             return dispatch({ type: READ_TOKEN_ERROR, payload: action.error });
-          case 'song_started':
-            return dispatch({ type: SONG_STARTED, payload: action.payload });
-          case 'song_finished':
-            return dispatch({ type: SONG_FINISHED, payload: action.payload });
           case 'song_added':
             return dispatch({ type: SONG_ADDED, payload: action.payload });
           case 'song_modified':
@@ -99,6 +97,10 @@ export function synchronize() {
             return dispatch({ type: SONG_DELETED, payload: action.payload });
           default:
         }
+      } else if (event.type === 'song_started') {
+        return dispatch({ type: SONG_STARTED, payload: event.song });
+      } else if (event.type === 'song_finished') {
+        return dispatch({ type: SONG_FINISHED, payload: event.song });
       }
     });
   };

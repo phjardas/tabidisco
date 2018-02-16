@@ -10,10 +10,16 @@ import { LogFactory, LogFactorySymbol, LogFactoryImpl } from './log';
 import { effects, EffectsSymbol } from './lib/effects';
 
 export const container = new Container();
-container.bind<Bus>(BusSymbol).to(BusImpl);
+container
+  .bind<Bus>(BusSymbol)
+  .to(BusImpl)
+  .inSingletonScope();
 container.bind<LogFactory>(LogFactorySymbol).to(LogFactoryImpl);
 container.bind<Library>(LibrarySymbol).to(FileLibrary);
-container.bind<Player>(PlayerSymbol).to(PlayerImpl);
+container
+  .bind<Player>(PlayerSymbol)
+  .to(PlayerImpl)
+  .inSingletonScope();
 container.bind<PiAdapter>(PiAdapterSymbol).to(MockPiAdapter);
 container.bind<Tabidisco>(TabidiscoSymbol).to(TabidiscoImpl);
 container.bind<Server>(ServerSymbol).to(ServerImpl);

@@ -55,7 +55,7 @@ const currentSong = (state = null, action) => {
   const { type, payload } = action;
   switch (type) {
     case SONG_STARTED:
-      return payload.song;
+      return payload;
 
     case SONG_FINISHED:
       return null;
