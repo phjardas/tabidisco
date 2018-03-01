@@ -9,11 +9,11 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-helmet": "^5.2.0",
-    "react-redux": "^5.0.6",
+    "react-redux": "^5.0.7",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "^1.1.1",
-    "reactstrap": "^5.0.0-beta",
+    "reactstrap": "^5.0.0-beta.2",
     "redux": "^3.7.2",
     "redux-notifications": "^4.0.1",
     "redux-saga": "^0.16.0",
@@ -34,17 +34,23 @@
   "devDependencies": {
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "fixme": "^0.4.4",
+    "fixme": "^0.4.5",
     "husky": "^0.14.3",
     "jest-enzyme": "^4.2.0",
-    "lint-staged": "^6.1.0",
-    "prettier": "^1.10.2",
+    "lint-staged": "^7.0.0",
+    "prettier": "^1.11.1",
     "react-test-renderer": "^16.2.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
+    "src/**/*.{js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "jest": {
-    "collectCoverageFrom": ["src/**/*.{js,jsx}", "!**/__tests__/**/*"]
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!**/__tests__/**/*"
+    ]
   }
 }
