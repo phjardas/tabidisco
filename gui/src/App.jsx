@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { store } from './redux';
 import Home from './pages/Home';
 import Events from './pages/Events';
-import './styles.css';
+import './styles.scss';
 
 export default function App() {
   return (

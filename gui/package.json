@@ -4,15 +4,12 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.0.0",
-    "node-sass-chokidar": "0.0.3",
-    "npm-run-all": "^4.1.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-helmet": "^5.2.0",
     "react-redux": "^5.0.7",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "^1.1.1",
     "reactstrap": "^5.0.0-beta.2",
     "redux": "^3.7.2",
     "redux-notifications": "^4.0.1",
@@ -21,36 +18,70 @@
     "socket.io-client": "^2.0.4"
   },
   "scripts": {
-    "start": "npm-run-all -p watch-css start-js",
-    "build": "npm-run-all build-css build-js",
-    "start-js": "react-scripts start",
-    "build-js": "react-scripts build",
-    "build-css": "node-sass-chokidar src/ --include-path ./node_modules -o src/",
-    "watch-css": "npm run build-css && npm run build-css -- --watch --recursive",
-    "test": "react-scripts test",
+    "start": "NODE_ENV=development webpack-dev-server",
+    "build": "rm -rf build && NODE_ENV=production webpack -p",
     "precommit": "lint-staged",
     "fixme": "fixme *.ts"
   },
   "devDependencies": {
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^0.28.10",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^1.1.11",
     "fixme": "^0.4.5",
+    "html-webpack-plugin": "github:webpack-contrib/html-webpack-plugin",
+    "html-webpack-template": "^6.1.0",
     "husky": "^0.14.3",
-    "jest-enzyme": "^4.2.0",
     "lint-staged": "^7.0.0",
+    "node-sass": "^4.7.2",
     "prettier": "^1.11.1",
-    "react-test-renderer": "^16.2.0"
+    "sass-loader": "^6.0.6",
+    "style-loader": "^0.20.2",
+    "url-loader": "^0.6.2",
+    "webpack": "^4.0.1",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.0"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "browsers": [
+              "last 2 versions"
+            ]
+          },
+          "modules": false
+        }
+      ],
+      "react"
+    ],
+    "plugins": [
+      "transform-object-rest-spread",
+      "transform-class-properties"
+    ],
+    "env": {
+      "test": {
+        "presets": [
+          [
+            "env"
+          ],
+          "react"
+        ]
+      }
+    }
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
       "prettier --write",
       "git add"
-    ]
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx}",
-      "!**/__tests__/**/*"
     ]
   }
 }
