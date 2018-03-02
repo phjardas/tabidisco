@@ -9,6 +9,7 @@ interface TagMapping {
   readonly frames: string[];
 }
 
+// FIXME read song length from mp3 tags
 const tagMappings: TagMapping[] = [
   { field: 'title', frames: ['TIT1', 'TIT2'] },
   { field: 'artist', frames: ['TPE1', 'TPE2'] },

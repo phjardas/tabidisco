@@ -7,8 +7,6 @@ import { readFile, writeFile, deleteFile } from './io';
 import { parseTags } from './mp3';
 import { Song } from './api';
 
-const dbDir = process.env.DB_PATH || 'db';
-
 export interface Library {
   readonly songs: Observable<Song[]>;
   getSong(tokenId: string): Observable<Song>;
@@ -23,11 +21,13 @@ type SongMap = { [tokenId: string]: Song };
 @injectable()
 export class FileLibrary implements Library {
   private log: Log;
+  private readonly dbDir: string;
   private readonly dbFile: string;
 
   constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
     this.log = logFactory.getLog('library');
-    this.dbFile = path.resolve(dbDir, 'songs.json');
+    this.dbDir = process.env.TABIDISCO_DB_DIR || path.resolve('db');
+    this.dbFile = path.resolve(this.dbDir, 'songs.json');
   }
 
   get songs(): Observable<Song[]> {
@@ -39,21 +39,29 @@ export class FileLibrary implements Library {
     return this.load().map(songs => {
       const song = songs[tokenId];
       if (!song) throw new Error(`Song not found: ${tokenId}`);
-      return song;
+      return { ...song, file: path.resolve(this.dbDir, song.file) };
     });
   }
 
-  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
+  setSong(tokenId: string, originalFilename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
     this.log.info('setting song %s', tokenId);
-    const suffix = filename.replace(/^.+\.([^.]+)$/, '$1');
-    const fullFile = path.resolve(dbDir, `${tokenId}.${suffix}`);
+    const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
+    const filename = `${tokenId}.${suffix}`;
+    const fullFile = path.resolve(this.dbDir, filename);
 
     return writeFile(fullFile, buffer)
       .flatMap(() => Observable.combineLatest(this.load(), parseTags(fullFile)))
       .flatMap(([songs, tags]) => {
-        const song = { tokenId, file: fullFile, type: suffix, size: buffer.byteLength, filename, ...tags };
-        const oldSong = songs[tokenId];
+        const song = {
+          tokenId,
+          file: filename,
+          type: suffix,
+          size: buffer.byteLength,
+          filename: originalFilename,
+          ...tags,
+        };
 
+        const oldSong = songs[tokenId];
         return this.save({ ...songs, [tokenId]: song }).map(() => {
           if (oldSong) {
             this.log.info('updated song %s', tokenId);

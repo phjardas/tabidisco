@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const prod = process.env.NODE_ENV === 'production';
 
-const BUILD_DIR = path.resolve(__dirname, 'build');
+const BUILD_DIR = path.resolve(__dirname, 'dist');
 const APP_DIR = path.resolve(__dirname, 'src');
 
 const extractScss = new ExtractTextPlugin({

@@ -1,6 +1,7 @@
 import { injectable, inject } from 'inversify';
 import * as express from 'express';
 import * as http from 'http';
+import * as path from 'path';
 import * as socket from 'socket.io';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
@@ -22,11 +23,14 @@ export class ServerImpl implements Server {
   constructor(@inject(TabidiscoSymbol) tabidisco: Tabidisco) {
     const bus = tabidisco.bus;
 
+    const guiDir = process.env.TABIDISCO_GUI_DIR || path.resolve('../../gui/dist');
+    console.log('[server] serving GUI resources from %s', guiDir);
+
     const app = express();
     app.use(helmet());
     app.use(cors({ origin: true }));
     app.use(bodyParser.json());
-    app.use(express.static(`${__dirname}/../../gui/build`));
+    app.use(express.static(guiDir));
 
     this.httpServer = new http.Server(app);
 
@@ -52,6 +56,6 @@ export class ServerImpl implements Server {
   }
 
   start(port: number) {
-    this.httpServer.listen(port, () => console.info('listening on %d', port));
+    this.httpServer.listen(port, () => console.info('[server] listening on %d', port));
   }
 }

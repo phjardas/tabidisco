@@ -1,0 +1,9 @@
+node_modules
+
+gui/node_modules
+gui/src
+
+server/node_modules
+server/db
+server/src
+server/typings

@@ -5,13 +5,17 @@ cache:
   directories:
   - gui/node_modules
   - server/node_modules
+sudo: required
+services:
+- docker
 addons:
   apt:
     packages:
     - libasound2-dev
 install:
-- (cd server && npm install)
-- (cd gui && npm install)
+- (cd server && npm ci)
+- (cd gui && npm ci)
 script:
 - (cd server && npm run build)
 - (cd gui && npm run build)
+- docker build --tag tabidisco .

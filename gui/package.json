@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=development webpack-dev-server",
-    "build": "rm -rf build && NODE_ENV=production webpack -p",
+    "build": "rm -rf dist && NODE_ENV=production webpack -p",
     "precommit": "lint-staged",
     "fixme": "fixme *.ts"
   },
@@ -54,34 +54,21 @@
         "env",
         {
           "targets": {
-            "browsers": [
-              "last 2 versions"
-            ]
+            "browsers": ["last 2 versions"]
           },
           "modules": false
         }
       ],
       "react"
     ],
-    "plugins": [
-      "transform-object-rest-spread",
-      "transform-class-properties"
-    ],
+    "plugins": ["transform-object-rest-spread", "transform-class-properties"],
     "env": {
       "test": {
-        "presets": [
-          [
-            "env"
-          ],
-          "react"
-        ]
+        "presets": [["env"], "react"]
       }
     }
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": [
-      "prettier --write",
-      "git add"
-    ]
+    "src/**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }

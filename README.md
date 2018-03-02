@@ -24,9 +24,9 @@ All in all (highly depending on the kind of amp and speakers you choose) these i
 
 ## Software
 
-The software runs on your Pi and observes the physical buttons. When the *play* button is pressed, it tries to read an RFID tag with the NFC module. The RFID is resolved against a locally stored MP3 file. If all of this succeeded, it will turn on the power supply of the amplifier and start playback of the MP3.
+The software runs on your Pi and observes the physical buttons. When the _play_ button is pressed, it tries to read an RFID tag with the NFC module. The RFID is resolved against a locally stored MP3 file. If all of this succeeded, it will turn on the power supply of the amplifier and start playback of the MP3.
 
-The *stop* button stops the active playback.
+The _stop_ button stops the active playback.
 
 Ten minutes after the last song has stopped playing, the power supply to the amplifier is automatically cut.
 
@@ -65,20 +65,39 @@ Start the GUI at the default port 3000:
 
 Open http://localhost:3000/
 
+### Building a Docker Image
+
+Prerequisites:
+
+* You have `docker` installed.
+* You have already run the instructions under _Setup_ above.
+
+```
+(cd gui && npm run build)
+(cd server && npm run build)
+docker build --tag tabidisco .
+```
+
+### Running a Docker Image
+
+```
+docker run \
+  --privileged \
+  -p 3000:3000 \
+  -v /path/to/data/dir:/data
+  tabidisco
+```
+
+The `--privileged` flag is required because the server needs access to the sound API. If you know how to do this without privileged mode, please do let me know.
+
 ### Installing on your Raspberry Pi
 
-Install node.js and git on your Pi.
+**TODO**
 
-Clone this repository and install it:
-
-```
-cd
-git clone https://github.com/phjardas/tabi-disco.git
-cd tabi-disco
-./deploy.sh
-```
-
-This will install a systemd service that will start the application on system boot on port 3000.
+* Install docker on your Pi
+* Enable docker swarm
+* Create the docker service
+* Describe redeployments/upgrades
 
 ## Author and Maintainer
 
