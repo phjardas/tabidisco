@@ -1,4 +1,4 @@
-# Tabi-Disco: a Raspberry Pi powered jukebox for kids [![Build Status](https://travis-ci.org/phjardas/tabi-disco.svg?branch=master)](https://travis-ci.org/phjardas/tabi-disco)
+# Tabidisco: a Raspberry Pi powered jukebox for kids [![Build Status](https://travis-ci.org/phjardas/tabidisco.svg?branch=master)](https://travis-ci.org/phjardas/tabidisco)
 
 At the time of the inception of this project my daughter Tabea was not even two-and-a-half years old and loved hearing music. However, she was still too young to be able to manage the elaborate controls of an MP3 player. Hence I came up with the idea to build something accessible for her to be able to play music independently from her parents.
 

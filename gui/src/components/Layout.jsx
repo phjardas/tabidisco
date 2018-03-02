@@ -16,7 +16,7 @@ const Layout = ({ connectionState, children, currentSong, token, power, dispatch
       <Container className="d-flex">
         <NavbarBrand to="/" tag={RRLink}>
           <FontAwesome name="music" className="mr-2" />
-          Tabi-Disco
+          Tabidisco
         </NavbarBrand>
         <Nav navbar>
           <NavItem>
