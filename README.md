@@ -75,7 +75,7 @@ Prerequisites:
 ```
 (cd gui && npm run build)
 (cd server && npm run build)
-docker build --tag tabidisco .
+docker build --tag phjardas/tabidisco .
 ```
 
 ### Running a Docker Image
@@ -85,7 +85,7 @@ docker run \
   --privileged \
   -p 3000:3000 \
   -v /path/to/data/dir:/data
-  tabidisco
+  phjardas/tabidisco
 ```
 
 The `--privileged` flag is required because the server needs access to the sound API. If you know how to do this without privileged mode, please do let me know.
