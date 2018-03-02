@@ -13,6 +13,7 @@ addons:
     packages:
     - libasound2-dev
 install:
+- npm install -g npm@5.7.1
 - (cd server && npm ci)
 - (cd gui && npm ci)
 script:
