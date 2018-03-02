@@ -19,4 +19,9 @@ install:
 script:
 - (cd server && npm run build)
 - (cd gui && npm run build)
-- docker build --tag tabidisco .
+- docker build --tag phjardas/tabidisco .
+deploy:
+  provider: script
+  script: bash docker_push.sh
+  on:
+    branch: master
