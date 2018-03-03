@@ -5,9 +5,9 @@ cache:
   directories:
   - gui/node_modules
   - server/node_modules
-sudo: required
-services:
-- docker
+#sudo: required
+#services:
+#- docker
 addons:
   apt:
     packages:
@@ -19,9 +19,9 @@ install:
 script:
 - (cd server && npm run build)
 - (cd gui && npm run build)
-- docker build --tag phjardas/tabidisco .
-deploy:
-  provider: script
-  script: bash docker_push.sh
-  on:
-    branch: master
+#- docker build --tag phjardas/tabidisco .
+#deploy:
+#  provider: script
+#  script: bash docker_push.sh
+#  on:
+#    branch: master

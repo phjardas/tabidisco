@@ -65,39 +65,67 @@ Start the GUI at the default port 3000:
 
 Open http://localhost:3000/
 
-### Building a Docker Image
-
-Prerequisites:
-
-* You have `docker` installed.
-* You have already run the instructions under _Setup_ above.
-
-```
-(cd gui && npm run build)
-(cd server && npm run build)
-docker build --tag phjardas/tabidisco .
-```
-
-### Running a Docker Image
-
-```
-docker run \
-  --privileged \
-  -p 3000:3000 \
-  -v /path/to/data/dir:/data
-  phjardas/tabidisco
-```
-
-The `--privileged` flag is required because the server needs access to the sound API. If you know how to do this without privileged mode, please do let me know.
-
 ### Installing on your Raspberry Pi
 
-**TODO**
+Install node.js version 8 or later on your Pi.
 
-* Install docker on your Pi
-* Enable docker swarm
-* Create the docker service
-* Describe redeployments/upgrades
+Make sure your `npm --version` is at least `5.7.1`, otherwise install the latest version:
+
+```
+sudo npm install -g npm@latest
+```
+
+Clone the tabidisco repository on your Pi into `/home/pi/tabidisco`:
+
+```
+git clone https://github.com/phjardas/tabidisco.git ~/tabidisco
+```
+
+Create a directory to store persistent data (eg. MP3 files):
+
+```
+mkdir -p ~/tabidisco-data
+```
+
+Create the file `/etc/default/tabidisco` with the following content:
+
+```
+NODE_ENV=production
+PORT=80
+TABIDISCO_GUI_DIR=/home/pi/tabidisco/gui/dist
+TABIDISCO_DB_DIR=/home/pi/tabidisco-data
+```
+
+Create the file `/etc/systemd/system/tabidisco.service` with the following content:
+
+```
+[Unit]
+Description=Tabidisco
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/home/pi/tabidisco/server
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tabidisco
+EnvironmentFile=/etc/default/tabidisco
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now everytime you want to deploy the newest version (including the first time) run the following commands:
+
+```
+cd ~/tabidisco
+(cd gui && npm ci && npm run build)
+(cd server && npm ci && npm run build)
+sudo service tabidisco restart
+```
+
+You can now access tabidisco on your Pi's IP address at port 80.
 
 ## Author and Maintainer
 
