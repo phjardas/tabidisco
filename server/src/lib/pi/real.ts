@@ -1,21 +1,44 @@
-import { Observable, Observer, Subject } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
 import { injectable, inject } from 'inversify';
 import * as mfrc from 'mfrc522-rpi';
+import * as wpi from 'wiringpi-node';
 
 import { LogFactory, Log, LogFactorySymbol } from './../../log';
 import { PiAdapter, ButtonId } from './api';
+
+interface ButtonConfig {
+  readonly type: ButtonId;
+  readonly pin: number;
+}
+
+const buttonConfigs: ButtonConfig[] = [{ type: 'play', pin: 17 }];
+
+function observeButton(config: ButtonConfig): Observable<ButtonId> {
+  const { pin, type } = config;
+  wpi.pinMode(pin, wpi.INPUT);
+  wpi.pullUpDnControl(pin, wpi.PUD_UP);
+
+  const obs: Observable<any> = Observable.create((obs: Observer<any>) => wpi.wiringPiISR(pin, wpi.INT_EDGE_FALLING, () => obs.next(null)));
+  return obs
+    .debounceTime(100)
+    .map(() => wpi.digitalRead(pin) === wpi.LOW)
+    .distinctUntilChanged()
+    .filter(value => value)
+    .map(() => type);
+}
 
 @injectable()
 export class RealPiAdapter implements PiAdapter {
   private readonly log: Log;
   powered = false;
-  // FIXME implement Pi buttons
-  private readonly _buttons = new Subject<ButtonId>();
-  readonly buttons = this._buttons.asObservable();
+  readonly buttons: Observable<ButtonId>;
 
   constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
     this.log = logFactory.getLog('pi');
     mfrc.initWiringPi(0);
+    this.buttons = Observable.merge(...buttonConfigs.map(observeButton))
+      .publish()
+      .refCount();
     this.log.info('initialized Raspberry Pi adapter');
   }
 
