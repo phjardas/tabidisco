@@ -11,7 +11,7 @@ interface ButtonConfig {
   readonly pin: number;
 }
 
-const buttonConfigs: ButtonConfig[] = [{ type: 'play', pin: 17 }];
+const buttonConfigs: ButtonConfig[] = [{ type: 'play', pin: 17 }, { type: 'stop', pin: 27 }];
 
 function observeButton(config: ButtonConfig): Observable<ButtonId> {
   const { pin, type } = config;
