@@ -106,11 +106,17 @@ EnvironmentFile=/etc/default/tabidisco
 WantedBy=multi-user.target
 ```
 
+Now enable the service to start on boot:
+
+```bash
+sudo systemctl enable tabidisco.service
+```
+
 ## Deployment
 
-Now everytime you want to deploy the newest version (including the first time) run the following commands:
+Everytime you want to deploy the newest version (including the first time) run the following commands:
 
-```
+```bash
 cd ~/tabidisco
 (cd gui && npm ci && npm run build)
 (cd server && npm ci && npm run build)
