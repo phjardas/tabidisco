@@ -40,9 +40,11 @@ The server component is written in [TypeScript](https://www.typescriptlang.org/)
 
 The GUI is written in [React](https://reactjs.org/) with [Redux](https://redux.js.org/) and [Bootstrap](https://getbootstrap.com).
 
-Communication between client and server is runs exclusively via WebSockets with [socket.io](https://socket.io/).
+Communication between client and server runs exclusively via WebSockets with [socket.io](https://socket.io/).
 
 ### Setup
+
+Note that because of binary compatibility issues the server must run under node version 8. Not 7, not 9 but 8.
 
 ```
 (cd server && npm install)

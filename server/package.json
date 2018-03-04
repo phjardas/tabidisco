@@ -6,8 +6,11 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec npx ts-node src/index.ts",
+    "dev": "TABIDISCO_MOCK_PI=true nodemon --watch src --ext ts --exec npx ts-node src/index.ts",
     "build": "tsc"
+  },
+  "engines": {
+    "node": "8.x.x"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
@@ -16,6 +19,7 @@
     "helmet": "^3.10.0",
     "inversify": "^4.10.0",
     "lame": "^1.2.4",
+    "mfrc522-rpi": "^1.1.0",
     "mp3-parser": "^0.3.0",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^5.5.6",
