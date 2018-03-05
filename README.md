@@ -31,7 +31,7 @@ In short, if you've never soldered or never set up a Pi, this project might over
 
 ## Community
 
-If you've built your own Tabidisco I'd be very grateful if you could send me some photos along with comments on what you did differently and suggestions for improvements. Pull requests are highly welcome. Thank you for giving back to the!
+If you've built your own Tabidisco I'd be very grateful if you could send me some photos along with comments on what you did differently and suggestions for improvements. Pull requests are highly welcome. Thank you for giving back to the community!
 
 ## Author and Maintainer
 
