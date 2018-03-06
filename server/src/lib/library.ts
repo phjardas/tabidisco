@@ -80,7 +80,7 @@ export class FileLibrary implements Library {
       if (!song) return Observable.empty();
 
       this.log.info('deleting song %s', tokenId);
-      return deleteFile(song.file).mergeMap(() => {
+      return deleteFile(path.resolve(this.dbDir, song.file)).mergeMap(() => {
         delete songs[tokenId];
         return this.save(songs).map(() => ({ oldSong: song }));
       });
