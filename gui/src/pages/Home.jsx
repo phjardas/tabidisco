@@ -7,7 +7,7 @@ import Layout from '../components/Layout';
 
 class Home extends React.Component {
   render() {
-    const { songs, currentSong, token, dispatch } = this.props;
+    const { songs, currentSong, songUpload, token, dispatch } = this.props;
 
     return (
       <Layout>
@@ -15,6 +15,7 @@ class Home extends React.Component {
           songs={songs}
           currentSong={currentSong}
           token={token}
+          songUpload={songUpload}
           play={tokenId => dispatch(playSong(tokenId))}
           deleteSong={tokenId => dispatch(deleteSong(tokenId))}
           uploadSong={file => dispatch(uploadSong(file))}
@@ -30,4 +31,6 @@ class Home extends React.Component {
   }
 }
 
-export default connect(state => ({ songs: state.songs, currentSong: state.currentSong, token: state.token }))(Home);
+export default connect(state => ({ songs: state.songs, currentSong: state.currentSong, songUpload: state.songUpload, token: state.token }))(
+  Home
+);

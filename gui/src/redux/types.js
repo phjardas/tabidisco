@@ -22,3 +22,7 @@ export const POWER_ON_START = 'power.on.start';
 export const POWER_ON_SUCCESS = 'power.on.success';
 export const POWER_OFF_START = 'power.off.start';
 export const POWER_OFF_SUCCESS = 'power.off.success';
+
+export const UPLOAD_SONG = 'uploadSong';
+export const UPLOAD_SONG_SUCCESS = 'uploadSong.success';
+export const UPLOAD_SONG_ERROR = 'uploadSong.error';

@@ -20,6 +20,9 @@ import {
   POWER_ON_SUCCESS,
   POWER_OFF_START,
   POWER_OFF_SUCCESS,
+  UPLOAD_SONG,
+  UPLOAD_SONG_SUCCESS,
+  UPLOAD_SONG_ERROR,
 } from './types';
 
 function deleteProperty(obj, key) {
@@ -117,4 +120,18 @@ const power = (state = { shutdownTimer: null, state: 'off' }, action) => {
   }
 };
 
-export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token, power });
+const songUpload = (state = null, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case UPLOAD_SONG:
+      return { ...payload, pending: true };
+    case UPLOAD_SONG_SUCCESS:
+      return { ...state, pending: false };
+    case UPLOAD_SONG_ERROR:
+      return { ...state, pending: false, error: action.error };
+    default:
+      return state;
+  }
+};
+
+export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token, power, songUpload });

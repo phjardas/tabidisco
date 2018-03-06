@@ -11,7 +11,7 @@ const TokenInfo = ({ token }) => {
   return null;
 };
 
-export default function Dashboard({ songs, currentSong, token, play, deleteSong, uploadSong, stopSong, readToken }) {
+export default function Dashboard({ songs, currentSong, songUpload, token, play, deleteSong, uploadSong, stopSong, readToken }) {
   return (
     <Container className="mt-3">
       <div className="mb-3">
@@ -22,7 +22,7 @@ export default function Dashboard({ songs, currentSong, token, play, deleteSong,
       </div>
 
       <SongList songs={songs} currentSong={currentSong} play={play} deleteSong={deleteSong} stopSong={stopSong} />
-      <UploadSong uploadSong={uploadSong} />
+      <UploadSong uploadSong={uploadSong} songUpload={songUpload} />
     </Container>
   );
 }

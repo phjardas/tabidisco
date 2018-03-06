@@ -20,6 +20,9 @@ import {
   POWER_ON_SUCCESS,
   POWER_OFF_START,
   POWER_OFF_SUCCESS,
+  UPLOAD_SONG,
+  UPLOAD_SONG_SUCCESS,
+  UPLOAD_SONG_ERROR,
 } from './types';
 
 // FIXME make API URL configurable
@@ -133,13 +136,22 @@ export function deleteSong(token) {
 }
 
 export function uploadSong(file) {
-  return () => {
+  return dispatch => {
+    dispatch({ type: UPLOAD_SONG, payload: { name: file.name } });
+
     const reader = new FileReader();
     const filename = file.name;
 
-    reader.addEventListener('loadend', () => {
-      const data = btoa(new Uint8Array(reader.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-      request({ type: 'set_song', payload: { filename, data } });
+    reader.addEventListener('loadend', async () => {
+      try {
+        const data = btoa(new Uint8Array(reader.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+        await request({ type: 'set_song', payload: { filename, data } });
+        dispatch({ type: UPLOAD_SONG_SUCCESS });
+        dispatch(notifActions.notifSend({ kind: 'success', message: 'The song was successfully uploaded.', dismissAfter: 5000 }));
+      } catch (error) {
+        dispatch({ type: UPLOAD_SONG_ERROR, error });
+        dispatch(notifActions.notifSend({ kind: 'error', message: error.message, dismissAfter: 5000 }));
+      }
     });
 
     reader.readAsArrayBuffer(file);
