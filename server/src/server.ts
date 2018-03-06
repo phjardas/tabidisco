@@ -30,7 +30,16 @@ export class ServerImpl implements Server {
     app.use(helmet());
     app.use(cors({ origin: true }));
     app.use(bodyParser.json());
+
+    // Serve static resources with History API fallback
     app.use(express.static(guiDir));
+    app.use((req, res, next) => {
+      if ((req.method === 'GET' || req.method === 'HEAD') && req.accepts('html')) {
+        res.sendFile('index.html', { root: guiDir }, (err: Error) => err && next());
+      } else {
+        next();
+      }
+    });
 
     this.httpServer = new http.Server(app);
 
