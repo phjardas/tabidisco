@@ -20,26 +20,27 @@ Communication between client and server runs exclusively via WebSockets with [so
 
 Note that because of binary compatibility issues the server must run under node version 8. Not 7, not 9 but 8.
 
-```
-(cd server && npm install)
-(cd gui && npm install)
+```bash
+npm install
 ```
 
 ## Development
 
-Start the server at the default port 3001:
+Start server and GUI in development mode:
 
-```
-(cd server && npm run dev)
+```bash
+npm start
 ```
 
-Start the GUI at the default port 3000:
-
-```
-(cd gui && npm start)
-```
+The server will run by default on port 3001 and the gui on port 3000.
 
 Open http://localhost:3000/
+
+## Building
+
+```bash
+npm run build
+```
 
 ## Installing
 
