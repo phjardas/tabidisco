@@ -16,7 +16,7 @@ export default class UploadSong extends React.Component {
           <UploadSongForm uploadSong={uploadSong} />
           {songUpload &&
             songUpload.pending && (
-              <AnimatedModal particle={props => <FontAwesome name="music" {...props} />} particleCount={100}>
+              <AnimatedModal particle={props => <FontAwesome name="music" {...props} />} particleCount={50}>
                 Uploading song&hellip;
               </AnimatedModal>
             )}
