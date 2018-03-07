@@ -9,7 +9,7 @@
     "dev": "TABIDISCO_MOCK_PI=true nodemon --watch src --ext ts --exec npx ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "test:ci": "jest --coverage && cat ./coverage/lcov.info | coveralls"
+    "test:ci": "jest --coverage && nyc report --temp-directory=coverage --reporter=text-lcov | coveralls"
   },
   "engines": {
     "node": "^8"
@@ -39,6 +39,7 @@
     "coveralls": "^3.0.0",
     "jest": "^22.4.2",
     "nodemon": "^1.14.12",
+    "nyc": "^11.4.1",
     "ts-jest": "^22.4.1",
     "ts-node": "^4.1.0",
     "typescript": "^2.7.1"
