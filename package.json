@@ -8,7 +8,7 @@
     "start": "check-engine && concurrently --kill-others 'npm run start:server' 'npm run start:gui'",
     "start:server": "(cd server && npm run dev)",
     "start:gui": "(cd gui && npm start)",
-    "test:ci": "(cd server && npm test:ci)",
+    "test:ci": "(cd server && npm run test:ci)",
     "precommit": "lint-staged",
     "fixme": "fixme */src/**/*"
   },
