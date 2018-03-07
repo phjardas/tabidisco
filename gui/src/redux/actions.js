@@ -143,14 +143,19 @@ export function uploadSong(file) {
     const filename = file.name;
 
     reader.addEventListener('loadend', async () => {
+      const handleError = error => dispatch({ type: UPLOAD_SONG_ERROR, error });
+
       try {
         const data = btoa(new Uint8Array(reader.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-        await request({ type: 'set_song', payload: { filename, data } });
-        dispatch({ type: UPLOAD_SONG_SUCCESS });
-        dispatch(notifActions.notifSend({ kind: 'success', message: 'The song was successfully uploaded.', dismissAfter: 5000 }));
+        const result = await request({ type: 'set_song', payload: { filename, data } });
+        if (result.error) {
+          handleError(result.error);
+        } else {
+          dispatch({ type: UPLOAD_SONG_SUCCESS });
+          dispatch(notifActions.notifSend({ kind: 'success', message: 'The song was successfully uploaded.', dismissAfter: 5000 }));
+        }
       } catch (error) {
-        dispatch({ type: UPLOAD_SONG_ERROR, error });
-        dispatch(notifActions.notifSend({ kind: 'error', message: error.message, dismissAfter: 5000 }));
+        handleError(error);
       }
     });
 

@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { Subject, Observable, Observer } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 export interface ActionData<T = {}> {
   readonly type: string;
@@ -67,7 +67,7 @@ export interface EffectContext {
   readonly events: Observable<Event>;
   dispatch(action: ActionData<any>): void;
   emit(event: EventData): void;
-  request<T>(action: ActionData<any>): Observable<T>;
+  request<T>(action: ActionData<any>, options?: { throwError?: boolean }): Observable<T>;
 }
 
 export type Effect = (context: EffectContext) => Observable<ActionData<any>>;
@@ -78,7 +78,7 @@ export interface EffectFactory {
 
 export interface Bus extends EffectContext {
   readonly events: Observable<Event>;
-  dispatch(action: ActionData<any>): string;
+  dispatch(action: ActionData<any>): Action;
   effect(effect: Effect): void;
   attach(emitter: EventEmitter): void;
 }
@@ -97,30 +97,28 @@ export class BusImpl implements Bus, EffectContext {
     this.actions.subscribe(action => this.emit({ type: 'action', action }));
   }
 
-  dispatch(action: ActionData<any>): string {
+  dispatch(action: ActionData<any>): Action {
     const a = new Action(action);
     setImmediate(() => this._actions.next(a));
-    return a.id;
+    return a;
   }
 
-  request<T>(action: ActionData<any>): Observable<T> {
-    return Observable.create((obs: Observer<T>) => {
-      const id = this.dispatch(action);
-      this.actions
-        .filter(a => a.replyTo === id)
-        .first()
-        .subscribe(
-          reply => {
-            if (reply.error) {
-              obs.error(reply.error);
-            } else {
-              obs.next(reply.payload);
-            }
-          },
-          error => obs.error(error),
-          () => obs.complete()
-        );
-    });
+  request<T>(action: ActionData<any>, options?: { throwError?: boolean }): Observable<T> {
+    const { throwError } = { throwError: true, ...options };
+
+    const a = this.dispatch(action);
+
+    return this.actions
+      .first(({ replyTo }) => replyTo === a.id)
+      .map(({ error, payload }) => {
+        if (error) throw error;
+        return payload;
+      })
+      .catch(error => {
+        if (throwError) throw new Error(error.message);
+        return [a.replyError(error)];
+      })
+      .share();
   }
 
   emit(event: EventData) {
@@ -137,12 +135,14 @@ export class BusImpl implements Bus, EffectContext {
     };
 
     effect(context)
-      .catch(err => {
-        console.log('Error executing effect:', err);
-        return Observable.empty();
-      })
       .filter(a => !!a)
-      .subscribe(this.dispatch.bind(this));
+      .subscribe({
+        next: this.dispatch.bind(this),
+        error: err => {
+          console.log('Error executing effect:', err);
+          return [];
+        },
+      });
   }
 
   attach(emitter: EventEmitter) {

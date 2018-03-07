@@ -1,12 +1,12 @@
 import { Bus, Event } from './lib/bus';
 
 export function applyBusLogging(bus: Bus) {
-  bus.actions.subscribe(action => console.log('[action] %j', prepareActionForLogging(action)));
+  bus.actions.subscribe(action => console.log('[action] [%s] %j', action.type, prepareActionForLogging(action)));
   bus.events.subscribe(event => {
     if (event.type === 'log') {
       (console as any)[event.level](`[${event.module}] ${event.message}`, ...event.args);
     } else {
-      console.log('[event] %j', prepareEventForLogging(event));
+      console.log('[event] [%s] %j', event.type, prepareEventForLogging(event));
     }
   });
 }

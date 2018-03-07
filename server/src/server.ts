@@ -49,7 +49,7 @@ export class ServerImpl implements Server {
       socket.on('disconnect', () => bus.dispatch({ type: 'client_disconnected', payload: { id: socket.id } }));
       socket.on('action', action => bus.dispatch(action));
       socket.on('request', ({ action, requestId }) =>
-        bus.request({ ...action, private: socket.id }).subscribe(reply => socket.emit('reply', { requestId, reply }))
+        bus.request({ ...action, private: socket.id }, { throwError: false }).subscribe(reply => socket.emit('reply', { requestId, reply }))
       );
       bus.events
         .filter(event => event.action && event.action.private === socket.id)
