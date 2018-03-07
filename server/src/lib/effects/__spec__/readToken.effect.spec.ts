@@ -18,7 +18,7 @@ class MockPiAdapter implements PiAdapter {
     return Observable.of(token);
   }
 
-  setPower(power: boolean): Observable<any> {
+  setPower(_: boolean): Observable<any> {
     throw new Error('Method not implemented.');
   }
 }
