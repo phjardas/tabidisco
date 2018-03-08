@@ -79,7 +79,12 @@ export class PlayerImpl implements Player {
         .once('format', (format: any) => {
           const play = new Play(song, format, mp3stream);
           this.currentPlay = play;
-          play.events.subscribe(evt => this._events.next(evt));
+          play.events.subscribe(
+            evt => this._events.next(evt),
+            // FIXME handle errors during playback
+            err => console.error('Error playing song:', err),
+            () => (this.currentPlay = null)
+          );
           obs.next(play);
           play.start();
         })
