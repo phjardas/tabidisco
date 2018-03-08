@@ -12,6 +12,7 @@ interface ButtonConfig {
 }
 
 const buttonConfigs: ButtonConfig[] = [{ type: 'play', pin: 17 }, { type: 'stop', pin: 27 }];
+const powerPins = [22, 23];
 
 function observeButton(config: ButtonConfig): Observable<ButtonId> {
   const { pin, type } = config;
@@ -39,7 +40,9 @@ export class RealPiAdapter implements PiAdapter {
     this.buttons = Observable.merge(...buttonConfigs.map(observeButton))
       .publish()
       .refCount();
+    powerPins.forEach(pin => wpi.pinMode(pin, wpi.OUTPUT));
     this.log.info('initialized Raspberry Pi adapter');
+    this.setPower(false, true);
   }
 
   readToken(): Observable<string> {
@@ -66,12 +69,11 @@ export class RealPiAdapter implements PiAdapter {
     });
   }
 
-  setPower(power: boolean): Observable<any> {
-    if (power !== this.powered) {
+  setPower(power: boolean, force?: boolean): Observable<any> {
+    if (force || power !== this.powered) {
       this.log.info(`turning power ${power ? 'on' : 'off'}`);
       this.powered = power;
-      // FIXME implement Pi power management
-      this.log.warn('power management is not implemented yet!');
+      powerPins.forEach(pin => wpi.digitalWrite(pin, power ? 0 : 1));
     }
 
     return Observable.of(null);
