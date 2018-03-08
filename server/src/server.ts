@@ -7,7 +7,6 @@ import * as socket from 'socket.io';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 
-import { Configuration, ConfigurationSymbol } from './config';
 import { Tabidisco, TabidiscoSymbol } from './lib/tabidisco';
 import { applyBusLogging, prepareEventForLogging } from './bus-logger';
 

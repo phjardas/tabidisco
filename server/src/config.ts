@@ -17,7 +17,7 @@ export const ConfigurationSymbol = Symbol.for('Configuration');
 
 @injectable()
 export class ConfigurationImpl implements Configuration {
-  version = pkg.version;
+  version = (pkg as any).version;
   buildInfo = readBuildInfo();
 }
 
