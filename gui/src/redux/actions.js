@@ -30,12 +30,13 @@ const apiUrl = process.env.NODE_ENV === 'production' ? window.location.origin : 
 let io = SocketIO(apiUrl);
 
 function request(action) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const requestId = Math.floor(1000000000 * Math.random()).toString();
 
     const listener = reply => {
       if (reply.requestId === requestId) {
         io.off('reply', listener);
+        if (reply.reply && reply.reply.error) return reject(reply.reply.error);
         resolve(reply.reply);
       }
     };
@@ -136,30 +137,27 @@ export function deleteSong(token) {
 }
 
 export function uploadSong(file) {
-  return dispatch => {
+  console.log('uploadSong:', file);
+  return async dispatch => {
     dispatch({ type: UPLOAD_SONG, payload: { name: file.name } });
 
-    const reader = new FileReader();
-    const filename = file.name;
+    try {
+      const { token } = await request({ type: 'read_token' });
 
-    reader.addEventListener('loadend', async () => {
-      const handleError = error => dispatch({ type: UPLOAD_SONG_ERROR, error });
+      const formData = new FormData();
+      formData.append('file', file);
 
-      try {
-        const data = btoa(new Uint8Array(reader.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
-        const result = await request({ type: 'set_song', payload: { filename, data } });
-        if (result.error) {
-          handleError(result.error);
-        } else {
-          dispatch({ type: UPLOAD_SONG_SUCCESS });
-          dispatch(notifActions.notifSend({ kind: 'success', message: 'The song was successfully uploaded.', dismissAfter: 5000 }));
-        }
-      } catch (error) {
-        handleError(error);
-      }
-    });
+      const res = await fetch(`${apiUrl}/files/${token}`, {
+        method: 'PUT',
+        body: formData,
+      });
 
-    reader.readAsArrayBuffer(file);
+      if (!res.ok) throw new Error('Upload failed');
+      dispatch({ type: UPLOAD_SONG_SUCCESS });
+      dispatch(notifActions.notifSend({ kind: 'success', message: 'The song was successfully uploaded.', dismissAfter: 5000 }));
+    } catch (error) {
+      dispatch({ type: UPLOAD_SONG_ERROR, error });
+    }
   };
 }
 

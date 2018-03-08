@@ -2,8 +2,8 @@ import { injectable, inject } from 'inversify';
 import * as express from 'express';
 import * as http from 'http';
 import * as path from 'path';
+import * as multer from 'multer';
 import * as socket from 'socket.io';
-import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 
@@ -15,6 +15,14 @@ export interface Server {
 }
 
 export const ServerSymbol = Symbol.for('Server');
+
+function formatError(error: Error) {
+  if (error)
+    return {
+      type: error.name || error.constructor.name,
+      message: error.message,
+    };
+}
 
 @injectable()
 export class ServerImpl implements Server {
@@ -29,7 +37,16 @@ export class ServerImpl implements Server {
     const app = express();
     app.use(helmet());
     app.use(cors({ origin: true }));
-    app.use(bodyParser.json());
+
+    const upload = multer();
+    app.put('/files/:tokenId', upload.single('file'), (req, res, next) => {
+      const filename = req.file.originalname;
+      const data = req.file.buffer;
+
+      bus
+        .request({ type: 'set_song', payload: { tokenId: req.params.tokenId, filename, data } })
+        .subscribe(() => res.json({ success: true }), next);
+    });
 
     // Serve static resources with History API fallback
     app.use(express.static(guiDir));
@@ -49,7 +66,15 @@ export class ServerImpl implements Server {
       socket.on('disconnect', () => bus.dispatch({ type: 'client_disconnected', payload: { id: socket.id } }));
       socket.on('action', action => bus.dispatch(action));
       socket.on('request', ({ action, requestId }) =>
-        bus.request({ ...action, private: socket.id }, { throwError: false }).subscribe(reply => socket.emit('reply', { requestId, reply }))
+        bus.request<any>({ ...action, private: socket.id }, { throwError: false }).subscribe(reply =>
+          socket.emit('reply', {
+            requestId,
+            reply: reply && {
+              ...reply,
+              error: formatError(reply.error),
+            },
+          })
+        )
       );
       bus.events
         .filter(event => event.action && event.action.private === socket.id)
