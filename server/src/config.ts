@@ -1,17 +1,16 @@
 import { injectable } from 'inversify';
-import * as fs from 'fs';
+import * as getRepoInfo from 'git-repo-info';
 
 import * as pkg from '../package.json';
 
 export interface BuildInfo {
-  timestamp: string;
   branch: string;
   commit: string;
 }
 
 export interface Configuration {
   version: string;
-  buildInfo?: BuildInfo;
+  buildInfo: BuildInfo;
 }
 
 export const ConfigurationSymbol = Symbol.for('Configuration');
@@ -22,10 +21,7 @@ export class ConfigurationImpl implements Configuration {
   buildInfo = readBuildInfo();
 }
 
-function readBuildInfo(): BuildInfo | undefined {
-  try {
-    return JSON.parse(fs.readFileSync('build-info.json', 'utf-8'));
-  } catch (err) {
-    console.warn('No build info available.');
-  }
+function readBuildInfo(): BuildInfo {
+  const info = getRepoInfo();
+  return { commit: info.abbreviatedSha, branch: info.branch };
 }

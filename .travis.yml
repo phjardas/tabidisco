@@ -17,7 +17,10 @@ install:
 - npm install -g npm@5.7.1
 - npm install
 script:
-- scripts/travis-build.sh
+- npm run test:ci
+- npm run build
+- npm run fixme
+#- docker build --tag phjardas/tabidisco .
 #deploy:
 #  provider: script
 #  script: bash docker_push.sh

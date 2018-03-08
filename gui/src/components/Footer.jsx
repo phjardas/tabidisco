@@ -7,11 +7,9 @@ function Info({ info }) {
   return (
     <React.Fragment>
       <span>v{info.version}</span>
-      {info.buildInfo && (
-        <a href={`https://github.com/phjardas/tabidisco/commit/${info.buildInfo.commit}`} rel="noreferrer" className="ml-1">
-          commit {info.buildInfo.commit}
-        </a>
-      )}
+      <a href={`https://github.com/phjardas/tabidisco/commit/${info.buildInfo.commit}`} rel="noreferrer" className="ml-1">
+        commit {info.buildInfo.commit}
+      </a>
     </React.Fragment>
   );
 }
