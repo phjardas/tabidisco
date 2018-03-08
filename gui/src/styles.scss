@@ -11,3 +11,9 @@ body {
   transform: translateX(-50%);
   z-index: 100;
 }
+
+.active {
+  .text-muted {
+    color: $light !important;
+  }
+}

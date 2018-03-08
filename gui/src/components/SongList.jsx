@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Alert, Table } from 'reactstrap';
+import { Button, Alert, ListGroup, ListGroupItem } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
 export default function Library({ songs, currentSong, play, deleteSong, stopSong }) {
@@ -8,34 +8,31 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
     .sort((a, b) => a.filename.localeCompare(b.filename));
 
   return sortedSongs.length ? (
-    <Table>
-      <tbody>
-        {sortedSongs.map(song => {
-          const active = currentSong && currentSong.tokenId === song.tokenId;
-          return (
-            <tr key={song.tokenId} className={active ? 'table-active' : undefined}>
-              <td>
-                {active ? (
-                  <Button key="stop" color="primary" size="sm" onClick={stopSong}>
-                    <FontAwesome name="stop" />
-                  </Button>
-                ) : (
-                  <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
-                    <FontAwesome name="play" />
-                  </Button>
-                )}
-              </td>
-              <td>
-                <strong>{song.title || <span className="text-muted">unknown</span>}</strong>
-                <br />
-                {song.artist || <span className="text-muted">unknown</span>}
-              </td>
-              <td>
-                {song.filename}
-                <br />
-                <small className="text-muted">{song.tokenId}</small>
-              </td>
-              <td>
+    <ListGroup>
+      {sortedSongs.map(song => {
+        const active = currentSong && currentSong.tokenId === song.tokenId;
+        return (
+          <ListGroupItem key={song.tokenId} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
+            <div className="mr-3">
+              {active ? (
+                <Button key="stop" color="light" outline size="sm" onClick={stopSong}>
+                  <FontAwesome name="stop" />
+                </Button>
+              ) : (
+                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
+                  <FontAwesome name="play" />
+                </Button>
+              )}
+            </div>
+            <div className="mr-auto">
+              <strong>{song.title || song.filename}</strong>
+              <br />
+              {song.artist || <span className="text-muted">Unknown artist</span>}
+              <br />
+              <small className="text-muted">{song.tokenId}</small>
+            </div>
+            {active || (
+              <div>
                 <Button
                   color="danger"
                   outline
@@ -44,12 +41,12 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                 >
                   <FontAwesome name="trash" />
                 </Button>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </Table>
+              </div>
+            )}
+          </ListGroupItem>
+        );
+      })}
+    </ListGroup>
   ) : (
     <Alert color="warning">
       <FontAwesome name="exclamation-triangle" className="mr-1" />
