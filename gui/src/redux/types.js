@@ -26,3 +26,7 @@ export const POWER_OFF_SUCCESS = 'power.off.success';
 export const UPLOAD_SONG = 'uploadSong';
 export const UPLOAD_SONG_SUCCESS = 'uploadSong.success';
 export const UPLOAD_SONG_ERROR = 'uploadSong.error';
+
+export const GET_INFO = 'getInfo';
+export const GET_INFO_SUCCESS = 'getInfo.success';
+export const GET_INFO_ERROR = 'getInfo.error';

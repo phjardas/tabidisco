@@ -23,6 +23,9 @@ import {
   UPLOAD_SONG,
   UPLOAD_SONG_SUCCESS,
   UPLOAD_SONG_ERROR,
+  GET_INFO,
+  GET_INFO_SUCCESS,
+  GET_INFO_ERROR,
 } from './types';
 
 // FIXME make API URL configurable
@@ -44,6 +47,13 @@ function request(action) {
     io.on('reply', listener);
     io.emit('request', { action, requestId });
   });
+}
+
+export function getInfo(button) {
+  return dispatch => {
+    dispatch({ type: GET_INFO });
+    io.emit('action', { type: 'get_info' });
+  };
 }
 
 export function readToken(button) {
@@ -93,6 +103,10 @@ export function synchronize() {
         }
 
         switch (action.type) {
+          case 'get_info.success':
+            return dispatch({ type: GET_INFO_SUCCESS, payload: action.payload });
+          case 'get_info.error':
+            return dispatch({ type: GET_INFO_ERROR, payload: action.error });
           case 'read_token':
             return dispatch({ type: READ_TOKEN });
           case 'read_token.success':

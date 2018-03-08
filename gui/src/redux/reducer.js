@@ -23,7 +23,24 @@ import {
   UPLOAD_SONG,
   UPLOAD_SONG_SUCCESS,
   UPLOAD_SONG_ERROR,
+  GET_INFO,
+  GET_INFO_SUCCESS,
+  GET_INFO_ERROR,
 } from './types';
+
+const info = (state = null, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case GET_INFO:
+      return { pending: true };
+    case GET_INFO_SUCCESS:
+      return payload;
+    case GET_INFO_ERROR:
+      return { error: action.error };
+    default:
+      return state;
+  }
+};
 
 function deleteProperty(obj, key) {
   const ret = { ...obj };
@@ -134,4 +151,14 @@ const songUpload = (state = null, action) => {
   }
 };
 
-export const reducer = combineReducers({ connection, songs, currentSong, events, notifs, token, power, songUpload });
+export const reducer = combineReducers({
+  info,
+  connection,
+  songs,
+  currentSong,
+  events,
+  notifs,
+  token,
+  power,
+  songUpload,
+});
