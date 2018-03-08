@@ -9,8 +9,9 @@ import FontAwesome from './FontAwesome';
 import Buttons from './Buttons';
 import ConnectionState from './ConnectionState';
 import CurrentSong from './CurrentSong';
+import Footer from './Footer';
 
-const Layout = ({ connectionState, children, currentSong, token, power, dispatch }) => (
+const Layout = ({ info, connectionState, children, currentSong, token, power, dispatch }) => (
   <React.Fragment>
     <Navbar color="primary" dark>
       <Container className="d-flex">
@@ -40,9 +41,16 @@ const Layout = ({ connectionState, children, currentSong, token, power, dispatch
 
     {children}
 
+    <Footer info={info} />
+
     <CurrentSong currentSong={currentSong} stopSong={() => dispatch(pressButton('stop'))} />
     <Notifs CustomComponent={({ kind, message }) => <Alert color={kind === 'error' ? 'danger' : kind}>{message}</Alert>} />
   </React.Fragment>
 );
 
-export default connect(state => ({ connectionState: state.connection.state, currentSong: state.currentSong, power: state.power }))(Layout);
+export default connect(state => ({
+  info: state.info,
+  connectionState: state.connection.state,
+  currentSong: state.currentSong,
+  power: state.power,
+}))(Layout);

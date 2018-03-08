@@ -1,9 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
 
-body {
-  padding-bottom: 5rem;
-}
-
 .notif__container {
   position: absolute;
   top: 4rem;
@@ -16,4 +12,8 @@ body {
   .text-muted {
     color: $light !important;
   }
+}
+
+.footer a {
+  color: $light;
 }

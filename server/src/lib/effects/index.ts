@@ -2,6 +2,7 @@ import { ButtonPlayEffect } from './buttonPlay.effect';
 import { ButtonStopEffect } from './buttonStop.effect';
 import { CurrentSongEffect } from './currentSong.effect';
 import { DeleteSongEffect } from './deleteSong.effect';
+import { InfoEffect } from './info.effect';
 import { ListSongsEffect } from './listSongs.effect';
 import { PlaySongEffect } from './playSong.effect';
 import { PowerEffect } from './power.effect';
@@ -16,6 +17,7 @@ export const effects = [
   ButtonStopEffect,
   CurrentSongEffect,
   DeleteSongEffect,
+  InfoEffect,
   ListSongsEffect,
   PlaySongEffect,
   PowerEffect,

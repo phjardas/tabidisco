@@ -1,5 +1,6 @@
 import { Container } from 'inversify';
 
+import { Configuration, ConfigurationSymbol, ConfigurationImpl } from './config';
 import { Bus, BusSymbol, BusImpl, EffectFactory } from './lib/bus';
 import { Library, LibrarySymbol, FileLibrary } from './lib/library';
 import { Player, PlayerSymbol, PlayerImpl } from './lib/player';
@@ -11,6 +12,7 @@ import { effects, EffectsSymbol } from './lib/effects';
 import { ShutdownTimer, ShutdownTimerImpl, ShutdownTimerSymbol } from './lib/shutdown';
 
 export const container = new Container();
+container.bind<Configuration>(ConfigurationSymbol).to(ConfigurationImpl);
 container
   .bind<Bus>(BusSymbol)
   .to(BusImpl)
