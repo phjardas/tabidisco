@@ -2,17 +2,10 @@ import 'reflect-metadata';
 import 'jest';
 import { Observable } from 'rxjs';
 
-import { Bus, BusImpl, Effect } from '../../bus';
+import { Bus, BusImpl } from '../../bus';
 import { Song } from '../../api';
 import { Library } from '../../library';
-import { READ_TOKEN } from '../readToken.effect';
 import { SetSongEffect, SET_SONG } from '../setSong.effect';
-
-const readTokenSuccess: Effect = ({ actions }) =>
-  actions.filter(({ type }) => type === READ_TOKEN).map(action => action.replySuccess({ token: 'test' }));
-
-const readTokenError: Effect = ({ actions }) =>
-  actions.filter(({ type }) => type === READ_TOKEN).map(action => action.replyError(new Error('No token found')));
 
 class MockLibrary implements Library {
   db: { [id: string]: Song } = {};
@@ -46,17 +39,15 @@ describe('effects', () => {
     });
 
     it('should store the song if everything works well', () => {
-      bus.effect(readTokenSuccess);
       return bus
-        .request({ type: SET_SONG, payload: { filename: 'test.mp3', data: [0x00, 0x00, 0x00, 0x00] } })
+        .request({ type: SET_SONG, payload: { tokenId: 'test', filename: 'test.mp3', data: [0x00, 0x00, 0x00, 0x00] } })
         .map((song: Song) => expect(song.tokenId).toBe('test'))
         .toPromise()
         .then(() => expect(library.db['test'].size).toBe(4));
     });
 
     it('should emit a `song_added` event if token is new', () => {
-      bus.effect(readTokenSuccess);
-      bus.dispatch({ type: SET_SONG, payload: { filename: 'test.mp3', data: [] } });
+      bus.dispatch({ type: SET_SONG, payload: { tokenId: 'test', filename: 'test.mp3', data: [] } });
 
       return bus.actions
         .first(({ type }) => type === 'song_added')
@@ -70,8 +61,7 @@ describe('effects', () => {
     it('should emit a `song_modified` event if a song for this token already existed', () => {
       library.db['test'] = { tokenId: 'test', filename: 'old.mp3', file: 'old.mp3', type: 'who/cares', size: 0 };
 
-      bus.effect(readTokenSuccess);
-      bus.dispatch({ type: SET_SONG, payload: { filename: 'new.mp3', data: [] } });
+      bus.dispatch({ type: SET_SONG, payload: { tokenId: 'test', filename: 'new.mp3', data: [] } });
 
       return bus.actions
         .first(({ type }) => type === 'song_modified')
@@ -82,23 +72,12 @@ describe('effects', () => {
         .toPromise();
     });
 
-    it('should throw if no token was read', () => {
-      expect.assertions(1);
-      bus.effect(readTokenError);
-      return bus
-        .request({ type: SET_SONG, payload: { filename: 'test.mp3', data: [] } })
-        .toPromise()
-        .catch((err: Error) => expect(err.message).toBe('No token found'));
-    });
-
     it('should throw if saving the song failed', () => {
       expect.assertions(1);
-      bus.effect(readTokenSuccess);
-
       library.setSong = () => Observable.throw(new Error('sorry!'));
 
       return bus
-        .request({ type: SET_SONG, payload: { filename: 'test.mp3', data: [] } })
+        .request({ type: SET_SONG, payload: { tokenId: 'test', filename: 'test.mp3', data: [] } })
         .toPromise()
         .catch((err: Error) => expect(err.message).toBe('sorry!'));
     });
