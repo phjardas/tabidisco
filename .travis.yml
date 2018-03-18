@@ -6,9 +6,6 @@ cache:
   - node_modules
   - gui/node_modules
   - server/node_modules
-#sudo: required
-#services:
-#- docker
 addons:
   apt:
     packages:
@@ -20,9 +17,3 @@ script:
 - npm run test:ci
 - npm run build
 - npm run fixme
-#- docker build --tag phjardas/tabidisco .
-#deploy:
-#  provider: script
-#  script: bash docker_push.sh
-#  on:
-#    branch: master
