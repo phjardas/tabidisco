@@ -58,12 +58,6 @@ Install Tabidisco globally:
 npm install --global tabidisco
 ```
 
-Create a directory to store persistent data (eg. MP3 files):
-
-```bash
-mkdir -p ~/tabidisco-data
-```
-
 Create a startup script at `/home/pi/tabidisco.sh`:
 
 ```
@@ -72,9 +66,6 @@ source ~/.nvm/nvm.sh
 nvm use 8
 
 export NODE_ENV=production
-export PORT=3000
-export TABIDISCO_DB_DIR=/home/pi/tabidisco-data
-
 tabidisco
 ```
 
