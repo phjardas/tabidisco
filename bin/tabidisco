@@ -4,7 +4,7 @@
 const path = require('path');
 
 process.title = 'tabidisco';
-process.env.TABIDISCO_GUI_DIR = process.env.TABIDISCO_GUI_DIR || path.resolve('gui');
-process.env.TABIDISCO_DB_DIR = process.env.TABIDISCO_DB_DIR || path.resolve('db');
+process.env.TABIDISCO_GUI_DIR = path.resolve(__dirname, '..', 'gui');
+process.env.TABIDISCO_DB_DIR = process.env.TABIDISCO_DB_DIR || '/var/lib/tabidisco';
 
 require('..');
