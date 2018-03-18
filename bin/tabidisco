@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+'use strict';
+
+const path = require('path');
+
+process.title = 'tabidisco';
+process.env.TABIDISCO_GUI_DIR = path.resolve(__dirname, '..', 'gui');
+process.env.TABIDISCO_DB_DIR = process.env.TABIDISCO_DB_DIR || '/var/lib/tabidisco';
+
+require('..');

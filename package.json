@@ -1,10 +1,25 @@
 {
   "name": "tabidisco",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.1.0",
+  "description": "Jukebox for kids powered by Raspberry Pi",
+  "homepage": "https://github.com/phjardas/tabidisco",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phjardas/tabidisco"
+  },
+  "bugs": {
+    "url": "https://github.com/phjardas/tabidisco/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Philipp Jardas",
+    "email": "philipp@jardas.de",
+    "url": "https://github.com/phjardas"
+  },
   "scripts": {
     "postinstall": "check-engine && (cd gui && npm install) && (cd server && npm install)",
-    "build": "(cd gui && npm run build) && (cd server && npm run build)",
+    "build": "check-engine && (cd gui && npm run build) && (cd server && npm run build)",
     "start": "check-engine && concurrently --kill-others 'npm run start:server' 'npm run start:gui'",
     "start:server": "(cd server && npm run dev)",
     "start:gui": "(cd gui && npm start)",
@@ -19,11 +34,18 @@
     "check-engine": "^1.7.0",
     "concurrently": "^3.5.1",
     "fixme": "^0.4.5",
+    "fs-extra": "^5.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
     "prettier": "^1.11.1"
   },
+  "bin": {
+    "tabidisco": "./bin/tabidisco"
+  },
   "lint-staged": {
-    "{server,gui}/src/**/*.{ts,tsx,js,jsx,json,css}": ["prettier --write", "git add"]
+    "{server,gui}/src/**/*.{ts,tsx,js,jsx,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
