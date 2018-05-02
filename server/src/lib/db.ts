@@ -43,6 +43,11 @@ export class DBImpl implements DB {
       filename: { type: Sequelize.STRING, allowNull: false },
       type: { type: Sequelize.STRING, allowNull: false },
       size: { type: Sequelize.INTEGER, allowNull: false },
+      title: { type: Sequelize.STRING },
+      artist: { type: Sequelize.STRING },
+      album: { type: Sequelize.STRING },
+      plays: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
+      lastPlayedAt: { type: Sequelize.DATE },
     });
 
     this.SongData = this.db.define<SongDataInstance, SongData>('song_data', {
@@ -50,6 +55,9 @@ export class DBImpl implements DB {
       data: { type: Sequelize.BLOB, allowNull: false },
     });
 
-    this.db.sync();
+    this.db
+      .sync()
+      .then(() => this.log.info('[db] Database schema successfully synced.'))
+      .catch(err => this.log.error('[db] Error syncing database schema:', err));
   }
 }

@@ -1,10 +1,15 @@
 export interface SongTags {
-  title?: string;
-  artist?: string;
-  album?: string;
+  readonly title?: string;
+  readonly artist?: string;
+  readonly album?: string;
 }
 
-export interface Song extends SongTags {
+export interface SongStats {
+  readonly plays: number;
+  readonly lastPlayedAt?: string;
+}
+
+export interface Song extends SongTags, SongStats {
   readonly id: string;
   readonly filename: string;
   readonly type: string;

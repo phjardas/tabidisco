@@ -12,6 +12,7 @@ export interface Library {
   getSongData(id: string): Observable<SongData>;
   setSong(id: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }>;
   deleteSong(id: string): Observable<{ oldSong?: Song }>;
+  recordPlay(id: string): Observable<Song>;
 }
 
 export const LibrarySymbol = Symbol.for('Library');
@@ -79,6 +80,23 @@ export class FileLibrary implements Library {
 
           return {};
         })
+    );
+  }
+
+  recordPlay(id: string): Observable<Song> {
+    return Observable.fromPromise(
+      this.db.Song.findById(id)
+        .then(song => {
+          if (song) {
+            this.log.info('[library] recording playback for song %s', id);
+            song.set('plays', (song.get('plays') || 0) + 1);
+            song.set('lastPlayedAt', new Date());
+            return song.save();
+          }
+
+          return song;
+        })
+        .then(song => song.get())
     );
   }
 }

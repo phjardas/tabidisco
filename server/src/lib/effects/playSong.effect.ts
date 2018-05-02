@@ -13,6 +13,7 @@ export class PlaySongEffect implements EffectFactory {
       this.library
         .getSong(action.payload.token)
         .mergeMap(song => this.library.getSongData(song.id).map(({ data }) => ({ song, data })))
+        .mergeMap(({ song, data }) => this.library.recordPlay(song.id).map(song => ({ song, data })))
         .mergeMap(({ song, data }) =>
           request({ type: 'power_on' })
             .mergeMap(() => this.player.play(song, data))

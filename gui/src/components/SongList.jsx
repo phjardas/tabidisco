@@ -29,7 +29,13 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
               <br />
               {song.artist || <span className="text-muted">Unknown artist</span>}
               <br />
-              <small className="text-muted">{song.id}</small>
+              {song.plays ? (
+                <small className="text-muted">
+                  {song.plays} plays, last played on {new Date(song.lastPlayedAt).toLocaleDateString()}
+                </small>
+              ) : (
+                <small className="text-muted">never played yet</small>
+              )}
             </div>
             {active || (
               <div>
