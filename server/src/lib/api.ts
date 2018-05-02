@@ -5,11 +5,15 @@ export interface SongTags {
 }
 
 export interface Song extends SongTags {
-  readonly tokenId: string;
-  readonly file: string;
+  readonly id: string;
   readonly filename: string;
   readonly type: string;
   readonly size: number;
+}
+
+export interface SongData {
+  readonly id: string;
+  readonly data: Buffer;
 }
 
 export interface Playback extends Song {

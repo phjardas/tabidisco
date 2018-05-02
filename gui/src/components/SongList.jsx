@@ -10,16 +10,16 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
   return sortedSongs.length ? (
     <ListGroup>
       {sortedSongs.map(song => {
-        const active = currentSong && currentSong.tokenId === song.tokenId;
+        const active = currentSong && currentSong.id === song.id;
         return (
-          <ListGroupItem key={song.tokenId} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
+          <ListGroupItem key={song.id} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
             <div className="mr-3">
               {active ? (
                 <Button key="stop" color="light" outline size="sm" onClick={stopSong}>
                   <FontAwesome name="stop" />
                 </Button>
               ) : (
-                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
+                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.id)}>
                   <FontAwesome name="play" />
                 </Button>
               )}
@@ -29,7 +29,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
               <br />
               {song.artist || <span className="text-muted">Unknown artist</span>}
               <br />
-              <small className="text-muted">{song.tokenId}</small>
+              <small className="text-muted">{song.id}</small>
             </div>
             {active || (
               <div>
@@ -37,7 +37,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   color="danger"
                   outline
                   size="sm"
-                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
+                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.id)}
                 >
                   <FontAwesome name="trash" />
                 </Button>
