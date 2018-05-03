@@ -29,10 +29,10 @@ export class FileLibrary implements Library {
     return Observable.fromPromise(this.db.Song.findAll()).map(songs => songs.map(s => s.get()));
   }
 
-  getSong(tokenId: string): Observable<Song> {
+  getSong(id: string): Observable<Song> {
     return Observable.fromPromise(
-      this.db.Song.findById(tokenId).then(song => {
-        if (!song) throw new Error(`Song not found: ${tokenId}`);
+      this.db.Song.findById(id).then(song => {
+        if (!song) throw new Error(`Song not found: ${id}`);
         return song.get();
       })
     );
@@ -47,23 +47,39 @@ export class FileLibrary implements Library {
     );
   }
 
-  setSong(tokenId: string, originalFilename: string, buffer: Buffer): Observable<{ song: Song }> {
-    this.log.info('setting song %s', tokenId);
+  setSong(id: string, originalFilename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
+    this.log.info('setting song %s', id);
     const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
     const data = [...buffer];
     const tags = parseTags(new Buffer(data));
 
     const song: Song = {
-      id: tokenId,
+      id,
       filename: originalFilename,
       type: suffix,
       size: data.length,
+      plays: 0,
       ...tags,
     };
 
-    const songData = { id: song.id, data: new Buffer(data) };
+    const songData = { id, data: new Buffer(data) };
 
-    return Observable.fromPromise(Promise.all([this.db.Song.upsert(song), this.db.SongData.upsert(songData)]).then(() => ({ song })));
+    return Observable.fromPromise(
+      this.db.Song.findById(id)
+        .then(async oldSong => {
+          if (oldSong) {
+            this.log.info('replacing song %s', id);
+            await this.db.SongData.destroy({ where: { id } });
+            await this.db.Song.destroy({ where: { id } });
+            return oldSong.get();
+          }
+        })
+        .then(async oldSong => {
+          const created = await this.db.Song.create(song);
+          await this.db.SongData.create(songData);
+          return { song: created.get(), oldSong };
+        })
+    );
   }
 
   deleteSong(id: string): Observable<{ oldSong?: Song }> {

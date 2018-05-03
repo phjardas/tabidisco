@@ -54,15 +54,7 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": ".spec.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json",
-      "node"
-    ],
-    "collectCoverageFrom": [
-      "src/**"
-    ]
+    "moduleFileExtensions": ["ts", "tsx", "js", "json", "node"],
+    "collectCoverageFrom": ["src/**"]
   }
 }
