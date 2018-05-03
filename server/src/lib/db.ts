@@ -9,8 +9,10 @@ export type SongInstance = Sequelize.Instance<Song>;
 export type SongDataInstance = Sequelize.Instance<SongData>;
 
 export interface DB {
+  readonly dbDir: string;
   readonly Song: Sequelize.Model<SongInstance, Song>;
   readonly SongData: Sequelize.Model<SongDataInstance, SongData>;
+  initialize(): Promise<any>;
 }
 
 export const DBSymbol = Symbol.for('DB');
@@ -19,21 +21,22 @@ export const DBSymbol = Symbol.for('DB');
 export class DBImpl implements DB {
   private readonly log: Log;
   private readonly db: Sequelize.Sequelize;
+  readonly dbDir: string;
   readonly Song: Sequelize.Model<SongInstance, Song>;
   readonly SongData: Sequelize.Model<SongDataInstance, SongData>;
 
   constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
     this.log = logFactory.getLog('db');
+    this.dbDir = process.env.TABIDISCO_DB_DIR || path.resolve('db');
 
-    const dbDir = process.env.TABIDISCO_DB_DIR || path.resolve('db');
-    const dbFile = path.resolve(dbDir, 'db.sqlite');
+    const dbFile = path.resolve(this.dbDir, 'db.sqlite');
     const enableSqlLogging = process.env.DB_LOG_SQL === 'true';
 
-    this.log.info('[db] Opening sqlite database at %s', dbFile);
+    this.log.info('Opening sqlite database at %s', dbFile);
     const config: Sequelize.Options = {
       dialect: 'sqlite',
       storage: dbFile,
-      logging: enableSqlLogging ? (msg: any) => this.log.debug('[db] [sql] %s', msg) : false,
+      logging: enableSqlLogging ? (msg: any) => this.log.debug('[sql] %s', msg) : false,
     };
 
     this.db = new Sequelize(config);
@@ -54,10 +57,12 @@ export class DBImpl implements DB {
       id: { type: Sequelize.STRING, primaryKey: true },
       data: { type: Sequelize.BLOB, allowNull: false },
     });
+  }
 
-    this.db
+  async initialize() {
+    return this.db
       .sync()
-      .then(() => this.log.info('[db] Database schema successfully synced.'))
-      .catch(err => this.log.error('[db] Error syncing database schema:', err));
+      .then(() => this.log.info('Database schema successfully synced.'))
+      .catch(err => this.log.error('Error syncing database schema:', err));
   }
 }
