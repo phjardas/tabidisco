@@ -1,11 +1,11 @@
 import { injectable } from 'inversify';
-import * as fs from 'fs';
 import { Observable, Observer, Subject } from 'rxjs';
 import { Decoder } from 'lame';
 import * as Speaker from 'speaker';
 
 import { Song } from './api';
 import { EventEmitter, EventData } from './bus';
+import { PassThrough } from 'stream';
 
 export class SongStartedEvent implements EventData {
   readonly type = 'song_started';
@@ -18,7 +18,7 @@ export class SongFinishedEvent implements EventData {
 }
 
 export interface Player extends EventEmitter {
-  play(song: Song): Observable<any>;
+  play(song: Song, data: Buffer): Observable<any>;
   currentSong: Song | null;
   stop(): Observable<any>;
 }
@@ -65,16 +65,17 @@ export class PlayerImpl implements Player {
     return this.currentPlay && this.currentPlay.song;
   }
 
-  play(song: Song): Observable<any> {
-    return this.stop().mergeMap(() => this.doPlaySong(song));
+  play(song: Song, data: Buffer): Observable<any> {
+    return this.stop().mergeMap(() => this.doPlaySong(song, data));
   }
 
-  private doPlaySong(song: Song): Observable<any> {
-    const stream = fs.createReadStream(song.file);
-    const lame = new Decoder();
-
+  private doPlaySong(song: Song, data: Buffer): Observable<any> {
     return Observable.create((obs: Observer<any>) => {
+      const stream = new PassThrough();
+      stream.end(data);
+      const lame = new Decoder();
       const mp3stream = stream.pipe(lame);
+
       mp3stream
         .once('format', (format: any) => {
           const play = new Play(song, format, mp3stream);
