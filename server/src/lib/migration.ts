@@ -5,7 +5,6 @@ import { promisify } from 'util';
 import { Log, LogFactory, LogFactorySymbol } from './../log';
 import { DB, DBSymbol } from './db';
 import { Library, LibrarySymbol } from './library';
-import { Song } from './api';
 
 const getStats = promisify(fs.stat);
 const readFile = promisify(fs.readFile);
