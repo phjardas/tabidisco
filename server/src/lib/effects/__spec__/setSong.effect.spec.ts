@@ -28,11 +28,11 @@ class MockLibrary implements Library {
     throw new Error('Method not implemented.');
   }
 
-  getSongData(id: string): Observable<SongData> {
+  getSongData(_: string): Observable<SongData> {
     throw new Error('Method not implemented.');
   }
 
-  recordPlay(id: string): Observable<Song> {
+  recordPlay(_: string): Observable<Song> {
     throw new Error('Method not implemented.');
   }
 }

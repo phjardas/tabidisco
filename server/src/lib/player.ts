@@ -3,7 +3,7 @@ import { Observable, Observer, Subject } from 'rxjs';
 import { Decoder } from 'lame';
 import * as Speaker from 'speaker';
 
-import { Song, SongData } from './api';
+import { Song } from './api';
 import { EventEmitter, EventData } from './bus';
 import { PassThrough } from 'stream';
 

@@ -1,7 +1,7 @@
 export interface SongTags {
-  readonly title?: string;
-  readonly artist?: string;
-  readonly album?: string;
+  title?: string;
+  artist?: string;
+  album?: string;
 }
 
 export interface SongStats {
