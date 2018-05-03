@@ -32,7 +32,7 @@
     "css-loader": "^0.28.10",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
-    "html-webpack-plugin": "github:webpack-contrib/html-webpack-plugin",
+    "html-webpack-plugin": "^3.2.0",
     "html-webpack-template": "^6.1.0",
     "lint-staged": "^7.0.5",
     "node-sass": "^4.7.2",
@@ -49,27 +49,17 @@
         "env",
         {
           "targets": {
-            "browsers": [
-              "last 2 versions"
-            ]
+            "browsers": ["last 2 versions"]
           },
           "modules": false
         }
       ],
       "react"
     ],
-    "plugins": [
-      "transform-object-rest-spread",
-      "transform-class-properties"
-    ],
+    "plugins": ["transform-object-rest-spread", "transform-class-properties"],
     "env": {
       "test": {
-        "presets": [
-          [
-            "env"
-          ],
-          "react"
-        ]
+        "presets": [["env"], "react"]
       }
     }
   }
