@@ -11,15 +11,15 @@ class MockLibrary implements Library {
   db: { [id: string]: Song } = {};
   songs: Observable<Song[]>;
 
-  getSong(_: string): Observable<Song> {
-    throw new Error('Method not implemented.');
-  }
-
   setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
     const oldSong = this.db[tokenId];
     const song = { tokenId, file: filename, filename, type: 'who/cares', size: buffer.length };
     this.db[tokenId] = song;
     return Observable.of({ song, oldSong });
+  }
+
+  recordPlay(_: string): Observable<Song> {
+    throw new Error('Method not implemented.');
   }
 
   deleteSong(_: string): Observable<{ oldSong?: Song }> {
