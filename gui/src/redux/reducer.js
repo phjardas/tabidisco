@@ -67,13 +67,10 @@ const songs = (state = {}, action) => {
   switch (type) {
     case SONG_ADDED:
     case SONG_MODIFIED:
-      return { ...state, [payload.song.id]: payload.song };
+      return { ...state, [payload.song.tokenId]: payload.song };
 
     case SONG_DELETED:
-      return deleteProperty(state, payload.oldSong.id);
-
-    case SONG_STARTED:
-      return { ...state, [payload.id]: payload };
+      return deleteProperty(state, payload.oldSong.tokenId);
 
     default:
       return state;

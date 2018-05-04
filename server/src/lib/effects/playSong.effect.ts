@@ -12,11 +12,9 @@ export class PlaySongEffect implements EffectFactory {
     return actions.filter(a => a.type === 'play_song').mergeMap(action =>
       this.library
         .getSong(action.payload.token)
-        .mergeMap(song => this.library.getSongData(song.id).map(({ data }) => ({ song, data })))
-        .mergeMap(({ song, data }) => this.library.recordPlay(song.id).map(song => ({ song, data })))
-        .mergeMap(({ song, data }) =>
+        .mergeMap(song =>
           request({ type: 'power_on' })
-            .mergeMap(() => this.player.play(song, data))
+            .mergeMap(() => this.player.play(song))
             .map(() => action.replySuccess(song))
         )
         .catch(error => [action.replyError(error)])

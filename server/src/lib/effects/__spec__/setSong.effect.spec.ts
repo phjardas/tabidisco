@@ -3,11 +3,9 @@ import 'jest';
 import { Observable } from 'rxjs';
 
 import { Bus, BusImpl } from '../../bus';
-import { Song, SongData } from '../../api';
+import { Song } from '../../api';
 import { Library } from '../../library';
 import { SetSongEffect, SET_SONG } from '../setSong.effect';
-
-jest.setTimeout(1000);
 
 class MockLibrary implements Library {
   db: { [id: string]: Song } = {};
@@ -17,22 +15,14 @@ class MockLibrary implements Library {
     throw new Error('Method not implemented.');
   }
 
-  setSong(id: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
-    const oldSong = this.db[id];
-    const song: Song = { id, filename, type: 'who/cares', size: buffer.length, plays: 0 };
-    this.db[id] = song;
+  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
+    const oldSong = this.db[tokenId];
+    const song = { tokenId, file: filename, filename, type: 'who/cares', size: buffer.length };
+    this.db[tokenId] = song;
     return Observable.of({ song, oldSong });
   }
 
   deleteSong(_: string): Observable<{ oldSong?: Song }> {
-    throw new Error('Method not implemented.');
-  }
-
-  getSongData(_: string): Observable<SongData> {
-    throw new Error('Method not implemented.');
-  }
-
-  recordPlay(_: string): Observable<Song> {
     throw new Error('Method not implemented.');
   }
 }
@@ -51,7 +41,7 @@ describe('effects', () => {
     it('should store the song if everything works well', () => {
       return bus
         .request({ type: SET_SONG, payload: { tokenId: 'test', filename: 'test.mp3', data: [0x00, 0x00, 0x00, 0x00] } })
-        .map((song: Song) => expect(song.id).toBe('test'))
+        .map((song: Song) => expect(song.tokenId).toBe('test'))
         .toPromise()
         .then(() => expect(library.db['test'].size).toBe(4));
     });
@@ -62,14 +52,14 @@ describe('effects', () => {
       return bus.actions
         .first(({ type }) => type === 'song_added')
         .map((event: any) => {
-          expect(event.payload.song.id).toBe('test');
+          expect(event.payload.song.tokenId).toBe('test');
           expect(event.payload.oldSong).toBeFalsy();
         })
         .toPromise();
     });
 
     it('should emit a `song_modified` event if a song for this token already existed', () => {
-      library.db['test'] = { id: 'test', filename: 'old.mp3', type: 'who/cares', size: 0, plays: 0 };
+      library.db['test'] = { tokenId: 'test', filename: 'old.mp3', file: 'old.mp3', type: 'who/cares', size: 0 };
 
       bus.dispatch({ type: SET_SONG, payload: { tokenId: 'test', filename: 'new.mp3', data: [] } });
 

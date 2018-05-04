@@ -10,18 +10,12 @@ import { Server, ServerImpl, ServerSymbol } from './server';
 import { LogFactory, LogFactorySymbol, LogFactoryImpl } from './log';
 import { effects, EffectsSymbol } from './lib/effects';
 import { ShutdownTimer, ShutdownTimerImpl, ShutdownTimerSymbol } from './lib/shutdown';
-import { DB, DBSymbol, DBImpl } from './lib/db';
-import { Migration } from './lib/migration';
 
 export const container = new Container();
 container.bind<Configuration>(ConfigurationSymbol).to(ConfigurationImpl);
 container
   .bind<Bus>(BusSymbol)
   .to(BusImpl)
-  .inSingletonScope();
-container
-  .bind<DB>(DBSymbol)
-  .to(DBImpl)
   .inSingletonScope();
 container.bind<LogFactory>(LogFactorySymbol).to(LogFactoryImpl);
 container.bind<Library>(LibrarySymbol).to(FileLibrary);
@@ -39,7 +33,6 @@ container
   .inSingletonScope();
 container.bind<Tabidisco>(TabidiscoSymbol).to(TabidiscoImpl);
 container.bind<Server>(ServerSymbol).to(ServerImpl);
-container.bind<Migration>(Migration).to(Migration);
 
 effects.forEach(effect => container.bind<EffectFactory>(EffectsSymbol).to(effect));
 

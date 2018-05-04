@@ -10,16 +10,16 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
   return sortedSongs.length ? (
     <ListGroup>
       {sortedSongs.map(song => {
-        const active = currentSong && currentSong.id === song.id;
+        const active = currentSong && currentSong.tokenId === song.tokenId;
         return (
-          <ListGroupItem key={song.id} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
+          <ListGroupItem key={song.tokenId} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
             <div className="mr-3">
               {active ? (
                 <Button key="stop" color="light" outline size="sm" onClick={stopSong}>
                   <FontAwesome name="stop" />
                 </Button>
               ) : (
-                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.id)}>
+                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
                   <FontAwesome name="play" />
                 </Button>
               )}
@@ -29,13 +29,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
               <br />
               {song.artist || <span className="text-muted">Unknown artist</span>}
               <br />
-              {song.plays ? (
-                <small className="text-muted">
-                  {song.plays} plays, last played on {new Date(song.lastPlayedAt).toLocaleDateString()}
-                </small>
-              ) : (
-                <small className="text-muted">never played yet</small>
-              )}
+              <small className="text-muted">{song.tokenId}</small>
             </div>
             {active || (
               <div>
@@ -43,7 +37,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   color="danger"
                   outline
                   size="sm"
-                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.id)}
+                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
                 >
                   <FontAwesome name="trash" />
                 </Button>
