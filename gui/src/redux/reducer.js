@@ -72,6 +72,9 @@ const songs = (state = {}, action) => {
     case SONG_DELETED:
       return deleteProperty(state, payload.oldSong.tokenId);
 
+    case SONG_STARTED:
+      return { ...state, [payload.tokenId]: payload };
+
     default:
       return state;
   }

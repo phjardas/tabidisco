@@ -9,9 +9,9 @@ import { Song } from './api';
 
 export interface Library {
   readonly songs: Observable<Song[]>;
-  getSong(tokenId: string): Observable<Song>;
   setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }>;
   deleteSong(tokenId: string): Observable<{ oldSong?: Song }>;
+  recordPlay(id: string): Observable<Song>;
 }
 
 export const LibrarySymbol = Symbol.for('Library');
@@ -34,15 +34,6 @@ export class FileLibrary implements Library {
     return this.load().map(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  getSong(tokenId: string): Observable<Song> {
-    this.log.info('loading song %s', tokenId);
-    return this.load().map(songs => {
-      const song = songs[tokenId];
-      if (!song) throw new Error(`Song not found: ${tokenId}`);
-      return { ...song, file: path.resolve(this.dbDir, song.file) };
-    });
-  }
-
   setSong(tokenId: string, originalFilename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
     this.log.info('setting song %s', tokenId);
     const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
@@ -58,6 +49,7 @@ export class FileLibrary implements Library {
           type: suffix,
           size: buffer.byteLength,
           filename: originalFilename,
+          plays: 0,
           ...tags,
         };
 
@@ -84,6 +76,24 @@ export class FileLibrary implements Library {
         delete songs[tokenId];
         return this.save(songs).map(() => ({ oldSong: song }));
       });
+    });
+  }
+
+  recordPlay(id: string): Observable<Song> {
+    return this.load().flatMap(songs => {
+      const song = songs[id];
+      if (!song) throw new Error(`Song not found: ${id}`);
+
+      const newSong = {
+        ...song,
+        plays: (song.plays || 0) + 1,
+        lastPlayedAt: new Date().toISOString(),
+      };
+
+      return this.save({
+        ...songs,
+        [id]: newSong,
+      }).map(() => ({ ...newSong, file: path.resolve(this.dbDir, newSong.file) }));
     });
   }
 
