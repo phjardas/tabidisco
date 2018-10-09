@@ -1,10 +1,8 @@
-import { Observable, Observer } from 'rxjs';
-import { injectable, inject } from 'inversify';
 import * as mfrc from 'mfrc522-rpi';
+import { merge, Observable, Observer } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, publish, refCount } from 'rxjs/operators';
 import * as wpi from 'wiringpi-node';
-
-import { LogFactory, Log, LogFactorySymbol } from './../../log';
-import { PiAdapter, ButtonId } from './api';
+import { ButtonId, PiAdapter } from './api';
 
 interface ButtonConfig {
   readonly type: ButtonId;
@@ -21,61 +19,57 @@ function observeButton(config: ButtonConfig): Observable<ButtonId> {
 
   const obs: Observable<any> = Observable.create((obs: Observer<any>) => wpi.wiringPiISR(pin, wpi.INT_EDGE_FALLING, () => obs.next(null)));
   return obs
-    .debounceTime(100)
-    .map(() => wpi.digitalRead(pin) === wpi.LOW)
-    .distinctUntilChanged()
-    .filter(value => value)
-    .map(() => type);
+    .pipe(debounceTime(100))
+    .pipe(map(() => wpi.digitalRead(pin) === wpi.LOW))
+    .pipe(distinctUntilChanged())
+    .pipe(filter(value => value))
+    .pipe(map(() => type));
 }
 
-@injectable()
 export class RealPiAdapter implements PiAdapter {
-  private readonly log: Log;
   powered = false;
-  readonly buttons: Observable<ButtonId>;
+  buttons: Observable<ButtonId>;
 
-  constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
-    this.log = logFactory.getLog('pi');
+  constructor() {
     mfrc.initWiringPi(0);
-    this.buttons = Observable.merge(...buttonConfigs.map(observeButton))
-      .publish()
-      .refCount();
+    this.buttons = merge(...buttonConfigs.map(observeButton))
+      .pipe(publish())
+      .pipe(refCount());
     powerPins.forEach(pin => wpi.pinMode(pin, wpi.OUTPUT));
-    this.log.info('initialized Raspberry Pi adapter');
+    console.info('initialized Raspberry Pi adapter');
     this.setPower(false, true);
   }
 
-  readToken(): Observable<string> {
-    return Observable.create((obs: Observer<string>) => {
-      this.log.debug('reading token...');
+  readToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      console.debug('reading token...');
       mfrc.reset();
 
       let response = mfrc.findCard();
       if (!response.status) {
-        this.log.warn('No RFID token found:', response);
-        return obs.error(new Error('No RFID token found'));
+        console.warn('No RFID token found:', response);
+        return reject(new Error('No RFID token found'));
       }
 
       response = mfrc.getUid();
       if (!response.status) {
-        this.log.warn('Could not read ID from token:', response);
-        return obs.error(new Error('Could not read ID from token'));
+        console.warn('Could not read ID from token:', response);
+        return reject(new Error('Could not read ID from token'));
       }
 
       const data: number[] = response.data;
-      this.log.debug('token read:', data);
-      obs.next(data.map(d => d.toString(16)).join(''));
-      obs.complete();
+      console.debug('token read:', data);
+      resolve(data.map(d => d.toString(16)).join(''));
     });
   }
 
-  setPower(power: boolean, force?: boolean): Observable<any> {
+  setPower(power: boolean, force?: boolean): Promise<any> {
     if (force || power !== this.powered) {
-      this.log.info(`turning power ${power ? 'on' : 'off'}`);
+      console.info(`turning power ${power ? 'on' : 'off'}`);
       this.powered = power;
       powerPins.forEach(pin => wpi.digitalWrite(pin, power ? 0 : 1));
     }
 
-    return Observable.of(null);
+    return Promise.resolve(null);
   }
 }

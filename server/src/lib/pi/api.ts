@@ -5,8 +5,6 @@ export type ButtonId = 'play' | 'stop';
 export interface PiAdapter {
   readonly powered: boolean;
   readonly buttons: Observable<ButtonId>;
-  readToken(): Observable<string>;
-  setPower(power: boolean): Observable<any>;
+  readToken(): Promise<string>;
+  setPower(power: boolean): Promise<any>;
 }
-
-export const PiAdapterSymbol = Symbol.for('PiAdapter');

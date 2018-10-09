@@ -1,29 +1,27 @@
-import { injectable } from 'inversify';
 import * as fs from 'fs';
-import { Observable, Observer, Subject } from 'rxjs';
 import { Decoder } from 'lame';
+import { Observable, Subject } from 'rxjs';
 import * as Speaker from 'speaker';
+import { Song } from './library';
 
-import { Song } from './api';
-import { EventEmitter, EventData } from './bus';
-
-export class SongStartedEvent implements EventData {
+export class SongStartedEvent {
   readonly type = 'song_started';
   constructor(readonly song: Song) {}
 }
 
-export class SongFinishedEvent implements EventData {
+export class SongFinishedEvent {
   readonly type = 'song_finished';
   constructor(readonly song: Song) {}
 }
 
-export interface Player extends EventEmitter {
-  play(song: Song): Observable<any>;
-  currentSong: Song | null;
-  stop(): Observable<any>;
-}
+export type SongEvent = SongStartedEvent | SongFinishedEvent;
 
-export const PlayerSymbol = Symbol.for('Player');
+export interface Player {
+  readonly events: Observable<SongEvent>;
+  play(song: Song): Promise<any>;
+  readonly currentSong?: Song;
+  stop(): Promise<any>;
+}
 
 class Play {
   readonly events = new Subject<SongStartedEvent | SongFinishedEvent>();
@@ -42,57 +40,55 @@ class Play {
     this.events.next(new SongStartedEvent(this.song));
   }
 
-  stop(): Observable<any> {
-    return Observable.create((obs: Observer<any>) => {
-      this.speaker.on('close', () => {
-        obs.next(null);
-        obs.complete();
-      });
-
+  stop(): Promise<any> {
+    return new Promise(resolve => {
+      this.speaker.on('close', () => resolve(null));
       this.stream.unpipe();
       this.speaker.end();
     });
   }
 }
 
-@injectable()
 export class PlayerImpl implements Player {
-  private currentPlay: Play;
-  private readonly _events = new Subject<EventData>();
-  readonly events = this._events.asObservable();
+  private currentPlay?: Play;
+  readonly events = new Subject<SongEvent>();
 
   get currentSong() {
     return this.currentPlay && this.currentPlay.song;
   }
 
-  play(song: Song): Observable<any> {
-    return this.stop().mergeMap(() => this.doPlaySong(song));
+  async play(song: Song): Promise<any> {
+    await this.stop();
+    return this.doPlaySong(song);
   }
 
-  private doPlaySong(song: Song): Observable<any> {
-    const stream = fs.createReadStream(song.file);
-    const lame = new Decoder();
+  private doPlaySong(song: Song): Promise<Play> {
+    return new Promise((resolve, reject) => {
+      const stream = fs.createReadStream(song.file);
+      stream.on('error', reject);
 
-    return Observable.create((obs: Observer<any>) => {
-      const mp3stream = stream.pipe(lame);
+      const mp3stream = stream.pipe(new Decoder());
       mp3stream
         .once('format', (format: any) => {
           const play = new Play(song, format, mp3stream);
           this.currentPlay = play;
           play.events.subscribe(
-            evt => this._events.next(evt),
+            evt => this.events.next(evt),
             // FIXME handle errors during playback
             err => console.error('Error playing song:', err),
             () => (this.currentPlay = null)
           );
-          obs.next(play);
+          resolve(play);
           play.start();
         })
-        .on('error', (err: Error) => obs.error(err));
+        .on('error', reject);
     });
   }
-  stop(): Observable<any> {
-    if (!this.currentPlay) return Observable.of(null);
-    return this.currentPlay.stop().do(() => (this.currentPlay = null));
+
+  async stop(): Promise<any> {
+    if (this.currentPlay) {
+      await this.currentPlay.stop();
+      this.currentPlay = undefined;
+    }
   }
 }

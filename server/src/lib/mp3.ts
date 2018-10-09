@@ -1,8 +1,14 @@
-import { Observable } from 'rxjs';
+import * as fs from 'fs';
 import * as mp3 from 'mp3-parser';
+import { promisify } from 'util';
 
-import { SongTags } from './api';
-import { readFile } from './io';
+const readFile = promisify(fs.readFile);
+
+export interface SongTags {
+  title?: string;
+  artist?: string;
+  album?: string;
+}
 
 interface TagMapping {
   readonly field: keyof SongTags;
@@ -19,28 +25,26 @@ const tagMappings: TagMapping[] = [
 type FrameValue = { id: string; value?: any };
 type FramesById = { [frameId: string]: string[] };
 
-function parseFramesById(filename: string): Observable<FramesById> {
-  return readFile<Buffer>(filename).map(data => {
-    const tags = mp3.readTags(new DataView(data.buffer));
-    const frames: FrameValue[] = tags
-      .map(tag => (tag.frames || []).map(frame => ({ id: frame.header.id, value: frame.content.text || frame.content.value })))
-      .reduce((a, b) => [...a, ...b])
-      .filter(t => typeof t.value !== 'undefined');
-    const reducer: (acc: FramesById, v: FrameValue) => FramesById = (acc, b) => ({
-      ...acc,
-      [b.id]: [...(acc[b.id] || []), b.value],
-    });
-    return frames.reduce(reducer, {});
+async function parseFramesById(filename: string): Promise<FramesById> {
+  const data = await readFile(filename);
+  const tags = mp3.readTags(new DataView(data.buffer));
+  const frames: FrameValue[] = tags
+    .map(tag => (tag.frames || []).map(frame => ({ id: frame.header.id, value: frame.content.text || frame.content.value })))
+    .reduce((a, b) => [...a, ...b])
+    .filter(t => typeof t.value !== 'undefined');
+  const reducer: (acc: FramesById, v: FrameValue) => FramesById = (acc, b) => ({
+    ...acc,
+    [b.id]: [...(acc[b.id] || []), b.value],
   });
+  return frames.reduce(reducer, {});
 }
 
-export function parseTags(filename: string): Observable<SongTags> {
-  return parseFramesById(filename).map(frames => {
-    const tags: SongTags = {};
-    tagMappings.forEach(tm => {
-      const frameId = tm.frames.find(frame => frame in frames);
-      if (frameId) tags[tm.field] = frames[frameId][0];
-    });
-    return tags;
+export async function parseTags(filename: string): Promise<SongTags> {
+  const frames = await parseFramesById(filename);
+  const tags: SongTags = {};
+  tagMappings.forEach(tm => {
+    const frameId = tm.frames.find(frame => frame in frames);
+    if (frameId) tags[tm.field] = frames[frameId][0];
   });
+  return tags;
 }
