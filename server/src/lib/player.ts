@@ -5,12 +5,14 @@ import * as Speaker from 'speaker';
 import { Song } from './library';
 
 export class SongStartedEvent {
-  readonly type = 'song_started';
+  static readonly TYPE = 'song_started';
+  readonly type = SongStartedEvent.TYPE;
   constructor(readonly song: Song) {}
 }
 
 export class SongFinishedEvent {
-  readonly type = 'song_finished';
+  static readonly TYPE = 'song_finished';
+  readonly type = SongFinishedEvent.TYPE;
   constructor(readonly song: Song) {}
 }
 
@@ -64,6 +66,7 @@ export class PlayerImpl implements Player {
 
   private doPlaySong(song: Song): Promise<Play> {
     return new Promise((resolve, reject) => {
+      console.info('Playing song: %s', song.tokenId);
       const stream = fs.createReadStream(song.file);
       stream.on('error', reject);
 
@@ -87,6 +90,7 @@ export class PlayerImpl implements Player {
 
   async stop(): Promise<any> {
     if (this.currentPlay) {
+      console.info('Stopping song: %s', this.currentPlay.song.tokenId);
       await this.currentPlay.stop();
       this.currentPlay = undefined;
     }

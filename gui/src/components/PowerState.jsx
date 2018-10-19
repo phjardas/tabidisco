@@ -4,7 +4,7 @@ import { Button } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
 function getColor(power) {
-  return power.state === 'on' || power.state === 'powering_down' ? 'success' : 'danger';
+  return power.state === 'on' || power.state === 'down' ? 'success' : 'danger';
 }
 
 function getTitle(power) {
@@ -14,9 +14,9 @@ function getTitle(power) {
       return 'Power is on';
     case 'off':
       return 'Power is off';
-    case 'powering_up':
+    case 'up':
       return 'Powering up...';
-    case 'powering_down':
+    case 'down':
       return 'Powering down...';
     default:
       return null;
@@ -24,17 +24,18 @@ function getTitle(power) {
 }
 
 function getIcon(power) {
-  if (power.shutdownTimer) return <FontAwesome key="timer" name="clock" />;
-  if (power.state === 'powering_up' || power.state === 'powering_down')
-    return <FontAwesome key="transit" name="spinner" className="fa-pulse" />;
-  return <FontAwesome key="stable" name="power-off" />;
+  if (power.shutdownTimer) return <FontAwesome key="timer" icon="clock" />;
+  if (power.state === 'up' || power.state === 'down') return <FontAwesome key="transit" icon="spinner" className="fa-pulse" />;
+  return <FontAwesome key="stable" icon="power-off" />;
 }
 
-export default function ConnectionState({ power, setPower, cancelShutdownTimer }) {
+export default function PowerState({ power, setPower, cancelShutdownTimer }) {
+  if (!power) return null;
+
   const togglePower = () => {
+    if (power.shutdownTimer) return cancelShutdownTimer();
     if (power.state === 'on') return setPower(false);
     if (power.state === 'off') return setPower(true);
-    if (power.shutdownTimer) return cancelShutdownTimer();
   };
 
   return (

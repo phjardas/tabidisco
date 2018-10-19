@@ -1,13 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
 
-.notif__container {
-  position: absolute;
-  top: 4rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-}
-
 .active {
   .text-muted {
     color: $light !important;

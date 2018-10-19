@@ -4,12 +4,21 @@ export const typeDefs = gql`
   type Query {
     songs: [Song!]!
     currentSong: Song
+    power: PowerState!
   }
 
   type Mutation {
     readToken: ReadTokenResult!
     playSong(tokenId: ID): PlaySongResult!
     stopSong: SimpleResult!
+    setPower(power: Boolean!): SimpleResult!
+    cancelShutdownTimer: SimpleResult!
+    simulateButtonPress(button: String!): SimpleResult!
+  }
+
+  type Subscription {
+    currentSong: Song
+    power: PowerState!
   }
 
   type Song {
@@ -22,6 +31,12 @@ export const typeDefs = gql`
     artist: String
     title: String
     album: String
+  }
+
+  type PowerState {
+    powered: Boolean!
+    state: String!
+    shutdownTimer: Boolean
   }
 
   type SimpleResult {

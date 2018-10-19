@@ -1,8 +1,10 @@
 import * as mfrc from 'mfrc522-rpi';
-import { merge, Observable, Observer } from 'rxjs';
+import { merge, Observable, Observer, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, publish, refCount } from 'rxjs/operators';
 import * as wpi from 'wiringpi-node';
-import { ButtonId, PiAdapter } from './api';
+import { ButtonId, PiAdapter, PowerState, PiEvent } from './api';
+
+const shutdownTimerDuration = 10000;
 
 interface ButtonConfig {
   readonly type: ButtonId;
@@ -27,12 +29,15 @@ function observeButton(config: ButtonConfig): Observable<ButtonId> {
 }
 
 export class RealPiAdapter implements PiAdapter {
-  powered = false;
+  events = new Subject<PiEvent>();
+  power: PowerState = { powered: false, state: 'off', shutdownTimer: false };
   buttons: Observable<ButtonId>;
+  private simulatedButtons = new Subject<ButtonId>();
+  private shutdownTimer?: NodeJS.Timer;
 
   constructor() {
     mfrc.initWiringPi(0);
-    this.buttons = merge(...buttonConfigs.map(observeButton))
+    this.buttons = merge(...buttonConfigs.map(observeButton), this.simulatedButtons)
       .pipe(publish())
       .pipe(refCount());
     powerPins.forEach(pin => wpi.pinMode(pin, wpi.OUTPUT));
@@ -64,12 +69,42 @@ export class RealPiAdapter implements PiAdapter {
   }
 
   setPower(power: boolean, force?: boolean): Promise<any> {
-    if (force || power !== this.powered) {
+    if (force || power !== this.power.powered) {
       console.info(`turning power ${power ? 'on' : 'off'}`);
-      this.powered = power;
+      this.power = { ...this.power, state: power ? 'up' : 'down' };
+      this.events.next({ type: 'power', state: this.power });
+
       powerPins.forEach(pin => wpi.digitalWrite(pin, power ? 0 : 1));
+
+      this.power = { powered: power, state: power ? 'on' : 'off', shutdownTimer: false };
+      this.events.next({ type: 'power', state: this.power });
     }
 
     return Promise.resolve(null);
+  }
+
+  activateShutdownTimer() {
+    console.info('[pi] activating shutdown timer in %d ms', shutdownTimerDuration);
+
+    if (this.shutdownTimer) {
+      clearTimeout(this.shutdownTimer);
+    }
+
+    this.power = { ...this.power, shutdownTimer: true };
+    this.events.next({ type: 'power', state: this.power });
+    this.shutdownTimer = setTimeout(() => this.setPower(false), shutdownTimerDuration);
+  }
+
+  cancelShutdownTimer() {
+    if (this.shutdownTimer) {
+      console.info('[pi] cancelling shutdown timer');
+      clearTimeout(this.shutdownTimer);
+      this.power = { ...this.power, shutdownTimer: false };
+      this.events.next({ type: 'power', state: this.power });
+    }
+  }
+
+  simulateButtonPress(button: ButtonId) {
+    this.simulatedButtons.next(button);
   }
 }

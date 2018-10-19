@@ -1,11 +1,7 @@
-import React from 'react';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faMusic, faStop, faPlay, faTrash, faExclamationTriangle, faClock, faSpinner, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export default function FontAwesome({ name, spinner, className, ...props }) {
-  className = `fas fa-${name} ${className || ''}`;
+library.add(faMusic, faStop, faPlay, faTrash, faExclamationTriangle, faClock, faSpinner, faPowerOff);
 
-  return (
-    <span>
-      <i className={className} {...props} />
-    </span>
-  );
-}
+export default FontAwesomeIcon;

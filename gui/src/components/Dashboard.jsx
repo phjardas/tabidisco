@@ -1,28 +1,64 @@
+import gql from 'graphql-tag';
 import React from 'react';
-import { Container, Button } from 'reactstrap';
-
-import FontAwesome from './FontAwesome';
+import { Mutation, Query } from 'react-apollo';
+import { Alert, Container } from 'reactstrap';
+import { WithCurrentSong } from '../providers/CurrentSong';
+import { songDetails } from '../providers/data';
 import SongList from './SongList';
-import UploadSong from './UploadSong';
 
-const TokenInfo = ({ token }) => {
-  if (token.pending) return 'Reading token...';
-  if (token.token) return token.token;
-  return null;
-};
+const getSongsQuery = gql`
+  query GetSongs {
+    songs {
+      ...SongDetails
+    }
+  }
 
-export default function Dashboard({ songs, currentSong, songUpload, token, play, deleteSong, uploadSong, stopSong, readToken }) {
+  ${songDetails}
+`;
+
+const playSongMutation = gql`
+  mutation PlaySong($tokenId: ID!) {
+    playSong(tokenId: $tokenId) {
+      success
+      error
+      song {
+        ...SongDetails
+      }
+    }
+  }
+
+  ${songDetails}
+`;
+
+function Dashboard({ songs, currentSong, play, stopSong }) {
   return (
     <Container className="mt-3">
-      <div className="mb-3">
-        <Button color="primary" outline size="sm" className="mr-3" style={{ marginLeft: '.75rem' }} onClick={readToken}>
-          {token.pending ? <FontAwesome key="pending" name="spinner" className="fa-pulse" /> : <FontAwesome key="normal" name="tag" />}
-        </Button>
-        <TokenInfo token={token} />
-      </div>
-
-      <SongList songs={songs} currentSong={currentSong} play={play} deleteSong={deleteSong} stopSong={stopSong} />
-      <UploadSong uploadSong={uploadSong} songUpload={songUpload} />
+      <SongList songs={songs} currentSong={currentSong} play={play} stopSong={stopSong} />
     </Container>
   );
 }
+
+export default () => (
+  <WithCurrentSong>
+    {({ currentSong, stopSong }) => (
+      <Query query={getSongsQuery}>
+        {({ loading, error, data: { songs } }) => {
+          if (loading) return <Alert color="info">Loading&hellip;</Alert>;
+          if (error) return <Alert color="danger">Error: {error.message}</Alert>;
+          return (
+            <Mutation mutation={playSongMutation}>
+              {playSong => (
+                <Dashboard
+                  songs={songs}
+                  currentSong={currentSong}
+                  play={tokenId => playSong({ variables: { tokenId } })}
+                  stopSong={stopSong}
+                />
+              )}
+            </Mutation>
+          );
+        }}
+      </Query>
+    )}
+  </WithCurrentSong>
+);

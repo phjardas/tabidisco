@@ -16,11 +16,11 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
             <div className="mr-3">
               {active ? (
                 <Button key="stop" color="light" outline size="sm" onClick={stopSong}>
-                  <FontAwesome name="stop" />
+                  <FontAwesome icon="stop" />
                 </Button>
               ) : (
                 <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
-                  <FontAwesome name="play" />
+                  <FontAwesome icon="play" />
                 </Button>
               )}
             </div>
@@ -45,7 +45,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   size="sm"
                   onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
                 >
-                  <FontAwesome name="trash" />
+                  <FontAwesome icon="trash" />
                 </Button>
               </div>
             )}
@@ -55,7 +55,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
     </ListGroup>
   ) : (
     <Alert color="warning">
-      <FontAwesome name="exclamation-triangle" className="mr-1" />
+      <FontAwesome icon="exclamation-triangle" className="mr-1" />
       There are no songs in the library yet.
     </Alert>
   );

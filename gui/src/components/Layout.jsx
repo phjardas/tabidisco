@@ -1,22 +1,18 @@
 import React from 'react';
 import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Container, Alert, Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
-import { Notifs } from 'redux-notifications';
-
-import { pressButton, setPower, cancelShutdownTimer } from '../redux';
+import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
+import { WithCurrentSong } from '../providers/CurrentSong';
+import CurrentSong from './CurrentSong';
 import FontAwesome from './FontAwesome';
 import Buttons from './Buttons';
-import ConnectionState from './ConnectionState';
-import CurrentSong from './CurrentSong';
-import Footer from './Footer';
+import { WithPower } from '../providers/Power';
 
-const Layout = ({ info, connectionState, children, currentSong, token, power, dispatch }) => (
-  <React.Fragment>
+const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdownTimer }) => (
+  <>
     <Navbar color="primary" dark>
       <Container className="d-flex">
         <NavbarBrand to="/" tag={RRLink}>
-          <FontAwesome name="music" className="mr-2" />
+          <FontAwesome icon="music" className="mr-2" />
           Tabidisco
         </NavbarBrand>
         <Nav navbar>
@@ -27,30 +23,27 @@ const Layout = ({ info, connectionState, children, currentSong, token, power, di
           </NavItem>
         </Nav>
         <div className="ml-auto">
-          <Buttons
-            power={power}
-            setPower={powered => dispatch(setPower(powered))}
-            cancelShutdownTimer={() => dispatch(cancelShutdownTimer())}
-            pressButton={button => dispatch(pressButton(button))}
-          />
+          <Buttons power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} />
         </div>
       </Container>
     </Navbar>
 
-    <ConnectionState state={connectionState} />
-
     {children}
 
-    <Footer info={info} />
-
-    <CurrentSong currentSong={currentSong} stopSong={() => dispatch(pressButton('stop'))} />
-    <Notifs CustomComponent={({ kind, message }) => <Alert color={kind === 'error' ? 'danger' : kind}>{message}</Alert>} />
-  </React.Fragment>
+    {currentSong && <CurrentSong currentSong={currentSong} stopSong={stopSong} />}
+  </>
 );
 
-export default connect(state => ({
-  info: state.info,
-  connectionState: state.connection.state,
-  currentSong: state.currentSong,
-  power: state.power,
-}))(Layout);
+export default ({ children }) => (
+  <WithCurrentSong>
+    {({ currentSong, stopSong }) => (
+      <WithPower>
+        {({ power, setPower, cancelShutdownTimer }) => (
+          <Layout currentSong={currentSong} stopSong={stopSong} power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer}>
+            {children}
+          </Layout>
+        )}
+      </WithPower>
+    )}
+  </WithCurrentSong>
+);
