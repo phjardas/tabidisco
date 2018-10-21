@@ -1,9 +1,9 @@
 import React from 'react';
-import Dashboard from '../components/Dashboard';
+import Upload from '../components/Upload';
 import Layout from '../components/Layout';
 
 export default () => (
   <Layout>
-    <Dashboard />
+    <Upload />
   </Layout>
 );

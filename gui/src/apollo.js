@@ -1,9 +1,9 @@
+import { defaultDataIdFromObject, InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
-import { InMemoryCache, defaultDataIdFromObject } from 'apollo-cache-inmemory';
-import { HttpLink } from 'apollo-link-http';
-import { onError } from 'apollo-link-error';
 import { ApolloLink, split } from 'apollo-link';
+import { onError } from 'apollo-link-error';
 import { WebSocketLink } from 'apollo-link-ws';
+import { createUploadLink } from 'apollo-upload-client';
 import { getMainDefinition } from 'apollo-utilities';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -14,7 +14,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.error(`[Network error]: ${networkError}`);
 });
 
-const httpLink = new HttpLink({
+const httpLink = createUploadLink({
   uri: 'http://localhost:3001/graphql',
   credentials: 'same-origin',
 });

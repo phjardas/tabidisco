@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { Readable } from 'stream';
 import { promisify } from 'util';
 import { parseTags, SongTags } from './mp3';
 
@@ -13,13 +14,13 @@ export interface Song extends SongTags {
   readonly filename: string;
   readonly type: string;
   readonly size: number;
-  readonly plays?: number;
+  readonly plays: number;
   readonly lastPlayedAt?: string;
 }
 
 export interface Library {
   readonly songs: Promise<Song[]>;
-  setSong(tokenId: string, filename: string, buffer: Buffer): Promise<{ song: Song; oldSong?: Song }>;
+  setSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }>;
   deleteSong(tokenId: string): Promise<{ oldSong?: Song }>;
   recordPlay(id: string): Promise<Song>;
 }
@@ -39,19 +40,33 @@ export class FileLibrary implements Library {
     return this.load().then(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  async setSong(tokenId: string, originalFilename: string, buffer: Buffer): Promise<{ song: Song; oldSong?: Song }> {
+  async setSong(tokenId: string, stream: Readable, originalFilename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
     console.info('setting song %s', tokenId);
     const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
     const filename = `${tokenId}.${suffix}`;
     const fullFile = path.resolve(this.dbDir, filename);
 
-    await writeFile(fullFile, buffer);
+    const { size } = await new Promise<{ size: number }>((resolve, reject) => {
+      let size = 0;
+      const out = fs.createWriteStream(fullFile);
+      out.on('error', reject);
+      stream.on('error', reject);
+      stream.on('data', chunk => {
+        out.write(chunk);
+        size += chunk.length;
+      });
+      stream.on('end', () => {
+        out.end();
+        resolve({ size });
+      });
+    });
+
     const [songs, tags] = await Promise.all([this.load(), parseTags(fullFile)]);
     const song = {
       tokenId,
       file: filename,
-      type: suffix,
-      size: buffer.byteLength,
+      type: mimetype,
+      size,
       filename: originalFilename,
       plays: 0,
       ...tags,
@@ -61,10 +76,10 @@ export class FileLibrary implements Library {
     await this.save({ ...songs, [tokenId]: song });
 
     if (oldSong) {
-      console.info('updated song %s', tokenId);
+      console.info('[library] updated song %s', tokenId);
       return { song, oldSong };
     } else {
-      console.info('added song %s', tokenId);
+      console.info('[library] added song %s', tokenId);
       return { song };
     }
   }
@@ -74,7 +89,7 @@ export class FileLibrary implements Library {
     const song = songs[tokenId];
     if (!song) return {};
 
-    console.info('deleting song %s', tokenId);
+    console.info('[library] deleting song %s', tokenId);
     await deleteFile(path.resolve(this.dbDir, song.file));
     delete songs[tokenId];
     await this.save(songs);
@@ -101,20 +116,29 @@ export class FileLibrary implements Library {
   }
 
   private async load(): Promise<SongMap> {
-    const data = await readFile(this.dbFile, 'utf-8');
-    const songs: Song[] = JSON.parse(data || '[]');
-    return songs
-      .map(song => ({
-        ...song,
-        file: path.resolve(this.dbDir, song.file),
-      }))
-      .reduce(
-        (a, b) => ({
-          ...a,
-          [b.tokenId]: b,
-        }),
-        {}
-      );
+    try {
+      const data = await readFile(this.dbFile, 'utf-8');
+      const songs: Song[] = JSON.parse(data || '[]');
+      return songs
+        .map(song => ({
+          ...song,
+          plays: song.plays || 0,
+          file: path.resolve(this.dbDir, song.file),
+        }))
+        .reduce(
+          (a, b) => ({
+            ...a,
+            [b.tokenId]: b,
+          }),
+          {}
+        );
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return {};
+      }
+
+      throw error;
+    }
   }
 
   private async save(songs: SongMap): Promise<any> {

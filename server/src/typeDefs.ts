@@ -11,6 +11,8 @@ export const typeDefs = gql`
     readToken: ReadTokenResult!
     playSong(tokenId: ID): PlaySongResult!
     stopSong: SimpleResult!
+    addSong(tokenId: ID, file: Upload!): AddSongResult!
+    deleteSong(tokenId: ID!): SimpleResult!
     setPower(power: Boolean!): SimpleResult!
     cancelShutdownTimer: SimpleResult!
     simulateButtonPress(button: String!): SimpleResult!
@@ -26,7 +28,7 @@ export const typeDefs = gql`
     filename: String!
     type: String!
     size: Int!
-    plays: Int
+    plays: Int!
     lastPlayedAt: String
     artist: String
     title: String
@@ -46,13 +48,19 @@ export const typeDefs = gql`
 
   type ReadTokenResult {
     success: Boolean!
-    token: String
     error: String
+    token: String
   }
 
   type PlaySongResult {
     success: Boolean!
-    song: Song
     error: String
+    song: Song
+  }
+
+  type AddSongResult {
+    success: Boolean!
+    error: String
+    song: Song
   }
 `;

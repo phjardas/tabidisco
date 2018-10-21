@@ -3,6 +3,7 @@ import { filter, first } from 'rxjs/operators';
 import { Library, Song } from './library';
 import { ButtonId, PiAdapter, PiEvent, PowerState } from './pi';
 import { Player, SongEvent } from './player';
+import { Readable } from 'stream';
 
 export type TabidiscoEvent = PiEvent | SongEvent;
 
@@ -13,12 +14,18 @@ export class Tabidisco {
     this.events = merge(this.pi.events, this.player.events);
   }
 
-  setSong(tokenId: string, filename: string, buffer: Buffer): Promise<{ song: Song; oldSong?: Song }> {
-    return this.library.setSong(tokenId, filename, buffer);
+  setSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
+    return this.library.setSong(tokenId, stream, filename, mimetype);
   }
 
   deleteSong(tokenId: string): Promise<{ oldSong?: Song }> {
     return this.library.deleteSong(tokenId);
+  }
+
+  async addSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<Song> {
+    if (!tokenId) tokenId = await this.pi.readToken();
+    const { song } = await this.library.setSong(tokenId, stream, filename, mimetype);
+    return song;
   }
 
   get songs(): Promise<Song[]> {

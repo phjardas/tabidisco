@@ -1,5 +1,6 @@
 import { PubSub } from 'apollo-server-express';
 import { filter } from 'rxjs/operators';
+import { Readable } from 'stream';
 import { ButtonId, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from '../lib';
 
 type SuccessResult = { success: true };
@@ -25,6 +26,22 @@ function withPayload<Result = {}, Args = {}>(
   };
 }
 
+interface Upload {
+  stream: Readable;
+  filename: string;
+  mimetype: string;
+  encoding: string;
+}
+
+interface AddSongArgs {
+  tokenId?: string;
+  file: Promise<Upload>;
+}
+
+interface DeleteSongArgs {
+  tokenId: string;
+}
+
 interface SetPowerArgs {
   power: boolean;
 }
@@ -46,6 +63,8 @@ interface Resolvers {
   Mutation: {
     playSong(source: any, args: PlaySongArgs): Promise<{ song: Song }>;
     stopSong(): Promise<SimpleResult>;
+    addSong(source: any, args: AddSongArgs): Promise<PayloadResult<{ song: Song }>>;
+    deleteSong(source: any, args: DeleteSongArgs): Promise<SimpleResult>;
     readToken(): Promise<PayloadResult<{ token: string }>>;
     setPower(source: any, args: SetPowerArgs): Promise<SimpleResult>;
     cancelShutdownTimer(): Promise<SimpleResult>;
@@ -80,6 +99,15 @@ export const resolvers: Resolvers = {
     readToken: withPayload(async () => {
       const token = await tabidisco.readToken();
       return { token };
+    }),
+    addSong: withPayload(async (_, { tokenId, file }) => {
+      const data = await file;
+      const song = await tabidisco.addSong(tokenId, data.stream, data.filename, data.mimetype);
+      return { song };
+    }),
+    deleteSong: withPayload(async (_, { tokenId }) => {
+      await tabidisco.deleteSong(tokenId);
+      return null;
     }),
     setPower: withPayload((_: any, { power }: SetPowerArgs) => tabidisco.setPower(power)),
     cancelShutdownTimer: withPayload(() => {
