@@ -1,13 +1,15 @@
+import gql from 'graphql-tag';
 import React from 'react';
+import { Mutation } from 'react-apollo';
 import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
 import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
-import { WithCurrentSong } from '../providers/CurrentSong';
+import { WithLibrary } from '../providers/Library';
+import { WithPower } from '../providers/Power';
+import Buttons from './Buttons';
 import CurrentSong from './CurrentSong';
 import FontAwesome from './FontAwesome';
-import Buttons from './Buttons';
-import { WithPower } from '../providers/Power';
 
-const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdownTimer }) => (
+const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdownTimer, pressButton }) => (
   <>
     <Navbar color="primary" dark className="navbar-expand">
       <Container className="d-flex">
@@ -30,7 +32,7 @@ const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdo
           </Nav>
         </div>
         <div className="ml-auto">
-          <Buttons power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} />
+          <Buttons power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} pressButton={pressButton} />
         </div>
       </Container>
     </Navbar>
@@ -41,16 +43,36 @@ const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdo
   </>
 );
 
+const pressButtonMutation = gql`
+  mutation PressButton($button: String!) {
+    simulateButtonPress(button: $button) {
+      success
+      error
+    }
+  }
+`;
+
 export default ({ children }) => (
-  <WithCurrentSong>
+  <WithLibrary>
     {({ currentSong, stopSong }) => (
       <WithPower>
         {({ power, setPower, cancelShutdownTimer }) => (
-          <Layout currentSong={currentSong} stopSong={stopSong} power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer}>
-            {children}
-          </Layout>
+          <Mutation mutation={pressButtonMutation}>
+            {pressButton => (
+              <Layout
+                currentSong={currentSong}
+                stopSong={stopSong}
+                power={power}
+                setPower={setPower}
+                cancelShutdownTimer={cancelShutdownTimer}
+                pressButton={button => pressButton({ variables: { button } })}
+              >
+                {children}
+              </Layout>
+            )}
+          </Mutation>
         )}
       </WithPower>
     )}
-  </WithCurrentSong>
+  </WithLibrary>
 );

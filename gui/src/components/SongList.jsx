@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Alert, ListGroup, ListGroupItem } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
-export default function Library({ songs, currentSong, play, deleteSong, stopSong }) {
+export default function Library({ songs, currentSong, playSong, deleteSong, stopSong }) {
   const sortedSongs = Object.keys(songs)
     .map(id => songs[id])
     .sort((a, b) => a.filename.localeCompare(b.filename));
@@ -19,7 +19,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   <FontAwesome icon="stop" />
                 </Button>
               ) : (
-                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
+                <Button key="play" color="primary" outline size="sm" onClick={() => playSong(song.tokenId)}>
                   <FontAwesome icon="play" />
                 </Button>
               )}

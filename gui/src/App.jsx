@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 import { apollo } from './apollo';
 import Library from './pages/Library';
 import Upload from './pages/Upload';
-import { CurrentSongProvider } from './providers/CurrentSong';
+import { LibraryProvider } from './providers/Library';
 import { PowerProvider } from './providers/Power';
 import './styles.scss';
 
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <ApolloProvider client={apollo}>
       <PowerProvider>
-        <CurrentSongProvider>
+        <LibraryProvider>
           <Router>
             <Switch>
               <Route path="/library" component={Library} />
@@ -22,7 +22,7 @@ export default function App() {
               </Route>
             </Switch>
           </Router>
-        </CurrentSongProvider>
+        </LibraryProvider>
       </PowerProvider>
     </ApolloProvider>
   );

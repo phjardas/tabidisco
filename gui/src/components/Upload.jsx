@@ -1,29 +1,12 @@
-import gql from 'graphql-tag';
 import React from 'react';
-import { Mutation } from 'react-apollo';
-import { Button, Container, Form, FormGroup, Input, Alert } from 'reactstrap';
-import { songDetails } from '../providers/data';
-import { getSongsQuery } from './Library';
-
-const addSongMutation = gql`
-  mutation AddSong($tokenId: ID, $file: Upload!) {
-    addSong(tokenId: $tokenId, file: $file) {
-      success
-      error
-      song {
-        ...SongDetails
-      }
-    }
-  }
-
-  ${songDetails}
-`;
+import { Alert, Button, Container, Form, FormGroup, Input } from 'reactstrap';
+import { WithLibrary } from '../providers/Library';
 
 class Upload extends React.Component {
   state = { file: null };
 
   render() {
-    const { addSong, loading, data, error } = this.props;
+    const { addSong, result: { loading, error, data } } = this.props;
     const { file } = this.state;
 
     return (
@@ -99,24 +82,4 @@ class Upload extends React.Component {
   }
 }
 
-export default () => (
-  <Mutation mutation={addSongMutation}>
-    {(addSong, result) => (
-      <Upload
-        addSong={({ tokenId, file }) =>
-          addSong({
-            variables: { tokenId, file },
-            update: (cache, result) => {
-              const { songs } = cache.readQuery({ query: getSongsQuery });
-              cache.writeQuery({
-                query: getSongsQuery,
-                data: { songs: [...songs, result.data.addSong.song] },
-              });
-            },
-          })
-        }
-        {...result}
-      />
-    )}
-  </Mutation>
-);
+export default () => <WithLibrary>{({ addSong, addSongResult }) => <Upload addSong={addSong} result={addSongResult} />}</WithLibrary>;
