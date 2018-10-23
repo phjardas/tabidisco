@@ -1,4 +1,4 @@
-import { PubSub } from 'apollo-server-express';
+import { IResolvers, PubSub } from 'apollo-server-express';
 import { filter } from 'rxjs/operators';
 import { Readable } from 'stream';
 import { ButtonId, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from '../lib';
@@ -54,7 +54,7 @@ interface PlaySongArgs {
   id?: string;
 }
 
-interface Resolvers {
+interface Resolvers extends IResolvers<any, any> {
   Query: {
     songs(): Promise<Song[]>;
     currentSong(): Promise<Song | undefined>;
