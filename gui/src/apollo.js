@@ -14,13 +14,19 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.error(`[Network error]: ${networkError}`);
 });
 
+const endpoint = process.env.REACT_APP_GRAPHQL_ENDPOINT || 'http://localhost:3001/graphql';
+const wsEndpoint = endpoint.startsWith('http') ? endpoint.replace(/^http/, 'ws') : `ws://${window.location.host}/graphql`;
+
+console.info('GraphQL REST endpoint: %s', endpoint);
+console.info('GraphQL WebSocket endpoint: %s', wsEndpoint);
+
 const httpLink = createUploadLink({
-  uri: 'http://localhost:3001/graphql',
+  uri: endpoint,
   credentials: 'same-origin',
 });
 
 const wsLink = new WebSocketLink({
-  uri: `ws://localhost:3001/graphql`,
+  uri: wsEndpoint,
   options: {
     reconnect: true,
   },
