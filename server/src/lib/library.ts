@@ -9,9 +9,10 @@ const writeFile = promisify(fs.writeFile);
 const deleteFile = promisify(fs.unlink);
 
 export interface Song extends SongTags {
-  readonly tokenId: string;
+  readonly id: string;
   readonly file: string;
   readonly filename: string;
+  readonly description?: string;
   readonly type: string;
   readonly size: number;
   readonly plays: number;
@@ -20,12 +21,12 @@ export interface Song extends SongTags {
 
 export interface Library {
   readonly songs: Promise<Song[]>;
-  setSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }>;
-  deleteSong(tokenId: string): Promise<{ oldSong?: Song }>;
+  setSong(id: string, stream: Readable, filename: string, mimetype: string, description?: string): Promise<{ song: Song; oldSong?: Song }>;
+  deleteSong(id: string): Promise<{ oldSong?: Song }>;
   recordPlay(id: string): Promise<Song>;
 }
 
-type SongMap = { [tokenId: string]: Song };
+type SongMap = { [id: string]: Song };
 
 export class FileLibrary implements Library {
   private readonly dbDir: string;
@@ -40,10 +41,16 @@ export class FileLibrary implements Library {
     return this.load().then(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  async setSong(tokenId: string, stream: Readable, originalFilename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
-    console.info('setting song %s', tokenId);
+  async setSong(
+    id: string,
+    stream: Readable,
+    originalFilename: string,
+    mimetype: string,
+    description?: string
+  ): Promise<{ song: Song; oldSong?: Song }> {
+    console.info('setting song %s', id);
     const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
-    const filename = `${tokenId}.${suffix}`;
+    const filename = `${id}.${suffix}`;
     const fullFile = path.resolve(this.dbDir, filename);
 
     const { size } = await new Promise<{ size: number }>((resolve, reject) => {
@@ -63,35 +70,36 @@ export class FileLibrary implements Library {
 
     const [songs, tags] = await Promise.all([this.load(), parseTags(fullFile)]);
     const song = {
-      tokenId,
+      id,
       file: filename,
       type: mimetype,
+      description,
       size,
       filename: originalFilename,
       plays: 0,
       ...tags,
     };
 
-    const oldSong = songs[tokenId];
-    await this.save({ ...songs, [tokenId]: song });
+    const oldSong = songs[id];
+    await this.save({ ...songs, [id]: song });
 
     if (oldSong) {
-      console.info('[library] updated song %s', tokenId);
+      console.info('[library] updated song %s', id);
       return { song, oldSong };
     } else {
-      console.info('[library] added song %s', tokenId);
+      console.info('[library] added song %s', id);
       return { song };
     }
   }
 
-  async deleteSong(tokenId: string): Promise<{ oldSong?: Song }> {
+  async deleteSong(id: string): Promise<{ oldSong?: Song }> {
     const songs = await this.load();
-    const song = songs[tokenId];
+    const song = songs[id];
     if (!song) return {};
 
-    console.info('[library] deleting song %s', tokenId);
+    console.info('[library] deleting song %s', id);
     await deleteFile(path.resolve(this.dbDir, song.file));
-    delete songs[tokenId];
+    delete songs[id];
     await this.save(songs);
     return { oldSong: song };
   }
@@ -128,7 +136,7 @@ export class FileLibrary implements Library {
         .reduce(
           (a, b) => ({
             ...a,
-            [b.tokenId]: b,
+            [b.id]: b,
           }),
           {}
         );
@@ -142,6 +150,7 @@ export class FileLibrary implements Library {
   }
 
   private async save(songs: SongMap): Promise<any> {
-    await writeFile(this.dbFile, JSON.stringify(Object.keys(songs).map(id => songs[id])), 'utf-8');
+    const data = JSON.stringify(Object.keys(songs).map(id => songs[id]), null, 2);
+    await writeFile(this.dbFile, data, 'utf-8');
   }
 }

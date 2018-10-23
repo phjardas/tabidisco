@@ -34,12 +34,12 @@ interface Upload {
 }
 
 interface AddSongArgs {
-  tokenId?: string;
   file: Promise<Upload>;
+  description?: string;
 }
 
 interface DeleteSongArgs {
-  tokenId: string;
+  id: string;
 }
 
 interface SetPowerArgs {
@@ -51,7 +51,7 @@ interface SimulateButtonPressArgs {
 }
 
 interface PlaySongArgs {
-  tokenId?: string;
+  id?: string;
 }
 
 interface Resolvers {
@@ -94,19 +94,19 @@ export const resolvers: Resolvers = {
     currentSong: () => Promise.resolve(tabidisco.currentSong),
   },
   Mutation: {
-    playSong: withPayload((_: any, { tokenId }: PlaySongArgs) => tabidisco.playSong(tokenId)),
+    playSong: withPayload((_: any, { id }: PlaySongArgs) => tabidisco.playSong(id)),
     stopSong: withPayload(() => tabidisco.stop()),
     readToken: withPayload(async () => {
       const token = await tabidisco.readToken();
       return { token };
     }),
-    addSong: withPayload(async (_, { tokenId, file }) => {
+    addSong: withPayload(async (_, { file, description }) => {
       const data = await file;
-      const song = await tabidisco.addSong(tokenId, data.stream, data.filename, data.mimetype);
+      const song = await tabidisco.addSong(data.stream, data.filename, data.mimetype, description);
       return { song };
     }),
-    deleteSong: withPayload(async (_, { tokenId }) => {
-      await tabidisco.deleteSong(tokenId);
+    deleteSong: withPayload(async (_, { id }) => {
+      await tabidisco.deleteSong(id);
       return null;
     }),
     setPower: withPayload((_: any, { power }: SetPowerArgs) => tabidisco.setPower(power)),

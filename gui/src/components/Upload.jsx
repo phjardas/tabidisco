@@ -1,20 +1,23 @@
 import React from 'react';
-import { Alert, Button, Container, Form, FormGroup, Input } from 'reactstrap';
+import { Alert, Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
 import { WithLibrary } from '../providers/Library';
 
 class Upload extends React.Component {
-  state = { file: null };
+  state = {
+    file: null,
+    description: '',
+  };
 
   render() {
     const { addSong, result: { loading, error, data } } = this.props;
-    const { file } = this.state;
+    const { file, description } = this.state;
 
     return (
       <Container className="mt-3">
         <Form
           onSubmit={e => {
             e.preventDefault();
-            addSong({ file });
+            addSong({ file, description });
           }}
         >
           <p>Place a token on the reader and upload an MP3 file.</p>
@@ -37,6 +40,10 @@ class Upload extends React.Component {
                 {file ? file.name : 'Choose file'}
               </label>
             </div>
+          </FormGroup>
+          <FormGroup>
+            <Label for="description">Description</Label>
+            <Input id="description" value={description} onChange={e => this.setState({ description: e.target.value })} />
           </FormGroup>
 
           <Button type="submit" color="primary" disabled={loading || !file} className="mb-3">
@@ -64,7 +71,7 @@ class Upload extends React.Component {
                   <strong>The new song was successfully added:</strong>
                 </p>
                 <p className="mb-0">
-                  Token: {data.addSong.song.tokenId}
+                  Token: {data.addSong.song.id}
                   <br />
                   Filename: {data.addSong.song.filename}
                   <br />
@@ -73,6 +80,8 @@ class Upload extends React.Component {
                   Artist: {data.addSong.song.artist || <em>unknown</em>}
                   <br />
                   Album: {data.addSong.song.album || <em>unknown</em>}
+                  <br />
+                  Description: {data.addSong.song.description || <em>none</em>}
                 </p>
               </Alert>
             )}

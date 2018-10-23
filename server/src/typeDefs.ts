@@ -9,10 +9,10 @@ export const typeDefs = gql`
 
   type Mutation {
     readToken: ReadTokenResult!
-    playSong(tokenId: ID): PlaySongResult!
+    playSong(id: ID): PlaySongResult!
     stopSong: SimpleResult!
-    addSong(tokenId: ID, file: Upload!): AddSongResult!
-    deleteSong(tokenId: ID!): SimpleResult!
+    addSong(file: Upload!, description: String): AddSongResult!
+    deleteSong(id: ID!): SimpleResult!
     setPower(power: Boolean!): SimpleResult!
     cancelShutdownTimer: SimpleResult!
     simulateButtonPress(button: String!): SimpleResult!
@@ -24,8 +24,9 @@ export const typeDefs = gql`
   }
 
   type Song {
-    tokenId: ID!
+    id: ID!
     filename: String!
+    description: String
     type: String!
     size: Int!
     plays: Int!

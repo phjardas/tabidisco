@@ -14,17 +14,17 @@ export class Tabidisco {
     this.events = merge(this.pi.events, this.player.events);
   }
 
-  setSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
-    return this.library.setSong(tokenId, stream, filename, mimetype);
+  setSong(id: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
+    return this.library.setSong(id, stream, filename, mimetype);
   }
 
-  deleteSong(tokenId: string): Promise<{ oldSong?: Song }> {
-    return this.library.deleteSong(tokenId);
+  deleteSong(id: string): Promise<{ oldSong?: Song }> {
+    return this.library.deleteSong(id);
   }
 
-  async addSong(tokenId: string, stream: Readable, filename: string, mimetype: string): Promise<Song> {
-    if (!tokenId) tokenId = await this.pi.readToken();
-    const { song } = await this.library.setSong(tokenId, stream, filename, mimetype);
+  async addSong(stream: Readable, filename: string, mimetype: string, description?: string): Promise<Song> {
+    const id = await this.pi.readToken();
+    const { song } = await this.library.setSong(id, stream, filename, mimetype, description);
     return song;
   }
 
@@ -52,14 +52,14 @@ export class Tabidisco {
     this.pi.simulateButtonPress(button);
   }
 
-  async playSong(tokenId?: string): Promise<any> {
-    if (!tokenId) tokenId = await this.pi.readToken();
+  async playSong(id?: string): Promise<any> {
+    if (!id) id = await this.pi.readToken();
 
-    let song = (await this.library.songs).find(song => song.tokenId === tokenId);
-    if (!song) throw new Error(`Song ${tokenId} not found`);
+    let song = (await this.library.songs).find(song => song.id === id);
+    if (!song) throw new Error(`Song ${id} not found`);
 
     await this.player.stop();
-    song = await this.library.recordPlay(song.tokenId);
+    song = await this.library.recordPlay(song.id);
     await this.pi.setPower(true);
 
     // activate the shutdown timer once the song has finished

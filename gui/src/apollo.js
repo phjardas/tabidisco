@@ -1,4 +1,4 @@
-import { defaultDataIdFromObject, InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { ApolloLink, split } from 'apollo-link';
 import { onError } from 'apollo-link-error';
@@ -37,14 +37,5 @@ const link = split(
 
 export const apollo = new ApolloClient({
   link: ApolloLink.from([errorLink, link]),
-  cache: new InMemoryCache({
-    dataIdFromObject(object) {
-      switch (object.__typename) {
-        case 'Song':
-          return `${object.__typename}:${object.tokenId}`;
-        default:
-          return defaultDataIdFromObject(object);
-      }
-    },
-  }),
+  cache: new InMemoryCache(),
 });

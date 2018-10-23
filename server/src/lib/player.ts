@@ -66,7 +66,7 @@ export class PlayerImpl implements Player {
 
   private doPlaySong(song: Song): Promise<Play> {
     return new Promise((resolve, reject) => {
-      console.info('Playing song: %s', song.tokenId);
+      console.info('Playing song: %s', song.id);
       const stream = fs.createReadStream(song.file);
       stream.on('error', reject);
 
@@ -90,7 +90,7 @@ export class PlayerImpl implements Player {
 
   async stop(): Promise<any> {
     if (this.currentPlay) {
-      console.info('Stopping song: %s', this.currentPlay.song.tokenId);
+      console.info('Stopping song: %s', this.currentPlay.song.id);
       await this.currentPlay.stop();
       this.currentPlay = undefined;
     }

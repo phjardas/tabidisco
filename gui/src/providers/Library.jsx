@@ -27,8 +27,8 @@ const currentSongSubscription = gql`
 `;
 
 const addSongMutation = gql`
-  mutation AddSong($tokenId: ID, $file: Upload!) {
-    addSong(tokenId: $tokenId, file: $file) {
+  mutation AddSong($file: Upload!, $description: String) {
+    addSong(file: $file, description: $description) {
       success
       error
       song {
@@ -41,8 +41,8 @@ const addSongMutation = gql`
 `;
 
 const deleteSongMutation = gql`
-  mutation DeleteSong($tokenId: ID!) {
-    deleteSong(tokenId: $tokenId) {
+  mutation DeleteSong($id: ID!) {
+    deleteSong(id: $id) {
       success
       error
     }
@@ -50,8 +50,8 @@ const deleteSongMutation = gql`
 `;
 
 const playSongMutation = gql`
-  mutation PlaySong($tokenId: ID!) {
-    playSong(tokenId: $tokenId) {
+  mutation PlaySong($id: ID!) {
+    playSong(id: $id) {
       success
       error
       song {
@@ -103,9 +103,9 @@ export function LibraryProvider({ children }) {
                           error={error}
                           songs={data && data.songs}
                           currentSong={data && data.currentSong}
-                          addSong={({ tokenId, file }) =>
+                          addSong={({ file, description }) =>
                             addSong({
-                              variables: { tokenId, file },
+                              variables: { file, description },
                               update: (cache, { data }) => {
                                 if (data && data.addSong && data.addSong.success) {
                                   const cached = cache.readQuery({ query: initialQuery });
@@ -121,23 +121,23 @@ export function LibraryProvider({ children }) {
                             })
                           }
                           addSongResult={addSongResult}
-                          deleteSong={tokenId =>
+                          deleteSong={id =>
                             deleteSong({
-                              variables: { tokenId },
+                              variables: { id },
                               update: cache => {
                                 const cached = cache.readQuery({ query: initialQuery });
                                 cache.writeQuery({
                                   query: initialQuery,
                                   data: {
                                     ...cached,
-                                    songs: cached.songs.filter(s => s.tokenId !== tokenId),
+                                    songs: cached.songs.filter(s => s.id !== id),
                                   },
                                 });
                               },
                             })
                           }
                           deleteSongResult={deleteSongResult}
-                          playSong={tokenId => playSong({ variables: { tokenId } })}
+                          playSong={id => playSong({ variables: { id } })}
                           playSongResult={playSongResult}
                           stopSong={stopSong}
                           stopSongResult={stopSongResult}
