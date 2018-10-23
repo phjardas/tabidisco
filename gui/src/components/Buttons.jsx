@@ -15,10 +15,10 @@ export default function Buttons({ power, setPower, cancelShutdownTimer, pressBut
         onClick={() => pressButton('play')}
         className="ml-2"
       >
-        <FontAwesome name="play" />
+        <FontAwesome icon="play" />
       </Button>
       <Button color="danger" title="Press STOP button" style={{ borderRadius: '50%' }} onClick={() => pressButton('stop')} className="ml-2">
-        <FontAwesome name="stop" />
+        <FontAwesome icon="stop" />
       </Button>
     </React.Fragment>
   );

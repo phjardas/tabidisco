@@ -1,56 +1,78 @@
+import gql from 'graphql-tag';
 import React from 'react';
+import { Mutation } from 'react-apollo';
 import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { Container, Alert, Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
-import { Notifs } from 'redux-notifications';
-
-import { pressButton, setPower, cancelShutdownTimer } from '../redux';
-import FontAwesome from './FontAwesome';
+import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
+import { WithLibrary } from '../providers/Library';
+import { WithPower } from '../providers/Power';
 import Buttons from './Buttons';
-import ConnectionState from './ConnectionState';
 import CurrentSong from './CurrentSong';
-import Footer from './Footer';
+import FontAwesome from './FontAwesome';
 
-const Layout = ({ info, connectionState, children, currentSong, token, power, dispatch }) => (
-  <React.Fragment>
-    <Navbar color="primary" dark>
+const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdownTimer, pressButton }) => (
+  <>
+    <Navbar color="primary" dark className="navbar-expand">
       <Container className="d-flex">
         <NavbarBrand to="/" tag={RRLink}>
-          <FontAwesome name="music" className="mr-2" />
+          <FontAwesome icon="music" className="mr-2" />
           Tabidisco
         </NavbarBrand>
-        <Nav navbar>
-          <NavItem>
-            <NavLink to="/events" tag={RRNavLink}>
-              Events
-            </NavLink>
-          </NavItem>
-        </Nav>
+        <div className="collapse navbar-collapse">
+          <Nav navbar>
+            <NavItem>
+              <NavLink to="/library" tag={RRNavLink}>
+                Library
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink to="/upload" tag={RRNavLink}>
+                Upload
+              </NavLink>
+            </NavItem>
+          </Nav>
+        </div>
         <div className="ml-auto">
-          <Buttons
-            power={power}
-            setPower={powered => dispatch(setPower(powered))}
-            cancelShutdownTimer={() => dispatch(cancelShutdownTimer())}
-            pressButton={button => dispatch(pressButton(button))}
-          />
+          <Buttons power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} pressButton={pressButton} />
         </div>
       </Container>
     </Navbar>
 
-    <ConnectionState state={connectionState} />
-
     {children}
 
-    <Footer info={info} />
-
-    <CurrentSong currentSong={currentSong} stopSong={() => dispatch(pressButton('stop'))} />
-    <Notifs CustomComponent={({ kind, message }) => <Alert color={kind === 'error' ? 'danger' : kind}>{message}</Alert>} />
-  </React.Fragment>
+    {currentSong && <CurrentSong currentSong={currentSong} stopSong={stopSong} />}
+  </>
 );
 
-export default connect(state => ({
-  info: state.info,
-  connectionState: state.connection.state,
-  currentSong: state.currentSong,
-  power: state.power,
-}))(Layout);
+const pressButtonMutation = gql`
+  mutation PressButton($button: String!) {
+    simulateButtonPress(button: $button) {
+      success
+      error
+    }
+  }
+`;
+
+export default ({ children }) => (
+  <WithLibrary>
+    {({ currentSong, stopSong }) => (
+      <WithPower>
+        {({ power, setPower, cancelShutdownTimer }) => (
+          <Mutation mutation={pressButtonMutation}>
+            {pressButton => (
+              <Layout
+                currentSong={currentSong}
+                stopSong={stopSong}
+                power={power}
+                setPower={setPower}
+                cancelShutdownTimer={cancelShutdownTimer}
+                pressButton={button => pressButton({ variables: { button } })}
+              >
+                {children}
+              </Layout>
+            )}
+          </Mutation>
+        )}
+      </WithPower>
+    )}
+  </WithLibrary>
+);

@@ -1,21 +1,29 @@
 import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-
-import { store } from './redux';
-import Home from './pages/Home';
-import Events from './pages/Events';
+import { ApolloProvider } from 'react-apollo';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { apollo } from './apollo';
+import Library from './pages/Library';
+import Upload from './pages/Upload';
+import { LibraryProvider } from './providers/Library';
+import { PowerProvider } from './providers/Power';
 import './styles.scss';
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <Router>
-        <React.Fragment>
-          <Route exact path="/" component={Home} />
-          <Route path="/events" component={Events} />
-        </React.Fragment>
-      </Router>
-    </Provider>
+    <ApolloProvider client={apollo}>
+      <PowerProvider>
+        <LibraryProvider>
+          <Router>
+            <Switch>
+              <Route path="/library" component={Library} />
+              <Route path="/upload" component={Upload} />
+              <Route exact path="/">
+                {() => <Redirect to="/library" />}
+              </Route>
+            </Switch>
+          </Router>
+        </LibraryProvider>
+      </PowerProvider>
+    </ApolloProvider>
   );
 }

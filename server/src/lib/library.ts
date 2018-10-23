@@ -1,110 +1,156 @@
-import { injectable, inject } from 'inversify';
-import { Observable } from 'rxjs';
+import * as fs from 'fs';
 import * as path from 'path';
+import { Readable } from 'stream';
+import { promisify } from 'util';
+import { parseTags, SongTags } from './mp3';
 
-import { Log, LogFactory, LogFactorySymbol } from './../log';
-import { readFile, writeFile, deleteFile } from './io';
-import { parseTags } from './mp3';
-import { Song } from './api';
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+const deleteFile = promisify(fs.unlink);
 
-export interface Library {
-  readonly songs: Observable<Song[]>;
-  setSong(tokenId: string, filename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }>;
-  deleteSong(tokenId: string): Observable<{ oldSong?: Song }>;
-  recordPlay(id: string): Observable<Song>;
+export interface Song extends SongTags {
+  readonly id: string;
+  readonly file: string;
+  readonly filename: string;
+  readonly description?: string;
+  readonly type: string;
+  readonly size: number;
+  readonly plays: number;
+  readonly lastPlayedAt?: string;
 }
 
-export const LibrarySymbol = Symbol.for('Library');
+export interface Library {
+  readonly songs: Promise<Song[]>;
+  setSong(id: string, stream: Readable, filename: string, mimetype: string, description?: string): Promise<{ song: Song; oldSong?: Song }>;
+  deleteSong(id: string): Promise<{ oldSong?: Song }>;
+  recordPlay(id: string): Promise<Song>;
+}
 
-type SongMap = { [tokenId: string]: Song };
+type SongMap = { [id: string]: Song };
 
-@injectable()
 export class FileLibrary implements Library {
-  private log: Log;
   private readonly dbDir: string;
   private readonly dbFile: string;
 
-  constructor(@inject(LogFactorySymbol) logFactory: LogFactory) {
-    this.log = logFactory.getLog('library');
+  constructor() {
     this.dbDir = process.env.TABIDISCO_DB_DIR || path.resolve('db');
     this.dbFile = path.resolve(this.dbDir, 'songs.json');
   }
 
-  get songs(): Observable<Song[]> {
-    return this.load().map(songs => Object.keys(songs).map(id => songs[id]));
+  get songs(): Promise<Song[]> {
+    return this.load().then(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  setSong(tokenId: string, originalFilename: string, buffer: Buffer): Observable<{ song: Song; oldSong?: Song }> {
-    this.log.info('setting song %s', tokenId);
+  async setSong(
+    id: string,
+    stream: Readable,
+    originalFilename: string,
+    mimetype: string,
+    description?: string
+  ): Promise<{ song: Song; oldSong?: Song }> {
+    console.info('setting song %s', id);
     const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
-    const filename = `${tokenId}.${suffix}`;
+    const filename = `${id}.${suffix}`;
     const fullFile = path.resolve(this.dbDir, filename);
 
-    return writeFile(fullFile, buffer)
-      .flatMap(() => Observable.combineLatest(this.load(), parseTags(fullFile)))
-      .flatMap(([songs, tags]) => {
-        const song = {
-          tokenId,
-          file: filename,
-          type: suffix,
-          size: buffer.byteLength,
-          filename: originalFilename,
-          plays: 0,
-          ...tags,
-        };
-
-        const oldSong = songs[tokenId];
-        return this.save({ ...songs, [tokenId]: song }).map(() => {
-          if (oldSong) {
-            this.log.info('updated song %s', tokenId);
-            return { song, oldSong };
-          } else {
-            this.log.info('added song %s', tokenId);
-            return { song };
-          }
-        });
+    const { size } = await new Promise<{ size: number }>((resolve, reject) => {
+      let size = 0;
+      const out = fs.createWriteStream(fullFile);
+      out.on('error', reject);
+      stream.on('error', reject);
+      stream.on('data', chunk => {
+        out.write(chunk);
+        size += chunk.length;
       });
-  }
-
-  deleteSong(tokenId: string): Observable<{ oldSong?: Song }> {
-    return this.load().flatMap(songs => {
-      const song = songs[tokenId];
-      if (!song) return Observable.empty();
-
-      this.log.info('deleting song %s', tokenId);
-      return deleteFile(path.resolve(this.dbDir, song.file)).mergeMap(() => {
-        delete songs[tokenId];
-        return this.save(songs).map(() => ({ oldSong: song }));
+      stream.on('end', () => {
+        out.end();
+        resolve({ size });
       });
     });
+
+    const [songs, tags] = await Promise.all([this.load(), parseTags(fullFile)]);
+    const song = {
+      id,
+      file: filename,
+      type: mimetype,
+      description,
+      size,
+      filename: originalFilename,
+      plays: 0,
+      ...tags,
+    };
+
+    const oldSong = songs[id];
+    await this.save({ ...songs, [id]: song });
+
+    if (oldSong) {
+      console.info('[library] updated song %s', id);
+      return { song, oldSong };
+    } else {
+      console.info('[library] added song %s', id);
+      return { song };
+    }
   }
 
-  recordPlay(id: string): Observable<Song> {
-    return this.load().flatMap(songs => {
-      const song = songs[id];
-      if (!song) throw new Error(`Song not found: ${id}`);
+  async deleteSong(id: string): Promise<{ oldSong?: Song }> {
+    const songs = await this.load();
+    const song = songs[id];
+    if (!song) return {};
 
-      const newSong = {
-        ...song,
-        plays: (song.plays || 0) + 1,
-        lastPlayedAt: new Date().toISOString(),
-      };
+    console.info('[library] deleting song %s', id);
+    await deleteFile(path.resolve(this.dbDir, song.file));
+    delete songs[id];
+    await this.save(songs);
+    return { oldSong: song };
+  }
 
-      return this.save({
-        ...songs,
-        [id]: newSong,
-      }).map(() => ({ ...newSong, file: path.resolve(this.dbDir, newSong.file) }));
+  async recordPlay(id: string): Promise<Song> {
+    const songs = await this.load();
+    const song = songs[id];
+    if (!song) throw new Error(`Song not found: ${id}`);
+
+    const newSong = {
+      ...song,
+      plays: (song.plays || 0) + 1,
+      lastPlayedAt: new Date().toISOString(),
+    };
+
+    await this.save({
+      ...songs,
+      [id]: newSong,
     });
+
+    return { ...newSong, file: path.resolve(this.dbDir, newSong.file) };
   }
 
-  private load(): Observable<SongMap> {
-    return readFile<string>(this.dbFile, 'utf-8').map(data => {
+  private async load(): Promise<SongMap> {
+    try {
+      const data = await readFile(this.dbFile, 'utf-8');
       const songs: Song[] = JSON.parse(data || '[]');
-      return songs.reduce((a, b) => ({ ...a, [b.tokenId]: b }), {});
-    });
+      return songs
+        .map(song => ({
+          ...song,
+          plays: song.plays || 0,
+          file: path.resolve(this.dbDir, song.file),
+        }))
+        .reduce(
+          (a, b) => ({
+            ...a,
+            [b.id]: b,
+          }),
+          {}
+        );
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return {};
+      }
+
+      throw error;
+    }
   }
 
-  private save(songs: SongMap): Observable<any> {
-    return writeFile(this.dbFile, JSON.stringify(Object.keys(songs).map(id => songs[id])), 'utf-8');
+  private async save(songs: SongMap): Promise<any> {
+    const data = JSON.stringify(Object.keys(songs).map(id => songs[id]), null, 2);
+    await writeFile(this.dbFile, data, 'utf-8');
   }
 }

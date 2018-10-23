@@ -80,7 +80,7 @@ Create the file `/etc/default/tabidisco` with the following content:
 ```
 NODE_ENV=production
 PORT=3000
-TABIDISCO_GUI_DIR=/home/pi/tabidisco/gui/dist
+TABIDISCO_GUI_DIR=/home/pi/tabidisco/gui/build
 TABIDISCO_DB_DIR=/home/pi/tabidisco-data
 ```
 

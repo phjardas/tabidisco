@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Alert, ListGroup, ListGroupItem } from 'reactstrap';
 import FontAwesome from './FontAwesome';
 
-export default function Library({ songs, currentSong, play, deleteSong, stopSong }) {
+export default function Library({ songs, currentSong, playSong, deleteSong, stopSong }) {
   const sortedSongs = Object.keys(songs)
     .map(id => songs[id])
     .sort((a, b) => a.filename.localeCompare(b.filename));
@@ -10,32 +10,31 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
   return sortedSongs.length ? (
     <ListGroup>
       {sortedSongs.map(song => {
-        const active = currentSong && currentSong.tokenId === song.tokenId;
+        const active = currentSong && currentSong.id === song.id;
         return (
-          <ListGroupItem key={song.tokenId} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
+          <ListGroupItem key={song.id} className={`d-flex flex-row justify-content-between ${active ? 'active' : ''}`}>
             <div className="mr-3">
               {active ? (
                 <Button key="stop" color="light" outline size="sm" onClick={stopSong}>
-                  <FontAwesome name="stop" />
+                  <FontAwesome icon="stop" />
                 </Button>
               ) : (
-                <Button key="play" color="primary" outline size="sm" onClick={() => play(song.tokenId)}>
-                  <FontAwesome name="play" />
+                <Button key="play" color="primary" outline size="sm" onClick={() => playSong(song.id)}>
+                  <FontAwesome icon="play" />
                 </Button>
               )}
             </div>
-            <div className="mr-auto">
+            <div className="mr-auto d-flex flex-column">
               <strong>{song.title || song.filename}</strong>
-              <br />
-              {song.artist || <span className="text-muted">Unknown artist</span>}
-              <br />
+              {song.artist ? <span>{song.artist}</span> : <span className="text-muted">Unknown artist</span>}
+              {song.description ? <small>{song.description}</small> : <small className="text-muted">No description</small>}
               {song.plays ? (
                 <small className="text-muted">
                   {song.plays} plays, last played on {new Date(song.lastPlayedAt).toLocaleDateString()}
                 </small>
               ) : (
                 <small className="text-muted">never played yet</small>
-              )}{' '}
+              )}
             </div>
             {active || (
               <div>
@@ -43,9 +42,9 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
                   color="danger"
                   outline
                   size="sm"
-                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.tokenId)}
+                  onClick={() => window.confirm('Are you sure you want to delete this song?') && deleteSong(song.id)}
                 >
-                  <FontAwesome name="trash" />
+                  <FontAwesome icon="trash" />
                 </Button>
               </div>
             )}
@@ -55,7 +54,7 @@ export default function Library({ songs, currentSong, play, deleteSong, stopSong
     </ListGroup>
   ) : (
     <Alert color="warning">
-      <FontAwesome name="exclamation-triangle" className="mr-1" />
+      <FontAwesome icon="exclamation-triangle" className="mr-1" />
       There are no songs in the library yet.
     </Alert>
   );
