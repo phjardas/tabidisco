@@ -41,13 +41,13 @@ export class RealPiAdapter implements PiAdapter {
       .pipe(publish())
       .pipe(refCount());
     powerPins.forEach(pin => wpi.pinMode(pin, wpi.OUTPUT));
-    console.info('initialized Raspberry Pi adapter');
+    console.info('[pi] initialized Raspberry Pi adapter');
     this.setPower(false, true);
   }
 
   readToken(): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.debug('reading token...');
+      console.debug('[pi] reading token...');
       mfrc.reset();
 
       let response = mfrc.findCard();
@@ -58,19 +58,19 @@ export class RealPiAdapter implements PiAdapter {
 
       response = mfrc.getUid();
       if (!response.status) {
-        console.warn('Could not read ID from token:', response);
+        console.warn('[pi] could not read ID from token:', response);
         return reject(new Error('Could not read ID from token'));
       }
 
       const data: number[] = response.data;
-      console.debug('token read:', data);
+      console.debug('[pi] token read:', data);
       resolve(data.map(d => d.toString(16)).join(''));
     });
   }
 
   setPower(power: boolean, force?: boolean): Promise<any> {
     if (force || power !== this.power.powered) {
-      console.info(`turning power ${power ? 'on' : 'off'}`);
+      console.info(`[pi] turning power ${power ? 'on' : 'off'}`);
       this.power = { ...this.power, state: power ? 'up' : 'down' };
       this.events.next({ type: 'power', state: this.power });
 
