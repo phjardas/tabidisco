@@ -1,26 +1,17 @@
 language: node_js
 node_js:
-- '8'
+  - '8'
 cache:
   directories:
-  - node_modules
-  - gui/node_modules
-  - server/node_modules
-#sudo: required
-#services:
-#- docker
+    - node_modules
+    - gui/node_modules
+    - server/node_modules
 addons:
   apt:
     packages:
-    - libasound2-dev
+      - libasound2-dev
 install:
-- npm install -g npm@5.7.1
-- npm install
+  - npm install -g npm@5.7.1
+  - npm install
 script:
-- npm run build
-#- docker build --tag phjardas/tabidisco .
-#deploy:
-#  provider: script
-#  script: bash docker_push.sh
-#  on:
-#    branch: master
+  - npm run build
