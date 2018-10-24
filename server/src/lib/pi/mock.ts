@@ -1,13 +1,8 @@
-import { Subject } from 'rxjs';
-import { ButtonId, PiAdapter, PiEvent, PowerState } from './api';
+import { PiAdapter } from './api';
+import { PiAdapterBase } from './base';
 
-const shutdownTimerDuration = 5000;
-
-export class MockPiAdapter implements PiAdapter {
-  events = new Subject<PiEvent>();
-  power: PowerState = { powered: false, state: 'off', shutdownTimer: false };
-  buttons = new Subject<ButtonId>();
-  private shutdownTimer?: NodeJS.Timer;
+export class MockPiAdapter extends PiAdapterBase implements PiAdapter {
+  buttons = this.simulatedButtons;
 
   readToken(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -26,52 +21,8 @@ export class MockPiAdapter implements PiAdapter {
     });
   }
 
-  setPower(power: boolean): Promise<any> {
-    if (power !== this.power.powered) {
-      return new Promise(resolve => {
-        console.info(`[pi] turning power ${power ? 'on' : 'off'}`);
-
-        if (this.shutdownTimer) {
-          clearTimeout(this.shutdownTimer);
-        }
-
-        this.power = { ...this.power, state: power ? 'up' : 'down' };
-        this.events.next({ type: 'power', state: this.power });
-
-        setTimeout(() => {
-          this.power = { powered: power, state: power ? 'on' : 'off', shutdownTimer: false };
-          this.events.next({ type: 'power', state: this.power });
-          resolve();
-        }, 1000);
-      });
-    }
-
-    return Promise.resolve(null);
-  }
-
-  activateShutdownTimer() {
-    console.info('[pi] activating shutdown timer in %d ms', shutdownTimerDuration);
-
-    if (this.shutdownTimer) {
-      clearTimeout(this.shutdownTimer);
-    }
-
-    this.power = { ...this.power, shutdownTimer: true };
-    this.events.next({ type: 'power', state: this.power });
-    this.shutdownTimer = setTimeout(() => this.setPower(false), shutdownTimerDuration);
-  }
-
-  cancelShutdownTimer() {
-    if (this.shutdownTimer) {
-      console.info('[pi] cancelling shutdown timer');
-      clearTimeout(this.shutdownTimer);
-      this.power = { ...this.power, shutdownTimer: false };
-      this.events.next({ type: 'power', state: this.power });
-    }
-  }
-
-  simulateButtonPress(button: ButtonId) {
-    this.buttons.next(button);
+  doSetPower(): Promise<any> {
+    return new Promise(resolve => setTimeout(resolve, 1000));
   }
 }
 

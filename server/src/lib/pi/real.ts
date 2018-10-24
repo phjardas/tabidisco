@@ -1,10 +1,9 @@
 import * as mfrc from 'mfrc522-rpi';
-import { merge, Observable, Observer, Subject } from 'rxjs';
+import { merge, Observable, Observer } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, publish, refCount } from 'rxjs/operators';
 import * as wpi from 'wiringpi-node';
-import { ButtonId, PiAdapter, PowerState, PiEvent } from './api';
-
-const shutdownTimerDuration = 10000;
+import { ButtonId, PiAdapter } from './api';
+import { PiAdapterBase } from './base';
 
 interface ButtonConfig {
   readonly type: ButtonId;
@@ -28,14 +27,11 @@ function observeButton(config: ButtonConfig): Observable<ButtonId> {
     .pipe(map(() => type));
 }
 
-export class RealPiAdapter implements PiAdapter {
-  events = new Subject<PiEvent>();
-  power: PowerState = { powered: false, state: 'off', shutdownTimer: false };
+export class RealPiAdapter extends PiAdapterBase implements PiAdapter {
   buttons: Observable<ButtonId>;
-  private simulatedButtons = new Subject<ButtonId>();
-  private shutdownTimer?: NodeJS.Timer;
 
   constructor() {
+    super();
     mfrc.initWiringPi(0);
     this.buttons = merge(...buttonConfigs.map(observeButton), this.simulatedButtons)
       .pipe(publish())
@@ -52,7 +48,7 @@ export class RealPiAdapter implements PiAdapter {
 
       let response = mfrc.findCard();
       if (!response.status) {
-        console.warn('No RFID token found:', response);
+        console.warn('[pi] no RFID token found:', response);
         return reject(new Error('No RFID token found'));
       }
 
@@ -68,43 +64,7 @@ export class RealPiAdapter implements PiAdapter {
     });
   }
 
-  setPower(power: boolean, force?: boolean): Promise<any> {
-    if (force || power !== this.power.powered) {
-      console.info(`[pi] turning power ${power ? 'on' : 'off'}`);
-      this.power = { ...this.power, state: power ? 'up' : 'down' };
-      this.events.next({ type: 'power', state: this.power });
-
-      powerPins.forEach(pin => wpi.digitalWrite(pin, power ? 0 : 1));
-
-      this.power = { powered: power, state: power ? 'on' : 'off', shutdownTimer: false };
-      this.events.next({ type: 'power', state: this.power });
-    }
-
-    return Promise.resolve(null);
-  }
-
-  activateShutdownTimer() {
-    console.info('[pi] activating shutdown timer in %d ms', shutdownTimerDuration);
-
-    if (this.shutdownTimer) {
-      clearTimeout(this.shutdownTimer);
-    }
-
-    this.power = { ...this.power, shutdownTimer: true };
-    this.events.next({ type: 'power', state: this.power });
-    this.shutdownTimer = setTimeout(() => this.setPower(false), shutdownTimerDuration);
-  }
-
-  cancelShutdownTimer() {
-    if (this.shutdownTimer) {
-      console.info('[pi] cancelling shutdown timer');
-      clearTimeout(this.shutdownTimer);
-      this.power = { ...this.power, shutdownTimer: false };
-      this.events.next({ type: 'power', state: this.power });
-    }
-  }
-
-  simulateButtonPress(button: ButtonId) {
-    this.simulatedButtons.next(button);
+  async doSetPower(power: boolean): Promise<any> {
+    powerPins.forEach(pin => wpi.digitalWrite(pin, power ? 0 : 1));
   }
 }
