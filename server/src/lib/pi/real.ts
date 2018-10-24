@@ -32,7 +32,11 @@ export class RealPiAdapter extends PiAdapterBase implements PiAdapter {
 
   constructor() {
     super();
+
     mfrc.initWiringPi(0);
+    // set maximum antenna gain
+    mfrc.setRegisterBitMask(0x26, 0x07 << 4);
+
     this.buttons = merge(...buttonConfigs.map(observeButton), this.simulatedButtons)
       .pipe(publish())
       .pipe(refCount());
