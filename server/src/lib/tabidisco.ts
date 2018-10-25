@@ -12,8 +12,12 @@ export class Tabidisco {
 
   constructor(private readonly library: Library, private readonly pi: PiAdapter, private readonly player: Player) {
     this.events = merge(this.pi.events, this.player.events);
-    this.pi.buttons.pipe(filter(btn => btn === 'play')).subscribe(() => this.playSong());
-    this.pi.buttons.pipe(filter(btn => btn === 'stop')).subscribe(() => this.stop());
+    this.pi.buttons
+      .pipe(filter(btn => btn === 'play'))
+      .subscribe(() => this.playSong().catch(error => console.error('Error playing song:', error)));
+    this.pi.buttons
+      .pipe(filter(btn => btn === 'stop'))
+      .subscribe(() => this.stop().catch(error => console.error('Error stopping song:', error)));
   }
 
   setSong(id: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
