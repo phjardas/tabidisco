@@ -1,27 +1,41 @@
 import React from 'react';
-import { Alert, Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Alert, Button, Container, Form, FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
 import { WithLibrary } from '../providers/Library';
+import FontAwesome from './FontAwesome';
 
 class Upload extends React.Component {
   state = {
+    id: '',
     file: null,
     description: '',
   };
 
   render() {
-    const { addSong, result: { loading, error, data } } = this.props;
-    const { file, description } = this.state;
+    const { readTokenResult, addSong, addSongResult: { loading, error, data } } = this.props;
+    const { id, file, description } = this.state;
 
     return (
       <Container className="mt-3">
         <Form
           onSubmit={e => {
             e.preventDefault();
-            addSong({ file, description });
+            addSong({ id, file, description });
           }}
         >
           <p>Place a token on the reader and upload an MP3 file.</p>
           <FormGroup>
+            <Label for="id">Token</Label>
+            <InputGroup>
+              <Input id="id" value={id} onChange={e => this.setState({ id: e.target.value })} />
+              <InputGroupAddon addonType="append">
+                <Button color="secondary" onClick={this.readToken} disabled={readTokenResult.loading}>
+                  {readTokenResult.loading ? <FontAwesome icon="spinner" className="fa-pulse" /> : <FontAwesome icon="tag" />}
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
+          </FormGroup>
+          <FormGroup>
+            <Label for="file">File</Label>
             <div className="custom-file">
               <Input
                 type="file"
@@ -89,6 +103,24 @@ class Upload extends React.Component {
       </Container>
     );
   }
+
+  readToken = async () => {
+    const { readToken } = this.props;
+    this.setState({ id: '' });
+    const { data: { readToken: result } } = await readToken();
+
+    if (result.success) {
+      this.setState({ id: result.token });
+    } else {
+      alert(result.error);
+    }
+  };
 }
 
-export default () => <WithLibrary>{({ addSong, addSongResult }) => <Upload addSong={addSong} result={addSongResult} />}</WithLibrary>;
+export default () => (
+  <WithLibrary>
+    {({ readToken, readTokenResult, addSong, addSongResult }) => (
+      <Upload readToken={readToken} readTokenResult={readTokenResult} addSong={addSong} addSongResult={addSongResult} />
+    )}
+  </WithLibrary>
+);

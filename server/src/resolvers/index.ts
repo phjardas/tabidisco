@@ -29,11 +29,11 @@ function withPayload<Result = {}, Args = {}>(
 interface Upload {
   stream: Readable;
   filename: string;
-  mimetype: string;
   encoding: string;
 }
 
 interface AddSongArgs {
+  id?: string;
   file: Promise<Upload>;
   description?: string;
 }
@@ -100,9 +100,9 @@ export const resolvers: Resolvers = {
       const token = await tabidisco.readToken();
       return { token };
     }),
-    addSong: withPayload(async (_, { file, description }) => {
+    addSong: withPayload(async (_, { id, file, description }) => {
       const data = await file;
-      const song = await tabidisco.addSong(data.stream, data.filename, data.mimetype, description);
+      const song = await tabidisco.addSong(data.stream, data.filename, id, description);
       return { song };
     }),
     deleteSong: withPayload(async (_, { id }) => {

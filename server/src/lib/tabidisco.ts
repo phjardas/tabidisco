@@ -20,17 +20,13 @@ export class Tabidisco {
       .subscribe(() => this.stop().catch(error => console.error('Error stopping song:', error)));
   }
 
-  setSong(id: string, stream: Readable, filename: string, mimetype: string): Promise<{ song: Song; oldSong?: Song }> {
-    return this.library.setSong(id, stream, filename, mimetype);
-  }
-
   deleteSong(id: string): Promise<{ oldSong?: Song }> {
     return this.library.deleteSong(id);
   }
 
-  async addSong(stream: Readable, filename: string, mimetype: string, description?: string): Promise<Song> {
-    const id = await this.pi.readToken();
-    const { song } = await this.library.setSong(id, stream, filename, mimetype, description);
+  async addSong(stream: Readable, filename: string, id: string, description?: string): Promise<Song> {
+    id = id || (await this.pi.readToken());
+    const { song } = await this.library.setSong(id, stream, filename, description);
     return song;
   }
 

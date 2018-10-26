@@ -11,7 +11,7 @@ export const typeDefs = gql`
     readToken: ReadTokenResult!
     playSong(id: ID): PlaySongResult!
     stopSong: SimpleResult!
-    addSong(file: Upload!, description: String): AddSongResult!
+    addSong(id: ID, file: Upload!, description: String): AddSongResult!
     deleteSong(id: ID!): SimpleResult!
     setPower(power: Boolean!): SimpleResult!
     cancelShutdownTimer: SimpleResult!
@@ -27,7 +27,6 @@ export const typeDefs = gql`
     id: ID!
     filename: String!
     description: String
-    type: String!
     size: Int!
     plays: Int!
     lastPlayedAt: String

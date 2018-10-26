@@ -13,7 +13,6 @@ export interface Song extends SongTags {
   readonly file: string;
   readonly filename: string;
   readonly description?: string;
-  readonly type: string;
   readonly size: number;
   readonly plays: number;
   readonly lastPlayedAt?: string;
@@ -21,7 +20,7 @@ export interface Song extends SongTags {
 
 export interface Library {
   readonly songs: Promise<Song[]>;
-  setSong(id: string, stream: Readable, filename: string, mimetype: string, description?: string): Promise<{ song: Song; oldSong?: Song }>;
+  setSong(id: string, stream: Readable, filename: string, description?: string): Promise<{ song: Song; oldSong?: Song }>;
   deleteSong(id: string): Promise<{ oldSong?: Song }>;
   recordPlay(id: string): Promise<Song>;
 }
@@ -41,16 +40,9 @@ export class FileLibrary implements Library {
     return this.load().then(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  async setSong(
-    id: string,
-    stream: Readable,
-    originalFilename: string,
-    mimetype: string,
-    description?: string
-  ): Promise<{ song: Song; oldSong?: Song }> {
+  async setSong(id: string, stream: Readable, originalFilename: string, description?: string): Promise<{ song: Song; oldSong?: Song }> {
     console.info('setting song %s', id);
-    const suffix = originalFilename.replace(/^.+\.([^.]+)$/, '$1');
-    const filename = `${id}.${suffix}`;
+    const filename = `${id}.mp3`;
     const fullFile = path.resolve(this.dbDir, filename);
 
     const { size } = await new Promise<{ size: number }>((resolve, reject) => {
@@ -72,7 +64,6 @@ export class FileLibrary implements Library {
     const song = {
       id,
       file: filename,
-      type: mimetype,
       description,
       size,
       filename: originalFilename,
