@@ -43,6 +43,7 @@ export class Tabidisco {
   }
 
   setPower(power: boolean): Promise<PowerState> {
+    this.cancelShutdownTimer();
     return this.pi.setPower(power);
   }
 
@@ -62,7 +63,7 @@ export class Tabidisco {
 
     await this.player.stop();
     song = await this.library.recordPlay(song.id);
-    await this.pi.setPower(true);
+    await this.setPower(true);
 
     // activate the shutdown timer once the song has finished
     this.player.events
