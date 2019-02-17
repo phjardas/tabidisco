@@ -1,12 +1,32 @@
 import { ApolloServer } from 'apollo-server-express';
+import bodyParser from 'body-parser';
 import history from 'connect-history-api-fallback';
+import cors from 'cors';
 import express from 'express';
+import fs from 'fs';
 import helmet from 'helmet';
 import http from 'http';
+import multer from 'multer';
+import { tabidisco } from './lib';
 import { resolvers } from './resolvers';
 import { typeDefs } from './typeDefs';
 
 const app = express();
+app.use(cors());
+
+const upload = multer({ dest: '/tmp' });
+app.put('/songs/:id', bodyParser.json(), upload.single('file'), async (req, res, next) => {
+  const stream = fs.createReadStream(req.file.path);
+  const id = req.params.id;
+  const filename = req.file.filename;
+  const description = req.body.description;
+  try {
+    const song = await tabidisco.addSong(stream, filename, id, description);
+    res.send(song);
+  } catch (error) {
+    next(error);
+  }
+});
 
 const server = new ApolloServer({
   typeDefs,

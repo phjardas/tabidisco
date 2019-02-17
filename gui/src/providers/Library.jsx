@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Mutation, Query } from 'react-apollo';
 import { songDetails } from './data';
 
@@ -181,3 +181,7 @@ export function LibraryProvider({ children }) {
 }
 
 export const WithLibrary = Context.Consumer;
+
+export function useLibrary() {
+  return useContext(Context);
+}
