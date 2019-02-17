@@ -1,7 +1,7 @@
 import { IResolvers, PubSub } from 'apollo-server-express';
 import { filter } from 'rxjs/operators';
 import { Readable } from 'stream';
-import { ButtonId, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from '../lib';
+import { ButtonId, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from './lib';
 
 type SuccessResult = { success: true };
 type ErrorResult = { success: false; error: string };
@@ -27,7 +27,7 @@ function withPayload<Result = {}, Args = {}>(
 }
 
 interface Upload {
-  stream: Readable;
+  createReadStream(): Readable;
   filename: string;
   encoding: string;
 }
@@ -102,7 +102,7 @@ export const resolvers: Resolvers = {
     }),
     addSong: withPayload(async (_, { id, file, description }) => {
       const data = await file;
-      const song = await tabidisco.addSong(data.stream, data.filename, id, description);
+      const song = await tabidisco.addSong(data.createReadStream(), data.filename, id, description);
       return { song };
     }),
     deleteSong: withPayload(async (_, { id }) => {

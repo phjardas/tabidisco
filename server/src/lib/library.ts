@@ -7,6 +7,7 @@ import { parseTags, SongTags } from './mp3';
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const deleteFile = promisify(fs.unlink);
+const stat = promisify(fs.stat);
 
 export interface Song extends SongTags {
   readonly id: string;
@@ -41,26 +42,21 @@ export class FileLibrary implements Library {
   }
 
   async setSong(id: string, stream: Readable, originalFilename: string, description?: string): Promise<{ song: Song; oldSong?: Song }> {
-    console.info('setting song %s', id);
     const filename = `${id}.mp3`;
     const fullFile = path.resolve(this.dbDir, filename);
+    console.info('[library] writing song %s to %s', id, fullFile);
 
-    const { size } = await new Promise<{ size: number }>((resolve, reject) => {
-      let size = 0;
+    await new Promise<never>((resolve, reject) => {
       const out = fs.createWriteStream(fullFile);
       out.on('error', reject);
       stream.on('error', reject);
-      stream.on('data', chunk => {
-        out.write(chunk);
-        size += chunk.length;
-      });
-      stream.on('end', () => {
-        out.end();
-        resolve({ size });
-      });
+      stream.pipe(out);
+      out.on('end', resolve);
     });
 
-    const [songs, tags] = await Promise.all([this.load(), parseTags(fullFile)]);
+    const [songs, tags, { size }] = await Promise.all([this.load(), parseTags(fullFile), stat(fullFile)]);
+    console.info('[library] wrote song %d to %s with %d bytes', id, fullFile, size);
+
     const song = {
       id,
       file: filename,
