@@ -5,11 +5,10 @@ import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
 import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
 import { WithLibrary } from '../providers/Library';
 import { WithPower } from '../providers/Power';
-import Buttons from './Buttons';
-import CurrentSong from './CurrentSong';
 import FontAwesome from './FontAwesome';
+import Footer from './Footer';
 
-const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdownTimer, pressButton }) => (
+const Layout = ({ children, currentSong, power, setPower, cancelShutdownTimer, pressButton }) => (
   <>
     <Navbar color="primary" dark className="navbar-expand">
       <Container className="d-flex">
@@ -31,15 +30,18 @@ const Layout = ({ children, currentSong, stopSong, power, setPower, cancelShutdo
             </NavItem>
           </Nav>
         </div>
-        <div className="ml-auto">
-          <Buttons power={power} setPower={setPower} cancelShutdownTimer={cancelShutdownTimer} pressButton={pressButton} />
-        </div>
       </Container>
     </Navbar>
 
     {children}
 
-    {currentSong && <CurrentSong currentSong={currentSong} stopSong={stopSong} />}
+    <Footer
+      power={power}
+      setPower={setPower}
+      cancelShutdownTimer={cancelShutdownTimer}
+      pressButton={pressButton}
+      currentSong={currentSong}
+    />
   </>
 );
 
@@ -54,14 +56,13 @@ const pressButtonMutation = gql`
 
 export default ({ children }) => (
   <WithLibrary>
-    {({ currentSong, stopSong }) => (
+    {({ currentSong }) => (
       <WithPower>
         {({ power, setPower, cancelShutdownTimer }) => (
           <Mutation mutation={pressButtonMutation}>
             {pressButton => (
               <Layout
                 currentSong={currentSong}
-                stopSong={stopSong}
                 power={power}
                 setPower={setPower}
                 cancelShutdownTimer={cancelShutdownTimer}
