@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as mp3 from 'mp3-parser';
+import fs from 'fs';
+import mp3 from 'mp3-parser';
 import { promisify } from 'util';
 
 const readFile = promisify(fs.readFile);

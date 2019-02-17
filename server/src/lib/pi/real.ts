@@ -1,7 +1,7 @@
-import * as mfrc from 'mfrc522-rpi';
+import mfrc from 'mfrc522-rpi';
 import { merge, Observable, Observer } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, publish, refCount } from 'rxjs/operators';
-import * as wpi from 'wiringpi-node';
+import wpi from 'wiringpi-node';
 import { ButtonId, PiAdapter } from './api';
 import { PiAdapterBase } from './base';
 

@@ -1,8 +1,8 @@
 import { ApolloServer } from 'apollo-server-express';
-import * as history from 'connect-history-api-fallback';
-import * as express from 'express';
-import * as helmet from 'helmet';
-import * as http from 'http';
+import history from 'connect-history-api-fallback';
+import express from 'express';
+import helmet from 'helmet';
+import http from 'http';
 import { resolvers } from './resolvers';
 import { typeDefs } from './typeDefs';
 

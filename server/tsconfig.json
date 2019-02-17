@@ -13,6 +13,7 @@
     "noUnusedParameters": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "typeRoots": ["./typings"]
+    "esModuleInterop": true,
+    "typeRoots": ["./typings", "./node_modules/@types"]
   }
 }

@@ -1,7 +1,7 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import { Decoder } from 'lame';
 import { Observable, Subject } from 'rxjs';
-import * as Speaker from 'speaker';
+import Speaker from 'speaker';
 import { Song } from './library';
 
 export class SongStartedEvent {
