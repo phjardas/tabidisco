@@ -41,21 +41,25 @@ export class FileLibrary implements Library {
     return this.load().then(songs => Object.keys(songs).map(id => songs[id]));
   }
 
-  async setSong(id: string, stream: Readable, originalFilename: string, description?: string): Promise<{ song: Song; oldSong?: Song }> {
+  async setSong(
+    id: string,
+    stream: fs.ReadStream,
+    originalFilename: string,
+    description?: string
+  ): Promise<{ song: Song; oldSong?: Song }> {
     const filename = `${id}.mp3`;
     const fullFile = path.resolve(this.dbDir, filename);
     console.info('[library] writing song %s to %s', id, fullFile);
 
     await new Promise<never>((resolve, reject) => {
-      const out = fs.createWriteStream(fullFile);
-      out.on('error', reject);
-      stream.on('error', reject);
-      stream.pipe(out);
-      out.on('end', resolve);
+      stream
+        .pipe(fs.createWriteStream(fullFile))
+        .on('error', reject)
+        .on('finish', resolve);
     });
 
     const [songs, tags, { size }] = await Promise.all([this.load(), parseTags(fullFile), stat(fullFile)]);
-    console.info('[library] wrote song %d to %s with %d bytes', id, fullFile, size);
+    console.info('[library] wrote song %s to %s with %d bytes', id, fullFile, size);
 
     const song = {
       id,
