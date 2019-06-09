@@ -5,8 +5,7 @@
   "scripts": {
     "start": "check-engine && concurrently --kill-others 'npm run start:server' 'npm run start:gui'",
     "start:server": "(cd server && npm run dev)",
-    "start:gui": "(cd gui && npm start)",
-    "precommit": "lint-staged"
+    "start:gui": "(cd gui && npm start)"
   },
   "engines": {
     "node": "^8"
@@ -23,5 +22,10 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
