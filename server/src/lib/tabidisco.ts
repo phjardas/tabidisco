@@ -61,6 +61,7 @@ export class Tabidisco {
 
     if (this.currentSong && this.currentSong.id === id) {
       console.info('Song %s is already playing', id);
+      return;
     }
 
     let song = (await this.library.songs).find(song => song.id === id);
@@ -68,6 +69,7 @@ export class Tabidisco {
 
     if (this.currentSong && this.currentSong.id === song.id) {
       console.info('Song %s is already playing', song.id);
+      return;
     }
     this.currentSong = song;
 
