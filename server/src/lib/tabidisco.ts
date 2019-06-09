@@ -9,6 +9,7 @@ export type TabidiscoEvent = PiEvent | SongEvent;
 
 export class Tabidisco {
   readonly events: Observable<TabidiscoEvent>;
+  currentSong?: Song;
 
   constructor(private readonly library: Library, private readonly pi: PiAdapter, private readonly player: Player) {
     this.events = merge(this.pi.events, this.player.events);
@@ -58,8 +59,17 @@ export class Tabidisco {
   async playSong(id?: string): Promise<any> {
     if (!id) id = await this.pi.readToken();
 
+    if (this.currentSong && this.currentSong.id === id) {
+      console.info('Song %s is already playing', id);
+    }
+
     let song = (await this.library.songs).find(song => song.id === id);
     if (!song) throw new Error(`Song ${id} not found`);
+
+    if (this.currentSong && this.currentSong.id === song.id) {
+      console.info('Song %s is already playing', song.id);
+    }
+    this.currentSong = song;
 
     await this.player.stop();
     song = await this.library.recordPlay(song.id);
@@ -69,14 +79,13 @@ export class Tabidisco {
     this.player.events
       .pipe(filter(evt => evt.type === 'song_finished'))
       .pipe(first())
-      .subscribe(() => this.pi.activateShutdownTimer());
+      .subscribe(() => {
+        this.currentSong = undefined;
+        this.pi.activateShutdownTimer();
+      });
 
     // start playback
     await this.player.play(song);
-  }
-
-  get currentSong(): Song | undefined {
-    return this.player.currentSong;
   }
 
   stop(): Promise<any> {

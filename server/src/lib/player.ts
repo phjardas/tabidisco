@@ -21,7 +21,6 @@ export type SongEvent = SongStartedEvent | SongFinishedEvent;
 export interface Player {
   readonly events: Observable<SongEvent>;
   play(song: Song): Promise<any>;
-  readonly currentSong?: Song;
   stop(): Promise<any>;
 }
 
@@ -54,10 +53,6 @@ class Play {
 export class PlayerImpl implements Player {
   private currentPlay?: Play;
   readonly events = new Subject<SongEvent>();
-
-  get currentSong() {
-    return this.currentPlay && this.currentPlay.song;
-  }
 
   async play(song: Song): Promise<any> {
     await this.stop();
