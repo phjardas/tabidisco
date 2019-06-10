@@ -30,7 +30,7 @@ export default function Library({ songs, currentSong, playSong, deleteSong, stop
               {song.description ? <small>{song.description}</small> : <small className="text-muted">No description</small>}
               {song.plays ? (
                 <small className="text-muted">
-                  {song.plays} plays, last played on {new Date(song.lastPlayedAt).toLocaleDateString()}
+                  {song.plays} plays, last played at {new Date(song.lastPlayedAt).toLocaleString()}
                 </small>
               ) : (
                 <small className="text-muted">never played yet</small>

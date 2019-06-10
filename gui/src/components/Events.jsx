@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import React, { useEffect } from 'react';
 import { Query } from 'react-apollo';
-import { Badge, Container, Table } from 'reactstrap';
+import { Alert, Badge, Container, Table } from 'reactstrap';
 
 const eventsQuery = gql`
   query EventsQuery {
@@ -51,7 +51,9 @@ function EventsList({ events, subscribeToMore }) {
       document: eventsSubscription,
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) return prev;
-        return { ...prev, logs: [...prev.logs, subscriptionData.data.log] };
+        let logs = [...prev.logs, subscriptionData.data.log];
+        if (logs.length > 20) logs = logs.slice(logs.length - 20);
+        return { ...prev, logs };
       },
     });
   }, []);
@@ -67,7 +69,7 @@ function EventsList({ events, subscribeToMore }) {
         </tr>
       </thead>
       <tbody>
-        {events.sort((a, b) => -a.time.localeCompare(b.time)).map(event => (
+        {[...events].reverse().map(event => (
           <tr key={event.time + event.module + event.msg}>
             <td className="text-nowrap">
               {new Date(event.time).toLocaleTimeString()}
@@ -88,11 +90,17 @@ function EventsList({ events, subscribeToMore }) {
 
 export default () => {
   return (
-    <Container className="mb-3">
-      <Query query={eventsQuery}>
+    <Container className="my-3">
+      <Query query={eventsQuery} fetchPolicy="network-only">
         {({ loading, data, error, subscribeToMore }) => {
-          if (loading) return 'loading';
-          if (error) return error.message;
+          if (loading) {
+            return <Alert color="info">Loading&hellip;</Alert>;
+          }
+
+          if (error) {
+            return <Alert color="danger">Error: {error.message}</Alert>;
+          }
+
           return <EventsList events={data.logs} subscribeToMore={subscribeToMore} />;
         }}
       </Query>

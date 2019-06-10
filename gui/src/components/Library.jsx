@@ -4,7 +4,7 @@ import { WithLibrary } from '../providers/Library';
 import SongList from './SongList';
 
 export default () => (
-  <Container className="mt-3">
+  <Container className="my-3">
     <WithLibrary>
       {({ loading, error, songs, currentSong, deleteSong, playSong, stopSong }) => {
         if (loading) return <Alert color="info">Loading&hellip;</Alert>;
