@@ -1,20 +1,23 @@
+import { logger } from '../log';
 import { PiAdapter } from './api';
 import { PiAdapterBase } from './base';
+
+const log = logger.child({ module: 'pi' });
 
 export class MockPiAdapter extends PiAdapterBase implements PiAdapter {
   buttons = this.simulatedButtons;
 
   readToken(): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.debug('[pi] reading token...');
+      log.debug('reading token...');
 
       setTimeout(() => {
         if (Math.random() < 0.3) {
-          console.debug('[pi] no token found');
+          log.debug('no token found');
           reject(new Error('No token found'));
         } else {
           const token = randomToken();
-          console.debug(`[pi] token resolved: ${token}`);
+          log.debug(`token resolved: ${token}`);
           resolve(token);
         }
       }, 200);

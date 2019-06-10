@@ -3,6 +3,9 @@ import { Decoder } from 'lame';
 import { Observable, Subject } from 'rxjs';
 import Speaker from 'speaker';
 import { Song } from './library';
+import { logger } from './log';
+
+const log = logger.child({ module: 'player' });
 
 export class SongStartedEvent {
   static readonly TYPE = 'song_started';
@@ -61,7 +64,7 @@ export class PlayerImpl implements Player {
 
   private doPlaySong(song: Song): Promise<Play> {
     return new Promise((resolve, reject) => {
-      console.info('Playing song: %s', song.id);
+      log.info('Playing song: %s', song.id);
       const stream = fs.createReadStream(song.file);
       stream.on('error', reject);
 
@@ -73,7 +76,7 @@ export class PlayerImpl implements Player {
           play.events.subscribe(
             evt => this.events.next(evt),
             // FIXME handle errors during playback
-            err => console.error('Error playing song:', err),
+            err => log.error('Error playing song:', err),
             () => (this.currentPlay = null)
           );
           resolve(play);
@@ -85,7 +88,7 @@ export class PlayerImpl implements Player {
 
   async stop(): Promise<any> {
     if (this.currentPlay) {
-      console.info('Stopping song: %s', this.currentPlay.song.id);
+      log.info('Stopping song: %s', this.currentPlay.song.id);
       await this.currentPlay.stop();
       this.currentPlay = undefined;
     }

@@ -1,7 +1,8 @@
 import { IResolvers, PubSub } from 'apollo-server-express';
-import { filter } from 'rxjs/operators';
+import { of, BehaviorSubject } from 'rxjs';
+import { filter, mergeScan } from 'rxjs/operators';
 import { Readable } from 'stream';
-import { ButtonId, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from './lib';
+import { ButtonId, LogEvent, logEvents, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from './lib';
 
 type SuccessResult = { success: true };
 type ErrorResult = { success: false; error: string };
@@ -59,6 +60,7 @@ interface Resolvers extends IResolvers<any, any> {
     songs(): Promise<Song[]>;
     currentSong(): Promise<Song | undefined>;
     power(): Promise<PowerState>;
+    logs(): Promise<LogEvent[]>;
   };
   Mutation: {
     playSong(source: any, args: PlaySongArgs): Promise<{ song: Song }>;
@@ -73,6 +75,7 @@ interface Resolvers extends IResolvers<any, any> {
   Subscription: {
     power: Subscription;
     currentSong: Subscription;
+    log: Subscription;
   };
 }
 
@@ -82,9 +85,15 @@ tabidisco.events
   .pipe(filter(e => e.type === 'song_started'))
   .subscribe((evt: SongStartedEvent) => events.publish('currentSong', { currentSong: evt.song }));
 tabidisco.events.pipe(filter(e => e.type === 'song_finished')).subscribe(() => events.publish('currentSong', { currentSong: null }));
+logEvents.subscribe(e => events.publish('log', { log: e }));
+
+const bufferedLogEvents = new BehaviorSubject<LogEvent[]>([]);
+logEvents.pipe(mergeScan((acc, value) => of([...acc, value]), [])).subscribe(e => bufferedLogEvents.next(e));
 
 function subscription(types: string[]): Subscription {
-  return { subscribe: () => events.asyncIterator(types) };
+  return {
+    subscribe: () => events.asyncIterator(types),
+  };
 }
 
 export const resolvers: Resolvers = {
@@ -92,6 +101,7 @@ export const resolvers: Resolvers = {
     songs: () => tabidisco.songs,
     power: () => Promise.resolve(tabidisco.power),
     currentSong: () => Promise.resolve(tabidisco.currentSong),
+    logs: () => Promise.resolve(bufferedLogEvents.getValue()),
   },
   Mutation: {
     playSong: withPayload((_: any, { id }: PlaySongArgs) => tabidisco.playSong(id)),
@@ -122,5 +132,6 @@ export const resolvers: Resolvers = {
   Subscription: {
     power: subscription(['power']),
     currentSong: subscription(['currentSong']),
+    log: subscription(['log']),
   },
 };

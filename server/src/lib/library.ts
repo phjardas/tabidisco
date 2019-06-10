@@ -3,11 +3,14 @@ import path from 'path';
 import { Readable } from 'stream';
 import { promisify } from 'util';
 import { parseTags, SongTags } from './mp3';
+import { logger } from './log';
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const deleteFile = promisify(fs.unlink);
 const stat = promisify(fs.stat);
+
+const log = logger.child({ module: 'library' });
 
 export interface Song extends SongTags {
   readonly id: string;
@@ -49,7 +52,7 @@ export class FileLibrary implements Library {
   ): Promise<{ song: Song; oldSong?: Song }> {
     const filename = `${id}.mp3`;
     const fullFile = path.resolve(this.dbDir, filename);
-    console.info('[library] writing song %s to %s', id, fullFile);
+    log.info('writing song %s to %s', id, fullFile);
 
     await new Promise<never>((resolve, reject) => {
       stream
@@ -59,7 +62,7 @@ export class FileLibrary implements Library {
     });
 
     const [songs, tags, { size }] = await Promise.all([this.load(), parseTags(fullFile), stat(fullFile)]);
-    console.info('[library] wrote song %s to %s with %d bytes', id, fullFile, size);
+    log.info('wrote song %s to %s with %d bytes', id, fullFile, size);
 
     const song = {
       id,
@@ -75,10 +78,10 @@ export class FileLibrary implements Library {
     await this.save({ ...songs, [id]: song });
 
     if (oldSong) {
-      console.info('[library] updated song %s', id);
+      log.info('updated song %s', id);
       return { song, oldSong };
     } else {
-      console.info('[library] added song %s', id);
+      log.info('added song %s', id);
       return { song };
     }
   }
@@ -88,7 +91,7 @@ export class FileLibrary implements Library {
     const song = songs[id];
     if (!song) return {};
 
-    console.info('[library] deleting song %s', id);
+    log.info('deleting song %s', id);
     await deleteFile(path.resolve(this.dbDir, song.file));
     delete songs[id];
     await this.save(songs);

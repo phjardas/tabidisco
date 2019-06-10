@@ -5,6 +5,7 @@ export const typeDefs = gql`
     songs: [Song!]!
     currentSong: Song
     power: PowerState!
+    logs: [LogEvent!]!
   }
 
   type Mutation {
@@ -21,6 +22,7 @@ export const typeDefs = gql`
   type Subscription {
     currentSong: Song
     power: PowerState!
+    log: LogEvent!
   }
 
   type Song {
@@ -62,5 +64,12 @@ export const typeDefs = gql`
     success: Boolean!
     error: String
     song: Song
+  }
+
+  type LogEvent {
+    time: String!
+    msg: String!
+    module: String!
+    level: Int!
   }
 `;

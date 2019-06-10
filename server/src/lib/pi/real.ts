@@ -2,8 +2,11 @@ import mfrc from 'mfrc522-rpi';
 import { merge, Observable, Observer } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, publish, refCount } from 'rxjs/operators';
 import wpi from 'wiringpi-node';
+import { logger } from '../log';
 import { ButtonId, PiAdapter } from './api';
 import { PiAdapterBase } from './base';
+
+const log = logger.child({ module: 'pi' });
 
 interface ButtonConfig {
   readonly type: ButtonId;
@@ -41,29 +44,29 @@ export class RealPiAdapter extends PiAdapterBase implements PiAdapter {
       .pipe(publish())
       .pipe(refCount());
     powerPins.forEach(pin => wpi.pinMode(pin, wpi.OUTPUT));
-    console.info('[pi] initialized Raspberry Pi adapter');
+    log.info('initialized Raspberry Pi adapter');
     this.setPower(false, true);
   }
 
   readToken(): Promise<string> {
     return new Promise((resolve, reject) => {
-      console.debug('[pi] reading token...');
+      log.debug('reading token...');
       mfrc.reset();
 
       let response = mfrc.findCard();
       if (!response.status) {
-        console.warn('[pi] no RFID token found:', response);
+        log.warn('no RFID token found:', response);
         return reject(new Error('No RFID token found'));
       }
 
       response = mfrc.getUid();
       if (!response.status) {
-        console.warn('[pi] could not read ID from token:', response);
+        log.warn('could not read ID from token:', response);
         return reject(new Error('Could not read ID from token'));
       }
 
       const data: number[] = response.data;
-      console.debug('[pi] token read:', data);
+      log.debug('token read:', data);
       resolve(data.map(d => d.toString(16)).join(''));
     });
   }

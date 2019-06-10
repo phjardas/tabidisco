@@ -2,6 +2,7 @@ import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import { apollo } from './apollo';
+import Events from './pages/Events';
 import Library from './pages/Library';
 import Upload from './pages/Upload';
 import { LibraryProvider } from './providers/Library';
@@ -17,6 +18,7 @@ export default function App() {
             <Switch>
               <Route path="/library" component={Library} />
               <Route path="/upload" component={Upload} />
+              <Route path="/events" component={Events} />
               <Route exact path="/">
                 {() => <Redirect to="/library" />}
               </Route>

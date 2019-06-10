@@ -7,9 +7,11 @@ import fs from 'fs';
 import helmet from 'helmet';
 import http from 'http';
 import multer from 'multer';
-import { tabidisco } from './lib';
+import { logger, tabidisco } from './lib';
 import { resolvers } from './resolvers';
 import { typeDefs } from './typeDefs';
+
+const log = logger.child({ module: 'server' });
 
 const app = express();
 app.use(cors());
@@ -38,15 +40,17 @@ server.applyMiddleware({ app });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-if (process.env.TABIDISCO_GUI_DIR) {
-  console.log('Serving GUI from %s', process.env.TABIDISCO_GUI_DIR);
+const { TABIDISCO_GUI_DIR: guiDir, PORT = '3000' } = process.env;
+
+if (guiDir) {
+  log.info(`Serving GUI from ${guiDir}`);
   app.use(helmet());
   app.use(history());
-  app.use(express.static(process.env.TABIDISCO_GUI_DIR));
+  app.use(express.static(guiDir));
 }
 
-const port = parseInt(process.env.PORT || '3001');
+const port = parseInt(PORT || '3001');
 httpServer.listen({ port }, () => {
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`);
-  console.log(`🚀 Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
+  log.info(`Server ready at http://localhost:${port}${server.graphqlPath}`);
+  log.info(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
 });

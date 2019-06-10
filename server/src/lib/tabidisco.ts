@@ -1,11 +1,14 @@
-import { Observable, merge } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
+import { Readable } from 'stream';
 import { Library, Song } from './library';
+import { LogEvent, logger } from './log';
 import { ButtonId, PiAdapter, PiEvent, PowerState } from './pi';
 import { Player, SongEvent } from './player';
-import { Readable } from 'stream';
 
-export type TabidiscoEvent = PiEvent | SongEvent;
+const log = logger.child({ module: 'tabidisco' });
+
+export type TabidiscoEvent = PiEvent | SongEvent | LogEvent;
 
 export class Tabidisco {
   readonly events: Observable<TabidiscoEvent>;
@@ -15,10 +18,10 @@ export class Tabidisco {
     this.events = merge(this.pi.events, this.player.events);
     this.pi.buttons
       .pipe(filter(btn => btn === 'play'))
-      .subscribe(() => this.playSong().catch(error => console.error('Error playing song:', error)));
+      .subscribe(() => this.playSong().catch(error => log.error('Error playing song:', error)));
     this.pi.buttons
       .pipe(filter(btn => btn === 'stop'))
-      .subscribe(() => this.stop().catch(error => console.error('Error stopping song:', error)));
+      .subscribe(() => this.stop().catch(error => log.error('Error stopping song:', error)));
   }
 
   deleteSong(id: string): Promise<{ oldSong?: Song }> {
@@ -60,7 +63,7 @@ export class Tabidisco {
     if (!id) id = await this.pi.readToken();
 
     if (this.currentSong && this.currentSong.id === id) {
-      console.info('Song %s is already playing', id);
+      log.info('Song %s is already playing', id);
       return;
     }
 
@@ -68,7 +71,7 @@ export class Tabidisco {
     if (!song) throw new Error(`Song ${id} not found`);
 
     if (this.currentSong && this.currentSong.id === song.id) {
-      console.info('Song %s is already playing', song.id);
+      log.info('Song %s is already playing', song.id);
       return;
     }
     this.currentSong = song;

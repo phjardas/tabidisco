@@ -28,12 +28,17 @@ const Layout = ({ children, currentSong, power, setPower, cancelShutdownTimer, p
                 Upload
               </NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink to="/events" tag={RRNavLink}>
+                Events
+              </NavLink>
+            </NavItem>
           </Nav>
         </div>
       </Container>
     </Navbar>
 
-    {children}
+    <div style={{ marginBottom: 54 }}>{children}</div>
 
     <Footer
       power={power}
