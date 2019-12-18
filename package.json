@@ -1,0 +1,16 @@
+{
+  "name": "tabidisco",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "start": "yarn workspaces run start",
+    "clean": "yarn workspaces run clean"
+  },
+  "workspaces": [
+    "server"
+  ],
+  "engines": {
+    "node": "^12"
+  }
+}
