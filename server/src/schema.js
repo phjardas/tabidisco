@@ -22,11 +22,12 @@ const typeDefs = gql`
   type Medium {
     id: ID!
     title: String!
+    artist: String
     duration: Int
+    image: String
   }
 
   type Playback {
-    id: ID!
     medium: Medium!
     elapsedSeconds: Int!
     paused: Boolean!
@@ -46,6 +47,7 @@ const typeDefs = gql`
 `;
 
 const pubsub = new PubSub();
+pubsub.publish('playback', { playback: null });
 
 player.registerListener((playback) => pubsub.publish('playback', { playback }));
 

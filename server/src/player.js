@@ -1,5 +1,4 @@
 import AsyncLock from 'async-lock';
-import ulid from 'ulid';
 import { EventEmitter } from 'events';
 import { Decoder } from 'lame';
 import Speaker from 'speaker';
@@ -64,7 +63,6 @@ export async function play(medium) {
 class Playback extends EventEmitter {
   constructor(medium, format, stream) {
     super();
-    this.id = ulid();
     this.medium = medium;
     this.stream = stream;
     this.speaker = new Speaker(format);

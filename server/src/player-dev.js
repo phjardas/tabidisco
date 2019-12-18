@@ -1,5 +1,4 @@
 import AsyncLock from 'async-lock';
-import { ulid } from 'ulid';
 import { EventEmitter } from 'events';
 
 const lock = new AsyncLock();
@@ -63,7 +62,6 @@ function startPlayback(medium) {
 class Playback extends EventEmitter {
   constructor(medium) {
     super();
-    this.id = ulid();
     this.medium = medium;
     this.elapsedSeconds = 0;
     this.paused = false;
