@@ -10,6 +10,10 @@ const theme = createMuiTheme({
   },
 });
 
+if (process.env.NODE_ENV === 'development') {
+  console.log('Theme:', theme);
+}
+
 export function ThemeProvider({ children }) {
   return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>;
 }

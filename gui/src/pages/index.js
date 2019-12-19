@@ -1,9 +1,16 @@
 import React from 'react';
-import { usePlayback } from '../data';
-import Library from './library';
-import Playback from './playback';
+import { Route, Switch } from 'react-router';
+import { BrowserRouter } from 'react-router-dom';
+import Admin from './admin';
+import Main from './main';
 
 export default function Pages() {
-  const playback = usePlayback();
-  return playback.playback ? <Playback {...playback} /> : <Library />;
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/admin" component={Admin} />
+        <Route component={Main} />
+      </Switch>
+    </BrowserRouter>
+  );
 }

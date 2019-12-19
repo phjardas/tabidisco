@@ -1,6 +1,7 @@
-import path from 'path';
-import fs from 'fs-extra';
 import AsyncLock from 'async-lock';
+import fs from 'fs-extra';
+import path from 'path';
+import { ulid } from 'ulid';
 
 const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '..', 'data');
 const dataFile = path.resolve(dataDir, 'data.json');
@@ -14,22 +15,82 @@ export async function getMedia() {
 
 export async function findMedium(id) {
   const media = await getMedia();
-  return media.find((m) => m.id === id);
+  const medium = media.find((m) => m.id === id);
+  if (!medium) return null;
+
+  return {
+    ...medium,
+    getAudioStream: () => fs.createReadStream(path.resolve(dataDir, medium.file.filename)),
+  };
+}
+
+export async function createMedium({ title, file, image }) {
+  return locked(async () => {
+    const db = await readDatabase();
+    const id = ulid();
+    const fileData = await writeFile(id, await file);
+    const imageData = await writeFile(id, await image);
+    // FIXME get duration from mp3 tags
+    const duration = 60;
+
+    const medium = { id, title, duration, file: fileData, image: imageData };
+    await writeDatabase({ ...db, media: [...db.media, medium] });
+
+    return medium;
+  });
+}
+
+async function writeFile(id, { mimetype, createReadStream }) {
+  return new Promise((resolve, reject) => {
+    const filename = `${id}.${getFileExtension(mimetype)}`;
+    const full = path.resolve(dataDir, filename);
+    const fileOut = fs.createWriteStream(full);
+    fileOut.on('error', reject);
+    fileOut.on('finish', () => resolve({ filename, type: mimetype }));
+    createReadStream().pipe(fileOut);
+  });
+}
+
+export async function getImage(medium) {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(path.resolve(dataDir, medium.image.filename));
+    const chunks = [];
+    stream.on('error', reject);
+    stream.on('data', (chunk) => chunks.push(chunk));
+    stream.on('end', () => {
+      const data = Buffer.concat(chunks).toString('base64');
+      resolve(`data:${medium.image.type};base64,${data}`);
+    });
+  });
+}
+
+export function getAudioStream(medium) {
+  return fs.createReadStream(path.resolve(dataDir, medium.file.filename));
+}
+
+function getFileExtension(mimetype) {
+  switch (mimetype) {
+    case 'audio/mp3':
+      return 'mp3';
+    case 'image/png':
+      return 'png';
+    case 'image/jpeg':
+      return 'jpg';
+    default:
+      throw new Error(`Cannot determine file extension for MIME type: "${mimetype}"`);
+  }
 }
 
 async function readDatabase() {
+  await fs.mkdirs(path.dirname(dataFile));
+
   if (await fs.pathExists(dataFile)) {
-    const data = await fs.readJSON(dataFile);
-    return {
-      ...data,
-      media: (data.media || []).map((medium) => ({ ...medium, file: path.resolve(dataDir, medium.filename) })),
-    };
+    return fs.readJSON(dataFile);
   }
 
   return { media: [] };
 }
 
 async function writeDatabase(data) {
-  await fs.mkdirs(path.dirname(dataFile));
-  await fs.writeJSON(dataFile, data);
+  await fs.writeJSON(dataFile, data, { spaces: 2 });
 }

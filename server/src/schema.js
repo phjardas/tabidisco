@@ -5,6 +5,8 @@ import * as player from './player-dev';
 import { PubSub } from 'graphql-subscriptions';
 
 const typeDefs = gql`
+  scalar Upload
+
   type Query {
     media: [Medium!]!
     playback: Playback
@@ -15,6 +17,7 @@ const typeDefs = gql`
     stop: SimpleResult!
     pause: PlaybackResult!
     resume: PlaybackResult!
+    createMedium(title: String!, file: Upload!, image: Upload!): MediumResult!
   }
 
   type Subscription {
@@ -24,9 +27,8 @@ const typeDefs = gql`
   type Medium {
     id: ID!
     title: String!
-    artist: String
     duration: Int
-    image: String
+    image: String!
   }
 
   type Playback {
@@ -46,6 +48,13 @@ const typeDefs = gql`
     message: String
     stack: String
     playback: Playback
+  }
+
+  type MediumResult {
+    success: Boolean!
+    message: String
+    stack: String
+    medium: Medium
   }
 `;
 
@@ -94,11 +103,22 @@ const resolvers = {
         return { success: false, message: error.message, stack: error.stack };
       }
     },
+    createMedium: async (_, args) => {
+      try {
+        const medium = await library.createMedium(args);
+        return { success: true, medium };
+      } catch (error) {
+        return { success: false, message: error.message, stack: error.stack };
+      }
+    },
   },
   Subscription: {
     playback: {
       subscribe: () => pubsub.asyncIterator(['playback']),
     },
+  },
+  Medium: {
+    image: (medium) => library.getImage(medium),
   },
 };
 

@@ -39,7 +39,6 @@ const playbackFragment = gql`
     medium {
       id
       title
-      artist
       duration
     }
     elapsedSeconds
