@@ -17,7 +17,9 @@
     "fs-extra": "^8.1.0",
     "graphql": "^14.5.8",
     "helmet": "^3.21.2",
+    "lame": "^1.2.4",
     "mp3-duration": "^1.1.0",
+    "speaker": "^0.5.1",
     "ulid": "^2.3.0"
   },
   "devDependencies": {

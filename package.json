@@ -12,7 +12,7 @@
     "server"
   ],
   "engines": {
-    "node": "^12"
+    "node": "11"
   },
   "devDependencies": {
     "lerna": "^3.19.0"

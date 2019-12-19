@@ -1,7 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
-import React, { useMemo, useCallback } from 'react';
+import { Button, makeStyles } from '@material-ui/core';
+import React, { useCallback, useMemo } from 'react';
 import { useLibrary, usePlayback } from '../data';
-import Button from '@material-ui/core/Button';
 
 function Library({ library }) {
   const classes = useStyles();

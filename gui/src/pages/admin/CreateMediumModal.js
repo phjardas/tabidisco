@@ -1,20 +1,7 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  makeStyles,
-  useMediaQuery,
-  useTheme,
-} from '@material-ui/core';
-import { Field, Form, Formik, useFormikContext } from 'formik';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormHelperText, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
+import { Field, Form, Formik, useField, useFormikContext } from 'formik';
 import { TextField } from 'formik-material-ui';
-import { DropzoneArea } from 'material-ui-dropzone';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { mixed, object, string } from 'yup';
 import { readMp3Tags } from '../../data/mp3';
 
@@ -73,65 +60,119 @@ export default function CreateMediumModal({ open, createMedium, handleClose }) {
 }
 
 function CreateMediumForm() {
-  const classes = useStyles();
-  const { values, errors, setFieldValue } = useFormikContext();
-  const onFileDrop = useCallback(
-    async (files) => {
-      if (files.length) {
-        setFieldValue('file', files[0]);
-
-        if (!values.title) {
-          const tags = await readMp3Tags(files[0]);
-          if (tags.title) setFieldValue('title', tags.title);
-        }
-      } else {
-        setFieldValue('file', '');
-      }
-    },
-    [setFieldValue, values]
-  );
-  const onImageDrop = useCallback((files) => setFieldValue('image', files.length ? files[0] : ''), [setFieldValue]);
+  const { values } = useFormikContext();
 
   return (
     <>
-      <FormControl margin="normal" fullWidth hiddenLabel required error={!!errors.file}>
-        <InputLabel>Audio file</InputLabel>
-        <DropzoneArea
-          acceptedFiles={['audio/mp3']}
-          filesLimit={1}
-          maxFileSize={1024 * 1024 * 1024}
-          showPreviewsInDropzone={false}
-          dropzoneText="Drag and drop an audio file here or click to select one"
-          dropzoneClass={classes.dropzone}
-          dropzoneParagraphClass={classes.dropzoneBody}
-          onChange={onFileDrop}
-        />
-        {errors.file && <FormHelperText>{errors.file}</FormHelperText>}
-      </FormControl>
-      <Field name="title" label="Title" component={TextField} margin="normal" required fullWidth />
-      <FormControl margin="normal" fullWidth hiddenLabel required error={!!errors.image}>
-        <InputLabel>Cover image</InputLabel>
-        <DropzoneArea
-          acceptedFiles={['image/*']}
-          filesLimit={1}
-          maxFileSize={1024 * 1024}
-          dropzoneText="Drag and drop a cover image here or click to select one"
-          dropzoneClass={classes.dropzone}
-          dropzoneParagraphClass={classes.dropzoneBody}
-          onChange={onImageDrop}
-        />
-        {errors.image && <FormHelperText>{errors.image}</FormHelperText>}
+      {values.file ? (
+        <>
+          <span>{values.file.name}</span>
+          <Field name="title" label="Title" component={TextField} margin="normal" required fullWidth color="secondary" />
+          <ImageField />
+        </>
+      ) : (
+        <FileField />
+      )}
+    </>
+  );
+}
+
+function FileField() {
+  const [input, meta] = useField('file');
+  const { setFieldValue } = useFormikContext();
+
+  const onChange = useCallback(
+    async (e) => {
+      const { files, name } = e.target;
+      if (files.length) {
+        const file = files[0];
+        const tags = await readMp3Tags(file);
+        setFieldValue(name, file);
+
+        if (tags.common.title) {
+          setFieldValue('title', tags.common.title);
+        }
+
+        if (tags.common.picture && tags.common.picture.length) {
+          const picture = tags.common.picture[0];
+          setFieldValue('image', new File([picture.data], 'picture', { type: picture.format }));
+        }
+      } else {
+        setFieldValue(name, null);
+      }
+    },
+    [setFieldValue]
+  );
+
+  return (
+    <FormControl margin="normal" fullWidth required error={!!meta.error}>
+      <label htmlFor="createMedium-file">
+        <Button variant="contained" type="button" color="secondary" component="span">
+          choose audio file
+        </Button>
+      </label>
+      <input id="createMedium-file" type="file" accept="audio/mp3" style={{ display: 'none' }} name={input.name} onChange={onChange} onBlur={input.onBlur} />
+      {meta.error && <FormHelperText>{meta.error}</FormHelperText>}
+    </FormControl>
+  );
+}
+
+function ImageField() {
+  const classes = useStyles();
+  const [input, meta] = useField('image');
+  const { setFieldValue } = useFormikContext();
+  const [preview, setPreview] = useState();
+
+  const onChange = useCallback(
+    async (e) => {
+      const { files, name } = e.target;
+      setFieldValue(name, files.length ? files[0] : null);
+    },
+    [setFieldValue]
+  );
+
+  useEffect(() => {
+    if (input.value) {
+      const reader = new FileReader();
+      reader.onload = (e) => setPreview(e.target.result);
+      reader.readAsDataURL(input.value);
+    } else {
+      setPreview(null);
+    }
+  }, [input.value, setPreview]);
+
+  return (
+    <>
+      <FormControl
+        margin="normal"
+        fullWidth
+        required
+        error={!!meta.error}
+        className={preview ? classes.imagePreview : ''}
+        style={{ backgroundImage: preview ? `url(${preview})` : null }}
+      >
+        <label htmlFor="createMedium-image" className={preview ? classes.imagePreviewButton : ''}>
+          <Button variant="contained" type="button" color="secondary" component="span">
+            choose cover image
+          </Button>
+        </label>
+        <input id="createMedium-image" type="file" accept="image/*" style={{ display: 'none' }} name={input.name} onChange={onChange} onBlur={input.onBlur} />
+        {meta.error && <FormHelperText>{meta.error}</FormHelperText>}
       </FormControl>
     </>
   );
 }
 
 const useStyles = makeStyles(({ spacing, typography }) => ({
-  dropzone: {
-    padding: spacing(2),
-    minHeight: 100,
+  imagePreview: {
+    backgroundSize: 'cover',
+    backgroundPosition: 'center center',
+    minHeight: 300,
+    position: 'relative',
   },
-  dropzoneBody: {
-    ...typography.body1,
+  imagePreviewButton: {
+    position: 'absolute',
+    bottom: spacing(1),
+    right: spacing(1),
   },
 }));

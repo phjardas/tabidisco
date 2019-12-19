@@ -1,7 +1,7 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import gql from 'graphql-tag';
 import * as library from './library';
-import * as player from './player-dev';
+import * as player from './player';
 import { PubSub } from 'graphql-subscriptions';
 
 const typeDefs = gql`

@@ -5,5 +5,10 @@ export default function Duration({ seconds }) {
   const minutes = Math.floor(remaining / 60);
   remaining = remaining - minutes * 60;
 
-  return [hours && hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0'), remaining.toString().padStart(2, '0')].filter((s) => !!s).join(':');
+  const str = [hours && hours.toString(), minutes.toString(), remaining.toString()]
+    .map((s, i) => (i ? s.padStart(2, '0') : s))
+    .join(':')
+    .replace(/^0:0?/, '');
+
+  return `${str} ${hours ? 'hours' : 'minutes'}`;
 }

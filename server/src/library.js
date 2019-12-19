@@ -21,7 +21,7 @@ export async function findMedium(id) {
 
   return {
     ...medium,
-    getAudioStream: () => fs.createReadStream(path.resolve(dataDir, medium.file.filename)),
+    createAudioStream: () => fs.createReadStream(path.resolve(dataDir, medium.file.filename)),
   };
 }
 

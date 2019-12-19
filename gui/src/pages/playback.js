@@ -1,8 +1,4 @@
-import Fab from '@material-ui/core/Fab';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import { Fab, LinearProgress, makeStyles, Paper, Typography } from '@material-ui/core';
 import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
@@ -66,9 +62,9 @@ const useStyles = makeStyles(({ spacing }) => ({
   },
   controls: {
     position: 'absolute',
-    bottom: 20,
-    left: '40%',
-    right: '40%',
+    bottom: spacing(4),
+    left: spacing(4),
+    right: spacing(4),
     padding: spacing(2),
     textAlign: 'center',
   },
