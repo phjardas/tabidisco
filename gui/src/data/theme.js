@@ -11,7 +11,7 @@ const theme = createMuiTheme({
 });
 
 if (process.env.NODE_ENV === 'development') {
-  console.log('Theme:', theme);
+  console.debug('Theme:', theme);
 }
 
 export function ThemeProvider({ children }) {

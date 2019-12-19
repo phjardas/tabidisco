@@ -1,3 +1,4 @@
+import Duration from '../../components/Duration';
 import {
   CircularProgress,
   Fab,
@@ -29,23 +30,29 @@ function Library({ library, createMedium, deleteMedium }) {
   return (
     <>
       {library.media.length > 0 ? (
-        <GridList cols={cols} cellHeight={300}>
-          {[...library.media]
-            .sort((a, b) => a.title.localeCompare(b.title))
-            .map((medium) => (
-              <GridListTile key={medium.id}>
-                <img src={medium.image} alt={medium.title} />
-                <GridListTileBar
-                  title={medium.title}
-                  actionIcon={
-                    <IconButton className={classes.actionIcon} onClick={() => deleteMedium(medium.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                />
-              </GridListTile>
-            ))}
-        </GridList>
+        <>
+          <GridList cols={cols} cellHeight={300}>
+            {[...library.media]
+              .sort((a, b) => a.title.localeCompare(b.title))
+              .map((medium) => (
+                <GridListTile key={medium.id}>
+                  <img src={medium.image} alt={medium.title} />
+                  <GridListTileBar
+                    title={medium.title}
+                    subtitle={medium.duration && <Duration seconds={medium.duration} />}
+                    actionIcon={
+                      <IconButton className={classes.actionIcon} onClick={() => deleteMedium(medium.id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    }
+                  />
+                </GridListTile>
+              ))}
+          </GridList>
+          <Typography variant="body2">
+            {library.media.length} items with a total play time of <Duration seconds={library.media.map((m) => m.duration || 0).reduce((a, b) => a + b, 0)} />
+          </Typography>
+        </>
       ) : (
         <>
           <Typography gutterBottom>No media yet.</Typography>

@@ -16,9 +16,10 @@ import { TextField } from 'formik-material-ui';
 import { DropzoneArea } from 'material-ui-dropzone';
 import React, { useCallback } from 'react';
 import { mixed, object, string } from 'yup';
+import { readMp3Tags } from '../../data/mp3';
 
 const initialValues = {
-  title: 'Der kleine Drache Kokosnuss im Weltraum',
+  title: '',
   file: '',
   image: '',
 };
@@ -73,13 +74,26 @@ export default function CreateMediumModal({ open, createMedium, handleClose }) {
 
 function CreateMediumForm() {
   const classes = useStyles();
-  const { errors, setFieldValue } = useFormikContext();
-  const onFileDrop = useCallback((files) => setFieldValue('file', files.length ? files[0] : ''), [setFieldValue]);
+  const { values, errors, setFieldValue } = useFormikContext();
+  const onFileDrop = useCallback(
+    async (files) => {
+      if (files.length) {
+        setFieldValue('file', files[0]);
+
+        if (!values.title) {
+          const tags = await readMp3Tags(files[0]);
+          if (tags.title) setFieldValue('title', tags.title);
+        }
+      } else {
+        setFieldValue('file', '');
+      }
+    },
+    [setFieldValue, values]
+  );
   const onImageDrop = useCallback((files) => setFieldValue('image', files.length ? files[0] : ''), [setFieldValue]);
 
   return (
     <>
-      <Field name="title" label="Title" component={TextField} margin="normal" required fullWidth />
       <FormControl margin="normal" fullWidth hiddenLabel required error={!!errors.file}>
         <InputLabel>Audio file</InputLabel>
         <DropzoneArea
@@ -94,6 +108,7 @@ function CreateMediumForm() {
         />
         {errors.file && <FormHelperText>{errors.file}</FormHelperText>}
       </FormControl>
+      <Field name="title" label="Title" component={TextField} margin="normal" required fullWidth />
       <FormControl margin="normal" fullWidth hiddenLabel required error={!!errors.image}>
         <InputLabel>Cover image</InputLabel>
         <DropzoneArea

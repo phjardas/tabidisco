@@ -7,6 +7,7 @@ import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import React, { useMemo } from 'react';
+import Duration from '../components/Duration';
 import { useLibrary } from '../data';
 
 export default function Playback({ playback: { medium, elapsedSeconds, paused }, pause, resume, stop }) {
@@ -31,29 +32,25 @@ export default function Playback({ playback: { medium, elapsedSeconds, paused },
             <StopIcon />
           </Fab>
         </div>
-        <div className={classes.progress}>
-          <LinearProgress variant="determinate" value={(elapsedSeconds / medium.duration) * 100} color="secondary" />
-          <div className={classes.progressText}>
-            <Duration seconds={elapsedSeconds} />
-            <Duration seconds={medium.duration - elapsedSeconds} />
-            <Duration seconds={medium.duration} />
+        {medium.duration && (
+          <div className={classes.progress}>
+            <LinearProgress variant="determinate" value={(elapsedSeconds / medium.duration) * 100} color="secondary" />
+            <div className={classes.progressText}>
+              <DurationInfo seconds={elapsedSeconds} />
+              <DurationInfo seconds={medium.duration - elapsedSeconds} />
+              <DurationInfo seconds={medium.duration} />
+            </div>
           </div>
-        </div>
+        )}
       </Paper>
     </div>
   );
 }
 
-function Duration({ seconds, ...rest }) {
-  let remaining = seconds;
-  const hours = Math.floor(remaining / 3600);
-  remaining = remaining - hours * 3600;
-  const minutes = Math.floor(remaining / 60);
-  remaining = remaining - minutes * 60;
-
+function DurationInfo({ seconds, ...rest }) {
   return (
     <Typography variant="caption" {...rest}>
-      {[hours && hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0'), remaining.toString().padStart(2, '0')].filter((s) => !!s).join(':')}
+      <Duration seconds={seconds} />
     </Typography>
   );
 }
@@ -76,10 +73,13 @@ const useStyles = makeStyles(({ spacing }) => ({
     textAlign: 'center',
   },
   buttons: {
-    margin: `${spacing(2)}px ${spacing(4)}px ${spacing(4)}px`,
+    margin: `${spacing(2)}px ${spacing(4)}px ${spacing(2)}px`,
   },
   stopButton: {
     marginLeft: spacing(4),
+  },
+  progress: {
+    marginTop: spacing(4),
   },
   progressText: {
     display: 'flex',

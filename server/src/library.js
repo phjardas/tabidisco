@@ -2,7 +2,7 @@ import AsyncLock from 'async-lock';
 import fs from 'fs-extra';
 import path from 'path';
 import { ulid } from 'ulid';
-import { write } from 'fs';
+import getMp3Duration from 'mp3-duration';
 
 const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '..', 'data');
 const dataFile = path.resolve(dataDir, 'data.json');
@@ -31,14 +31,21 @@ export async function createMedium({ title, file, image }) {
     const id = ulid();
     const fileData = await writeFile(id, await file);
     const imageData = await writeFile(id, await image);
-    // FIXME get duration from mp3 tags
-    const duration = 60;
-
+    const duration = await getDuration(fileData);
     const medium = { id, title, duration, file: fileData, image: imageData };
     await writeDatabase({ ...db, media: [...db.media, medium] });
 
     return medium;
   });
+}
+
+async function getDuration({ filename }) {
+  try {
+    const duration = await getMp3Duration(path.resolve(dataDir, filename));
+    return Math.ceil(duration);
+  } catch (error) {
+    console.error('Error getting MP3 duration:', error);
+  }
 }
 
 export async function deleteMedium(id) {

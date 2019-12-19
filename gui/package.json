@@ -21,6 +21,7 @@
     "formik": "^2.0.8",
     "formik-material-ui": "^1.0.0",
     "material-ui-dropzone": "^2.4.7",
+    "mp3-parser": "^0.3.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-router": "^5.1.2",

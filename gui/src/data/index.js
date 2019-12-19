@@ -1,11 +1,12 @@
 import React from 'react';
 import { ApolloProvider } from './apollo';
-import { PlaybackProvider } from './playback';
 import { LibraryProvider } from './library';
+import { PlaybackProvider } from './playback';
 import { ThemeProvider } from './theme';
 
-export { usePlayback } from './playback';
 export { useLibrary } from './library';
+export * from './mp3';
+export { usePlayback } from './playback';
 
 export default function Providers({ children }) {
   return (

@@ -3725,6 +3725,11 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
+bluebird-co@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/bluebird-co/-/bluebird-co-2.2.0.tgz#e0a49e63b6b17e34c91f48b3934b769a377fbed7"
+  integrity sha1-4KSeY7axfjTJH0izk0t2mjd/vtc=
+
 bluebird@^3.5.1, bluebird@^3.5.3, bluebird@^3.5.5:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
@@ -9335,6 +9340,19 @@ move-concurrently@^1.0.1:
     mkdirp "^0.5.1"
     rimraf "^2.5.4"
     run-queue "^1.0.3"
+
+mp3-duration@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/mp3-duration/-/mp3-duration-1.1.0.tgz#c002e4e454448060873660abb4da7d10118d0e9c"
+  integrity sha1-wALk5FREgGCHNmCrtNp9EBGNDpw=
+  dependencies:
+    bluebird "^3.5.1"
+    bluebird-co "^2.2.0"
+
+mp3-parser@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/mp3-parser/-/mp3-parser-0.3.0.tgz#f659268afb8326ded5cda302eda3ba52b0f61874"
+  integrity sha1-9lkmivuDJt7VzaMC7aO6UrD2GHQ=
 
 ms@2.0.0:
   version "2.0.0"
