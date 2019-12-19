@@ -18,6 +18,7 @@ const typeDefs = gql`
     pause: PlaybackResult!
     resume: PlaybackResult!
     createMedium(title: String!, file: Upload!, image: Upload!): MediumResult!
+    deleteMedium(id: ID!): MediumResult!
   }
 
   type Subscription {
@@ -106,6 +107,14 @@ const resolvers = {
     createMedium: async (_, args) => {
       try {
         const medium = await library.createMedium(args);
+        return { success: true, medium };
+      } catch (error) {
+        return { success: false, message: error.message, stack: error.stack };
+      }
+    },
+    deleteMedium: async (_, { id }) => {
+      try {
+        const medium = await library.deleteMedium(id);
         return { success: true, medium };
       } catch (error) {
         return { success: false, message: error.message, stack: error.stack };

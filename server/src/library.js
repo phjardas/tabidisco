@@ -2,6 +2,7 @@ import AsyncLock from 'async-lock';
 import fs from 'fs-extra';
 import path from 'path';
 import { ulid } from 'ulid';
+import { write } from 'fs';
 
 const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '..', 'data');
 const dataFile = path.resolve(dataDir, 'data.json');
@@ -40,15 +41,30 @@ export async function createMedium({ title, file, image }) {
   });
 }
 
+export async function deleteMedium(id) {
+  return locked(async () => {
+    const db = await readDatabase();
+    const medium = db.media.find((m) => m.id === id);
+    if (medium) {
+      await Promise.all([medium.file, medium.image].map(deleteFile));
+      await writeDatabase({ ...db, media: db.media.filter((m) => m.id !== id) });
+      return medium;
+    }
+  });
+}
+
 async function writeFile(id, { mimetype, createReadStream }) {
   return new Promise((resolve, reject) => {
     const filename = `${id}.${getFileExtension(mimetype)}`;
-    const full = path.resolve(dataDir, filename);
-    const fileOut = fs.createWriteStream(full);
+    const fileOut = fs.createWriteStream(path.resolve(dataDir, filename));
     fileOut.on('error', reject);
     fileOut.on('finish', () => resolve({ filename, type: mimetype }));
     createReadStream().pipe(fileOut);
   });
+}
+
+async function deleteFile({ filename }) {
+  await fs.unlink(path.resolve(dataDir, filename));
 }
 
 export async function getImage(medium) {

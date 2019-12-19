@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import { useLibrary } from '../../data';
 import CreateMediumModal from './CreateMediumModal';
 
-function Library({ library, createMedium }) {
+function Library({ library, createMedium, deleteMedium }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const classes = useStyles();
   const theme = useTheme();
@@ -38,7 +38,7 @@ function Library({ library, createMedium }) {
                 <GridListTileBar
                   title={medium.title}
                   actionIcon={
-                    <IconButton className={classes.actionIcon}>
+                    <IconButton className={classes.actionIcon} onClick={() => deleteMedium(medium.id)}>
                       <DeleteIcon />
                     </IconButton>
                   }
@@ -74,8 +74,8 @@ const useStyles = makeStyles(({ spacing }) => ({
 }));
 
 export default function LibraryPage() {
-  const { loading, error, data, createMedium } = useLibrary();
+  const { loading, error, data, createMedium, deleteMedium } = useLibrary();
   if (loading) return <CircularProgress />;
   if (error) return <div>Error: {error.message}</div>;
-  return <Library library={data} createMedium={createMedium} />;
+  return <Library library={data} createMedium={createMedium} deleteMedium={deleteMedium} />;
 }
