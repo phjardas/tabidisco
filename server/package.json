@@ -11,10 +11,12 @@
     "apollo-server-express": "^2.9.14",
     "async-lock": "^1.2.2",
     "body-parser": "^1.19.0",
+    "connect-history-api-fallback": "^1.6.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fs-extra": "^8.1.0",
     "graphql": "^14.5.8",
+    "helmet": "^3.21.2",
     "mp3-duration": "^1.1.0",
     "ulid": "^2.3.0"
   },

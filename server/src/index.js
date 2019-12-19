@@ -1,7 +1,9 @@
 import { ApolloServer } from 'apollo-server-express';
+import history from 'connect-history-api-fallback';
 import express from 'express';
-import { schema } from './schema';
+import helmet from 'helmet';
 import http from 'http';
+import { schema } from './schema';
 
 export const app = express();
 
@@ -10,6 +12,15 @@ server.applyMiddleware({ app });
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
+
+const { TABIDISCO_GUI_DIR: guiDir, PORT = '3000' } = process.env;
+
+if (guiDir) {
+  console.log('Serving GUI from %s', guiDir);
+  app.use(helmet());
+  app.use(history());
+  app.use(express.static(guiDir));
+}
 
 const port = process.env.PORT || 3001;
 httpServer.listen(port, () => {
