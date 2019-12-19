@@ -1,13 +1,12 @@
-import React from 'react';
-import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
-import { createMuiTheme } from '@material-ui/core/styles';
+import indigo from '@material-ui/core/colors/indigo';
 import pink from '@material-ui/core/colors/pink';
-import green from '@material-ui/core/colors/green';
+import { createMuiTheme, ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
+import React from 'react';
 
 const theme = createMuiTheme({
   palette: {
     primary: pink,
-    secondary: green,
+    secondary: indigo,
   },
 });
 

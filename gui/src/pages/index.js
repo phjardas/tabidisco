@@ -1,6 +1,9 @@
 import React from 'react';
-import Main from './main';
+import { usePlayback } from '../data';
+import Library from './library';
+import Playback from './playback';
 
 export default function Pages() {
-  return <Main />;
+  const playback = usePlayback();
+  return playback.playback ? <Playback {...playback} /> : <Library />;
 }

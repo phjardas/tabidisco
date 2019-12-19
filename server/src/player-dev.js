@@ -37,6 +37,24 @@ export async function play(medium) {
   return playback;
 }
 
+export async function pause() {
+  return locked(async () => {
+    if (playback) {
+      await playback.pause();
+    }
+    return playback;
+  });
+}
+
+export async function resume() {
+  return locked(async () => {
+    if (playback) {
+      await playback.resume();
+    }
+    return playback;
+  });
+}
+
 function emit() {
   listeners.forEach((listener) => listener(playback));
 }
@@ -65,22 +83,42 @@ class Playback extends EventEmitter {
     this.medium = medium;
     this.elapsedSeconds = 0;
     this.paused = false;
+    this.start();
+  }
 
-    const startedAt = Date.now();
-    setTimeout(() => this.stop(), this.medium.duration * 1000);
+  start() {
+    if (this.interval) clearInterval(this.interval);
+    this.lastTick = Date.now();
     this.interval = setInterval(() => {
-      this.elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+      const tick = Date.now();
+      this.elapsedSeconds += Math.floor((tick - this.lastTick) / 1000);
+      this.lastTick = tick;
       this.emit('progress', this);
+      if (this.elapsedSeconds >= this.medium.duration * 1000) {
+        this.stop();
+      }
     }, 1000);
+    this.emit('progress', this);
   }
 
   stop() {
     return new Promise((resolve) => {
       setTimeout(() => {
-        clearInterval(this.interval);
+        if (this.interval) clearInterval(this.interval);
         this.emit('finish');
         resolve();
       }, 300);
     });
+  }
+
+  pause() {
+    this.paused = true;
+    if (this.interval) clearInterval(this.interval);
+    this.emit('progress', this);
+  }
+
+  resume() {
+    this.paused = false;
+    this.start();
   }
 }
