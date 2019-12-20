@@ -22,16 +22,13 @@ export default function CreateMediumModal({ open, createMedium, handleClose }) {
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const onSubmit = async (data, actions) => {
-    try {
-      const result = await createMedium(data);
-      if (!result.success) {
-        console.error('Error uploading medium:', result);
-        actions.setStatus(result);
-      } else {
-        handleClose();
-      }
-    } finally {
+    const result = await createMedium(data);
+    if (!result.success) {
+      console.error('Error uploading medium:', result);
+      actions.setStatus(result);
       actions.setSubmitting(false);
+    } else {
+      handleClose();
     }
   };
 

@@ -23,13 +23,14 @@ const typeDefs = gql`
 
   type Subscription {
     playback: Playback
+    media: MediumEvent!
   }
 
   type Medium {
     id: ID!
     title: String!
     duration: Int
-    image: String!
+    image: String
   }
 
   type Playback {
@@ -57,12 +58,18 @@ const typeDefs = gql`
     stack: String
     medium: Medium
   }
+
+  type MediumEvent {
+    type: String!
+    medium: Medium!
+  }
 `;
 
 const pubsub = new PubSub();
 pubsub.publish('playback', { playback: null });
 
 player.registerListener((playback) => pubsub.publish('playback', { playback }));
+library.registerListener((event) => pubsub.publish('media', { media: event }));
 
 const resolvers = {
   Query: {
@@ -124,6 +131,9 @@ const resolvers = {
   Subscription: {
     playback: {
       subscribe: () => pubsub.asyncIterator(['playback']),
+    },
+    media: {
+      subscribe: () => pubsub.asyncIterator(['media']),
     },
   },
   Medium: {

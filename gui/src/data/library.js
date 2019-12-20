@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
-import React, { createContext, useCallback, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useEffect } from 'react';
 
 const LibraryContext = createContext();
 
@@ -49,47 +49,50 @@ const DeleteMediumMutation = gql`
   }
 `;
 
+const MediaSubscription = gql`
+  subscription Media {
+    media {
+      type
+      medium {
+        ...MediumFragment
+      }
+    }
+  }
+  ${MediumFragment}
+`;
+
 export function LibraryProvider({ children }) {
-  const { loading, error, data } = useQuery(LibraryQuery);
+  const { loading, error, data, subscribeToMore } = useQuery(LibraryQuery);
 
-  const [createMediumMutation] = useMutation(CreateMediumMutation, {
-    update(
-      cache,
-      {
-        data: {
-          createMedium: { medium },
+  useEffect(() => {
+    if (subscribeToMore) {
+      subscribeToMore({
+        document: MediaSubscription,
+        updateQuery(
+          previous,
+          {
+            subscriptionData: {
+              data: {
+                media: { type, medium },
+              },
+            },
+          }
+        ) {
+          if (type === 'created') {
+            return { ...previous, media: [...previous.media, medium] };
+          }
+
+          if (type === 'deleted') {
+            return { ...previous, media: previous.media.filter((m) => m.id !== medium.id) };
+          }
+
+          return previous;
         },
-      }
-    ) {
-      if (medium) {
-        const data = cache.readQuery({ query: LibraryQuery });
-        cache.writeQuery({
-          query: LibraryQuery,
-          data: { ...data, media: [...data.media, medium] },
-        });
-      }
-    },
-  });
+      });
+    }
+  }, [subscribeToMore]);
 
-  const [deleteMediumMutation] = useMutation(DeleteMediumMutation, {
-    update(
-      cache,
-      {
-        data: {
-          deleteMedium: { medium },
-        },
-      }
-    ) {
-      if (medium) {
-        const data = cache.readQuery({ query: LibraryQuery });
-        cache.writeQuery({
-          query: LibraryQuery,
-          data: { ...data, media: data.media.filter((m) => m.id !== medium.id) },
-        });
-      }
-    },
-  });
-
+  const [createMediumMutation] = useMutation(CreateMediumMutation);
   const createMedium = useCallback(
     async (data) => {
       const result = await createMediumMutation({ variables: data });
@@ -98,6 +101,7 @@ export function LibraryProvider({ children }) {
     [createMediumMutation]
   );
 
+  const [deleteMediumMutation] = useMutation(DeleteMediumMutation);
   const deleteMedium = useCallback(
     async (id) => {
       const result = await deleteMediumMutation({ variables: { id } });

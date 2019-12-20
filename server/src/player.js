@@ -5,12 +5,15 @@ import Speaker from 'speaker';
 
 const lock = new AsyncLock();
 const locked = (task) => lock.acquire('playback', task);
-const listeners = [];
 
 let playback = null;
 
+const listeners = [];
 export function registerListener(listener) {
   listeners.push(listener);
+}
+function emit() {
+  listeners.forEach((listener) => listener(playback));
 }
 
 export async function getPlayback() {
@@ -54,10 +57,6 @@ export async function resume() {
     }
     return playback;
   });
-}
-
-function emit() {
-  listeners.forEach((listener) => listener(playback));
 }
 
 function startPlayback(medium) {

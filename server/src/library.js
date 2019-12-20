@@ -9,6 +9,14 @@ const dataFile = path.resolve(dataDir, 'data.json');
 const lock = new AsyncLock();
 const locked = (task) => lock.acquire('data', task);
 
+const listeners = [];
+export function registerListener(listener) {
+  listeners.push(listener);
+}
+function emit(type, medium) {
+  listeners.forEach((listener) => listener({ type, medium }));
+}
+
 export async function getMedia() {
   const { media } = await readDatabase();
   return media;
@@ -34,6 +42,7 @@ export async function createMedium({ title, file, image }) {
     const duration = await getDuration(fileData);
     const medium = { id, title, duration, file: fileData, image: imageData };
     await writeDatabase({ ...db, media: [...db.media, medium] });
+    emit('created', medium);
 
     return medium;
   });
@@ -55,6 +64,7 @@ export async function deleteMedium(id) {
     if (medium) {
       await Promise.all([medium.file, medium.image].map(deleteFile));
       await writeDatabase({ ...db, media: db.media.filter((m) => m.id !== id) });
+      emit('deleted', medium);
       return medium;
     }
   });
@@ -75,8 +85,11 @@ async function deleteFile({ filename }) {
 }
 
 export async function getImage(medium) {
+  const filename = path.resolve(dataDir, medium.image.filename);
+  if (!(await fs.pathExists(filename))) return null;
+
   return new Promise((resolve, reject) => {
-    const stream = fs.createReadStream(path.resolve(dataDir, medium.image.filename));
+    const stream = fs.createReadStream(filename);
     const chunks = [];
     stream.on('error', reject);
     stream.on('data', (chunk) => chunks.push(chunk));
