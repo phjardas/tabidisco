@@ -1,0 +1,17 @@
+[Unit]
+Description=Tabidisco
+After=syslog.target
+After=network.target
+
+[Service]
+ExecStart=/home/pi/tabidisco/server/start.sh
+WorkingDirectory=/home/pi/tabidisco/server
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tabidisco
+EnvironmentFile=/etc/default/tabidisco
+
+[Install]
+WantedBy=multi-user.target

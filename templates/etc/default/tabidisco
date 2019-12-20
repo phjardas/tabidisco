@@ -1,0 +1,4 @@
+NODE_ENV=production
+PORT=3000
+TABIDISCO_GUI_DIR=/home/pi/tabidisco/gui/build
+TABIDISCO_DATA_DIR=/home/pi/tabidisco-data
