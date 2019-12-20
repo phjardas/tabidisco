@@ -1,10 +1,8 @@
-import { AppBar, makeStyles, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Toolbar, Typography } from '@material-ui/core';
 import React from 'react';
 import Library from './library';
 
 export default function Admin() {
-  const classes = useStyles();
-
   return (
     <>
       <AppBar position="sticky">
@@ -12,13 +10,9 @@ export default function Admin() {
           <Typography variant="h6">Tabidisco</Typography>
         </Toolbar>
       </AppBar>
-      <main className={classes.main}>
+      <main>
         <Library />
       </main>
     </>
   );
 }
-
-const useStyles = makeStyles(({ spacing }) => ({
-  main: { padding: spacing(2) },
-}));
