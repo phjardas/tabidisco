@@ -28,6 +28,7 @@ export default function Playback({ playback: { medium, elapsedSeconds, paused },
             <StopIcon />
           </Fab>
         </div>
+        <div>{medium.title}</div>
         {medium.duration && (
           <div className={classes.progress}>
             <LinearProgress variant="determinate" value={(elapsedSeconds / medium.duration) * 100} color="secondary" />
@@ -59,6 +60,7 @@ const useStyles = makeStyles(({ spacing }) => ({
     right: 0,
     bottom: 0,
     backgroundSize: 'cover',
+    backgroundPosition: 'center center',
   },
   controls: {
     position: 'absolute',
@@ -75,7 +77,7 @@ const useStyles = makeStyles(({ spacing }) => ({
     marginLeft: spacing(4),
   },
   progress: {
-    marginTop: spacing(4),
+    marginTop: spacing(2),
   },
   progressText: {
     display: 'flex',

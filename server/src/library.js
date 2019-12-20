@@ -29,8 +29,29 @@ export async function findMedium(id) {
 
   return {
     ...medium,
-    createAudioStream: () => fs.createReadStream(path.resolve(dataDir, medium.file.filename)),
+    createAudioStream: async () => {
+      await increasePlayCount(id);
+      return fs.createReadStream(path.resolve(dataDir, medium.file.filename));
+    },
   };
+}
+
+async function increasePlayCount(mediumId) {
+  return locked(async () => {
+    const library = await readDatabase();
+    let medium = library.media.find((m) => m.id === mediumId);
+
+    if (medium) {
+      medium = { ...medium, playCount: (medium.playCount || 0) + 1 };
+
+      await writeDatabase({
+        ...library,
+        media: library.media.map((m) => (m.id === mediumId ? medium : m)),
+      });
+
+      emit('update', medium);
+    }
+  });
 }
 
 export async function createMedium({ title, file, image }) {

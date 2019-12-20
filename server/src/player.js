@@ -59,32 +59,26 @@ export async function resume() {
   });
 }
 
-function startPlayback(medium) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      playback = new Playback(medium);
-
-      playback.on('progress', emit);
-
-      playback.on('finish', () => {
-        playback = null;
-        emit();
-      });
-
-      resolve(playback);
-      emit();
-    }, 300);
+async function startPlayback(medium) {
+  const stream = await medium.createAudioStream();
+  playback = new Playback(medium, stream);
+  playback.on('progress', emit);
+  playback.on('finish', () => {
+    playback = null;
+    emit();
   });
+
+  return playback;
 }
 
 class Playback extends EventEmitter {
-  constructor(medium) {
+  constructor(medium, stream) {
     super();
     this.medium = medium;
     this.elapsedSeconds = 0;
     this.paused = false;
 
-    this.stream = medium.createAudioStream().pipe(new Decoder());
+    this.stream = stream.pipe(new Decoder());
     this.stream.once('format', (format) => {
       this.speaker = new Speaker(format);
       this.speaker.on('close', () => {

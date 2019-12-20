@@ -31,6 +31,7 @@ const typeDefs = gql`
     title: String!
     duration: Int
     image: String
+    playCount: Int
   }
 
   type Playback {

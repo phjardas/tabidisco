@@ -48,7 +48,7 @@ function Library({ library, createMedium, deleteMedium }) {
 const useStyles = makeStyles(({ spacing }) => ({
   grid: { marginBottom: spacing(2) },
   fab: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: spacing(2),
     right: spacing(2),
   },

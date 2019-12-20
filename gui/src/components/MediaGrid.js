@@ -26,7 +26,14 @@ function MediumTile({ medium, onClick, createActionIcon }) {
     <Tile className={classes.tile} style={{ backgroundImage: `url(${medium.image})` }} onClick={onClick}>
       <GridListTileBar
         title={medium.title}
-        subtitle={medium.duration && <Duration seconds={medium.duration} />}
+        subtitle={
+          medium.duration && (
+            <>
+              <Duration seconds={medium.duration} />
+              {medium.playCount && `, ${medium.playCount} play${medium.playCount > 1 ? 's' : ''}`}
+            </>
+          )
+        }
         actionIcon={actionIcon}
         className={classes.title}
       />
@@ -58,6 +65,7 @@ const useStyles = makeStyles(({ spacing, breakpoints }) => ({
   tile: {
     position: 'relative',
     backgroundSize: 'cover',
+    backgroundPosition: 'center center',
     '&:nth-child(2)': {
       gridRow: '1 / 1',
       gridColumn: '1 / 1',

@@ -10,5 +10,5 @@ export default function Duration({ seconds }) {
     .join(':')
     .replace(/^0:0?/, '');
 
-  return `${str} ${hours ? 'hours' : 'minutes'}`;
+  return `${str} ${hours ? 'hours' : 'min'}`;
 }
