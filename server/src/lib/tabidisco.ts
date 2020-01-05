@@ -5,17 +5,20 @@ import { Library, Song } from './library';
 import { LogEvent, logger } from './log';
 import { ButtonId, PiAdapter, PiEvent, PowerState } from './pi';
 import { Player, SongEvent } from './player';
+import { Settings, SettingsEvent, SettingsManager } from './settings';
 
 const log = logger.child({ module: 'tabidisco' });
 
-export type TabidiscoEvent = PiEvent | SongEvent | LogEvent;
+export type TabidiscoEvent = PiEvent | SongEvent | LogEvent | SettingsEvent;
 
 export class Tabidisco {
+  private settingsManager = new SettingsManager();
+  readonly sonosGroups = this.settingsManager.sonosGroups;
   readonly events: Observable<TabidiscoEvent>;
   currentSong?: Song;
 
   constructor(private readonly library: Library, private readonly pi: PiAdapter, private readonly player: Player) {
-    this.events = merge(this.pi.events, this.player.events);
+    this.events = merge(this.pi.events, this.player.events, this.settingsManager.events);
     this.pi.buttons
       .pipe(filter(btn => btn === 'play'))
       .subscribe(() => this.playSong().catch(error => log.error('Error playing song:', error)));
@@ -95,5 +98,13 @@ export class Tabidisco {
 
   stop(): Promise<any> {
     return this.player.stop();
+  }
+
+  get settings(): Promise<Settings> {
+    return this.settingsManager.settings.pipe(first()).toPromise();
+  }
+
+  async updateSettings(updater: (settings: Settings) => Settings): Promise<Settings> {
+    return this.settingsManager.updateSettings(updater);
   }
 }

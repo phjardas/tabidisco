@@ -1,8 +1,20 @@
 import { IResolvers, PubSub } from 'apollo-server-express';
-import { of, BehaviorSubject } from 'rxjs';
-import { filter, mergeScan } from 'rxjs/operators';
+import { BehaviorSubject, of } from 'rxjs';
+import { filter, first, mergeScan } from 'rxjs/operators';
 import { Readable } from 'stream';
-import { ButtonId, LogEvent, logEvents, PowerEvent, PowerState, Song, SongStartedEvent, tabidisco } from './lib';
+import {
+  ButtonId,
+  LogEvent,
+  logEvents,
+  OutputChannel,
+  PowerEvent,
+  PowerState,
+  Settings,
+  Song,
+  SongStartedEvent,
+  SonosGroup,
+  tabidisco,
+} from './lib';
 
 type SuccessResult = { success: true };
 type ErrorResult = { success: false; error: string };
@@ -61,6 +73,8 @@ interface Resolvers extends IResolvers<any, any> {
     currentSong(): Promise<Song | undefined>;
     power(): Promise<PowerState>;
     logs(): Promise<LogEvent[]>;
+    settings(): Promise<Settings>;
+    sonosGroups(): Promise<SonosGroup[]>;
   };
   Mutation: {
     playSong(source: any, args: PlaySongArgs): Promise<{ song: Song }>;
@@ -71,11 +85,13 @@ interface Resolvers extends IResolvers<any, any> {
     setPower(source: any, args: SetPowerArgs): Promise<SimpleResult>;
     cancelShutdownTimer(): Promise<SimpleResult>;
     simulateButtonPress(source: any, args: SimulateButtonPressArgs): Promise<SimpleResult>;
+    setOutput(output: OutputChannel): Promise<PayloadResult<{ settings: Settings }>>;
   };
   Subscription: {
     power: Subscription;
     currentSong: Subscription;
     log: Subscription;
+    settings: Subscription;
   };
 }
 
@@ -85,6 +101,7 @@ tabidisco.events
   .pipe(filter(e => e.type === 'song_started'))
   .subscribe((evt: SongStartedEvent) => events.publish('currentSong', { currentSong: evt.song }));
 tabidisco.events.pipe(filter(e => e.type === 'song_finished')).subscribe(() => events.publish('currentSong', { currentSong: null }));
+tabidisco.events.pipe(filter(e => e.type === 'settings')).subscribe((evt: PowerEvent) => events.publish('power', { power: evt.state }));
 logEvents.subscribe(e => events.publish('log', { log: e }));
 
 const bufferedLogEvents = new BehaviorSubject<LogEvent[]>([]);
@@ -102,6 +119,8 @@ export const resolvers: Resolvers = {
     power: () => Promise.resolve(tabidisco.power),
     currentSong: () => Promise.resolve(tabidisco.currentSong),
     logs: () => Promise.resolve(bufferedLogEvents.getValue()),
+    settings: () => tabidisco.settings,
+    sonosGroups: () => tabidisco.sonosGroups.pipe(first()).toPromise(),
   },
   Mutation: {
     playSong: withPayload((_: any, { id }: PlaySongArgs) => tabidisco.playSong(id)),
@@ -128,10 +147,15 @@ export const resolvers: Resolvers = {
       tabidisco.simulateButtonPress(button);
       return null;
     }),
+    setOutput: withPayload(async (_: any, output: OutputChannel) => {
+      const settings = await tabidisco.updateSettings(s => ({ ...s, output }));
+      return { settings };
+    }),
   },
   Subscription: {
     power: subscription(['power']),
     currentSong: subscription(['currentSong']),
     log: subscription(['log']),
+    settings: subscription(['settings']),
   },
 };

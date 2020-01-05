@@ -6,6 +6,8 @@ export const typeDefs = gql`
     currentSong: Song
     power: PowerState!
     logs: [LogEvent!]!
+    settings: Settings!
+    sonosGroups: [SonosGroup!]!
   }
 
   type Mutation {
@@ -17,12 +19,14 @@ export const typeDefs = gql`
     setPower(power: Boolean!): SimpleResult!
     cancelShutdownTimer: SimpleResult!
     simulateButtonPress(button: String!): SimpleResult!
+    setOutput(type: ID!, groupId: String): SettingsResult!
   }
 
   type Subscription {
     currentSong: Song
     power: PowerState!
     log: LogEvent!
+    settings: Settings!
   }
 
   type Song {
@@ -71,5 +75,25 @@ export const typeDefs = gql`
     msg: String!
     module: String!
     level: Int!
+  }
+
+  type Settings {
+    output: OutputChannel!
+  }
+
+  type SettingsResult {
+    success: Boolean!
+    error: String
+    settings: Settings!
+  }
+
+  type OutputChannel {
+    type: ID!
+    groupId: String
+  }
+
+  type SonosGroup {
+    id: ID!
+    name: String!
   }
 `;
