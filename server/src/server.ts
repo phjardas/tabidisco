@@ -7,6 +7,7 @@ import fs from 'fs';
 import helmet from 'helmet';
 import http from 'http';
 import multer from 'multer';
+import { externalIp, guiDir, port } from './config';
 import { logger, tabidisco } from './lib';
 import { resolvers } from './resolvers';
 import { typeDefs } from './typeDefs';
@@ -30,6 +31,18 @@ app.put('/songs/:id', bodyParser.json(), upload.single('file'), async (req, res,
   }
 });
 
+app.get('/songs/:id.mp3', async (req, res, next) => {
+  try {
+    const song = (await tabidisco.songs).find(s => s.id === req.params.id);
+    if (!song) return res.status(404).end();
+    res.header('Content-Type', 'audio/mp3');
+    fs.createReadStream(song.file).pipe(res);
+  } catch (error) {
+    console.error('Error playing %s:', req.params.id, error);
+    next(error);
+  }
+});
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -40,8 +53,6 @@ server.applyMiddleware({ app });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-const { TABIDISCO_GUI_DIR: guiDir, PORT = '3000' } = process.env;
-
 if (guiDir) {
   log.info(`Serving GUI from ${guiDir}`);
   app.use(helmet());
@@ -49,8 +60,7 @@ if (guiDir) {
   app.use(express.static(guiDir));
 }
 
-const port = parseInt(PORT || '3001');
 httpServer.listen({ port }, () => {
-  log.info(`Server ready at http://localhost:${port}${server.graphqlPath}`);
-  log.info(`Subscriptions ready at ws://localhost:${port}${server.subscriptionsPath}`);
+  log.info(`Server ready at http://${externalIp}:${port}${server.graphqlPath}`);
+  log.info(`Subscriptions ready at ws://${externalIp}:${port}${server.subscriptionsPath}`);
 });

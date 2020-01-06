@@ -5,17 +5,24 @@ import { Library, Song } from './library';
 import { LogEvent, logger } from './log';
 import { ButtonId, PiAdapter, PiEvent, PowerState } from './pi';
 import { Player, SongEvent } from './player';
+import { Settings, SettingsEvent, SettingsManager, SonosGroupsEvent } from './settings';
 
 const log = logger.child({ module: 'tabidisco' });
 
-export type TabidiscoEvent = PiEvent | SongEvent | LogEvent;
+export type TabidiscoEvent = PiEvent | SongEvent | LogEvent | SettingsEvent | SonosGroupsEvent;
 
 export class Tabidisco {
+  readonly sonosGroups = this.settingsManager.sonosGroups;
   readonly events: Observable<TabidiscoEvent>;
   currentSong?: Song;
 
-  constructor(private readonly library: Library, private readonly pi: PiAdapter, private readonly player: Player) {
-    this.events = merge(this.pi.events, this.player.events);
+  constructor(
+    private readonly settingsManager: SettingsManager,
+    private readonly library: Library,
+    private readonly pi: PiAdapter,
+    private readonly player: Player
+  ) {
+    this.events = merge(this.pi.events, this.player.events, this.settingsManager.events);
     this.pi.buttons
       .pipe(filter(btn => btn === 'play'))
       .subscribe(() => this.playSong().catch(error => log.error('Error playing song:', error)));
@@ -74,11 +81,12 @@ export class Tabidisco {
       log.info('Song %s is already playing', song.id);
       return;
     }
+    await this.stop();
     this.currentSong = song;
 
-    await this.player.stop();
     song = await this.library.recordPlay(song.id);
-    await this.setPower(true);
+
+    if (this.player.requiresPower) await this.setPower(true);
 
     // activate the shutdown timer once the song has finished
     this.player.events
@@ -86,7 +94,7 @@ export class Tabidisco {
       .pipe(first())
       .subscribe(() => {
         this.currentSong = undefined;
-        this.pi.activateShutdownTimer();
+        if (this.player.requiresPower) this.pi.activateShutdownTimer();
       });
 
     // start playback
@@ -95,5 +103,14 @@ export class Tabidisco {
 
   stop(): Promise<any> {
     return this.player.stop();
+  }
+
+  get settings(): Promise<Settings> {
+    return this.settingsManager.settings.pipe(first()).toPromise();
+  }
+
+  async updateSettings(updater: (settings: Settings) => Settings): Promise<Settings> {
+    await this.stop();
+    return this.settingsManager.updateSettings(updater);
   }
 }

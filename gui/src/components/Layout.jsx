@@ -1,42 +1,14 @@
 import gql from 'graphql-tag';
 import React from 'react';
 import { Mutation } from 'react-apollo';
-import { Link as RRLink, NavLink as RRNavLink } from 'react-router-dom';
-import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink } from 'reactstrap';
 import { WithLibrary } from '../providers/Library';
 import { WithPower } from '../providers/Power';
-import FontAwesome from './FontAwesome';
 import Footer from './Footer';
+import Menu from './Menu';
 
 const Layout = ({ children, currentSong, power, setPower, cancelShutdownTimer, pressButton }) => (
   <>
-    <Navbar color="primary" dark className="navbar-expand">
-      <Container className="d-flex">
-        <NavbarBrand to="/" tag={RRLink}>
-          <FontAwesome icon="music" className="mr-2" />
-          Tabidisco
-        </NavbarBrand>
-        <div className="collapse navbar-collapse">
-          <Nav navbar>
-            <NavItem>
-              <NavLink to="/library" tag={RRNavLink}>
-                Library
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink to="/upload" tag={RRNavLink}>
-                Upload
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink to="/events" tag={RRNavLink}>
-                Events
-              </NavLink>
-            </NavItem>
-          </Nav>
-        </div>
-      </Container>
-    </Navbar>
+    <Menu />
 
     <div style={{ marginBottom: 54 }}>{children}</div>
 

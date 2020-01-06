@@ -144,7 +144,11 @@ export class FileLibrary implements Library {
   }
 
   private async save(songs: SongMap): Promise<any> {
-    const data = JSON.stringify(Object.keys(songs).map(id => songs[id]), null, 2);
+    const data = JSON.stringify(
+      Object.keys(songs).map(id => songs[id]),
+      null,
+      2
+    );
     await writeFile(this.dbFile, data, 'utf-8');
   }
 }

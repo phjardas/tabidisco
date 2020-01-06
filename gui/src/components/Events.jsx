@@ -56,7 +56,7 @@ function EventsList({ events, subscribeToMore }) {
         return { ...prev, logs };
       },
     });
-  }, []);
+  }, [subscribeToMore]);
 
   return (
     <Table>

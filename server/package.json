@@ -11,11 +11,13 @@
     "node": "^8"
   },
   "dependencies": {
+    "@types/fs-extra": "^8.0.1",
     "apollo-server-express": "^2.4.2",
     "bunyan": "^1.8.12",
     "connect-history-api-fallback": "^1.6.0",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "fs-extra": "^8.1.0",
     "graphql": "^14.1.1",
     "helmet": "^3.15.1",
     "lame": "^1.2.4",
@@ -23,6 +25,7 @@
     "mp3-parser": "^0.3.0",
     "multer": "^1.4.1",
     "rxjs": "^6.4.0",
+    "sonos": "^1.12.5",
     "speaker": "^0.4.1"
   },
   "devDependencies": {
