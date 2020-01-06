@@ -10,9 +10,11 @@ import {
   PowerEvent,
   PowerState,
   Settings,
+  SettingsEvent,
   Song,
   SongStartedEvent,
   SonosGroup,
+  SonosGroupsEvent,
   tabidisco,
 } from './lib';
 
@@ -92,6 +94,7 @@ interface Resolvers extends IResolvers<any, any> {
     currentSong: Subscription;
     log: Subscription;
     settings: Subscription;
+    sonosGroups: Subscription;
   };
 }
 
@@ -101,7 +104,12 @@ tabidisco.events
   .pipe(filter(e => e.type === 'song_started'))
   .subscribe((evt: SongStartedEvent) => events.publish('currentSong', { currentSong: evt.song }));
 tabidisco.events.pipe(filter(e => e.type === 'song_finished')).subscribe(() => events.publish('currentSong', { currentSong: null }));
-tabidisco.events.pipe(filter(e => e.type === 'settings')).subscribe((evt: PowerEvent) => events.publish('power', { power: evt.state }));
+tabidisco.events
+  .pipe(filter(e => e.type === 'settings'))
+  .subscribe((evt: SettingsEvent) => events.publish('settings', { settings: evt.settings }));
+tabidisco.events
+  .pipe(filter(e => e.type === 'sonosGroups'))
+  .subscribe((evt: SonosGroupsEvent) => events.publish('sonosGroups', { sonosGroups: evt.sonosGroups }));
 logEvents.subscribe(e => events.publish('log', { log: e }));
 
 const bufferedLogEvents = new BehaviorSubject<LogEvent[]>([]);
@@ -157,5 +165,6 @@ export const resolvers: Resolvers = {
     currentSong: subscription(['currentSong']),
     log: subscription(['log']),
     settings: subscription(['settings']),
+    sonosGroups: subscription(['sonosGroups']),
   },
 };

@@ -1,7 +1,8 @@
 import { FileLibrary, Library } from './library';
 import { logger } from './log';
 import { MockPiAdapter, PiAdapter, RealPiAdapter } from './pi';
-import { Player, PlayerImpl } from './player';
+import { Player, PlayerAdapter } from './player';
+import { SettingsManager } from './settings';
 import { Tabidisco } from './tabidisco';
 
 export * from './library';
@@ -12,9 +13,12 @@ export * from './player';
 export * from './settings';
 export * from './tabidisco';
 
+const settingsManager = new SettingsManager();
+const settings = settingsManager.settings;
+
 const library: Library = new FileLibrary();
 const pi: PiAdapter = getPiAdapter();
-const player: Player = new PlayerImpl();
+const player: Player = new PlayerAdapter(settings, settingsManager.sonosGroups);
 
 function getPiAdapter(): PiAdapter {
   if (process.env.TABIDISCO_MOCK_PI === 'true') {
@@ -25,4 +29,4 @@ function getPiAdapter(): PiAdapter {
   return new RealPiAdapter();
 }
 
-export const tabidisco = new Tabidisco(library, pi, player);
+export const tabidisco = new Tabidisco(settingsManager, library, pi, player);

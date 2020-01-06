@@ -27,6 +27,7 @@ export const typeDefs = gql`
     power: PowerState!
     log: LogEvent!
     settings: Settings!
+    sonosGroups: [SonosGroup!]!
   }
 
   type Song {

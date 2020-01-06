@@ -1,34 +1,15 @@
 import fs from 'fs';
 import { Decoder } from 'lame';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import Speaker from 'speaker';
-import { Song } from './library';
-import { logger } from './log';
+import { Song } from '../library';
+import { logger } from '../log';
+import { Player, SongEvent, SongFinishedEvent, SongStartedEvent } from './api';
 
-const log = logger.child({ module: 'player' });
-
-export class SongStartedEvent {
-  static readonly TYPE = 'song_started';
-  readonly type = SongStartedEvent.TYPE;
-  constructor(readonly song: Song) {}
-}
-
-export class SongFinishedEvent {
-  static readonly TYPE = 'song_finished';
-  readonly type = SongFinishedEvent.TYPE;
-  constructor(readonly song: Song) {}
-}
-
-export type SongEvent = SongStartedEvent | SongFinishedEvent;
-
-export interface Player {
-  readonly events: Observable<SongEvent>;
-  play(song: Song): Promise<any>;
-  stop(): Promise<any>;
-}
+const log = logger.child({ module: 'player_local' });
 
 class Play {
-  readonly events = new Subject<SongStartedEvent | SongFinishedEvent>();
+  readonly events = new Subject<SongEvent>();
   private speaker: any;
 
   constructor(readonly song: Song, format: any, private stream: any) {
@@ -53,12 +34,12 @@ class Play {
   }
 }
 
-export class PlayerImpl implements Player {
+export class LocalPlayer implements Player {
   private currentPlay?: Play;
   readonly events = new Subject<SongEvent>();
+  readonly requiresPower = true;
 
   async play(song: Song): Promise<any> {
-    await this.stop();
     return this.doPlaySong(song);
   }
 
