@@ -1,2 +1,4 @@
+/.yarn/build-state.yml
+/.yarn/unplugged/
 /node_modules/
 *.log

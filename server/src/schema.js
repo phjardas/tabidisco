@@ -1,8 +1,8 @@
-import { makeExecutableSchema } from 'graphql-tools';
-import gql from 'graphql-tag';
-import * as library from './library';
-import * as player from './player';
 import { PubSub } from 'graphql-subscriptions';
+import gql from 'graphql-tag';
+import { makeExecutableSchema } from 'graphql-tools';
+import * as library from './library';
+import * as player from './sonos';
 
 const typeDefs = gql`
   scalar Upload

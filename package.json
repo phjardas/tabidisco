@@ -3,9 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "lerna run build",
-    "start": "lerna run --parallel start",
-    "clean": "lerna run --parallel clean"
+    "build": "yarn workspaces foreach run build",
+    "start": "yarn workspaces foreach --parallel --interlaced run dev",
+    "clean": "yarn workspaces foreach --parallel run clean"
   },
   "workspaces": [
     "gui",
@@ -13,8 +13,5 @@
   ],
   "engines": {
     "node": "11"
-  },
-  "devDependencies": {
-    "lerna": "^3.19.0"
   }
 }

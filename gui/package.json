@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
+    "dev": "react-scripts start",
     "build": "react-scripts build",
     "clean": "shx rm -rf dist"
   },
@@ -20,11 +20,14 @@
     "apollo-utilities": "^1.3.3",
     "formik": "^2.0.8",
     "formik-material-ui": "^1.0.0",
+    "graphql": "^14.6.0",
+    "graphql-tag": "^2.10.1",
     "music-metadata-browser": "^1.9.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
+    "subscriptions-transport-ws": "^0.9.16",
     "yup": "^0.28.0"
   },
   "devDependencies": {

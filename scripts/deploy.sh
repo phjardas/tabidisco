@@ -2,8 +2,8 @@
 
 cd $(dirname $0)
 
-yarn --offline --frozen-lockfile
-yarn --offline clean
-yarn --offline build
+yarn --immutable --immutable-cache --inline-builds
+yarn clean
+yarn build
 
 sudo service tabidisco restart

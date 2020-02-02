@@ -33,6 +33,7 @@ export async function findMedium(id) {
       await increasePlayCount(id);
       return fs.createReadStream(path.resolve(dataDir, medium.file.filename));
     },
+    createImageStream: () => fs.createReadStream(path.resolve(dataDir, medium.image.filename)),
   };
 }
 
