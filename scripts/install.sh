@@ -11,11 +11,11 @@ sudo apt install -y libasound2-dev
 
 echo
 echo "=== Node Version Manager ==="
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.2/install.sh | bash
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.2/install.sh | sudo bash
 
 echo
 echo "=== Install Node.js ==="
-nvm install 11
+sudo nvm install 11
 
 echo
 echo "=== Update npm ==="
