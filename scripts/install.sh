@@ -18,10 +18,6 @@ echo "=== Install Node.js ==="
 sudo nvm install 11
 
 echo
-echo "=== Update npm ==="
-npm i -g npm@latest
-
-echo
 echo "=== Install yarn ==="
 npm i -g yarn@latest
 

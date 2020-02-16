@@ -4,7 +4,7 @@ import path from 'path';
 import { ulid } from 'ulid';
 import getMp3Duration from 'mp3-duration';
 
-const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '..', 'data');
+const dataDir = process.env.TABIDISCO_DATA_DIR || path.resolve(__dirname, '..', 'data');
 const dataFile = path.resolve(dataDir, 'data.json');
 const lock = new AsyncLock();
 const locked = (task) => lock.acquire('data', task);
