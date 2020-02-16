@@ -3,6 +3,7 @@ import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import React, { useMemo } from 'react';
+import { serverBaseUrl } from '../config';
 import { useLibrary } from '../data';
 
 export default function Playback({ playback: { medium, paused }, pause, resume, stop }) {
@@ -11,7 +12,7 @@ export default function Playback({ playback: { medium, paused }, pause, resume, 
   const mediumData = useMemo(() => data && data.media.find((m) => m.id === medium.id), [data, medium]);
 
   return (
-    <div className={classes.root} style={{ backgroundImage: mediumData && `url(${mediumData.image})` }}>
+    <div className={classes.root} style={{ backgroundImage: mediumData && `url(${serverBaseUrl}/media/${medium.id}/cover)` }}>
       <Paper className={classes.controls}>
         <div className={classes.buttons}>
           {paused ? (
