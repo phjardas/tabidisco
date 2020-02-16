@@ -30,7 +30,6 @@ const typeDefs = gql`
     id: ID!
     title: String!
     duration: Int
-    image: String
     playCount: Int
   }
 
@@ -136,9 +135,6 @@ const resolvers = {
     media: {
       subscribe: () => pubsub.asyncIterator(['media']),
     },
-  },
-  Medium: {
-    image: (medium) => library.getImage(medium),
   },
 };
 

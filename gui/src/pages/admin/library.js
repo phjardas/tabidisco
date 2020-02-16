@@ -1,4 +1,4 @@
-import { Button, Fab, IconButton, makeStyles, Typography } from '@material-ui/core';
+import { Button, Card, CardContent, Fab, IconButton, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React, { useState } from 'react';
@@ -25,17 +25,19 @@ function Library({ library, createMedium, deleteMedium }) {
             )}
             className={classes.grid}
           />
-          <Typography variant="body2">
-            {library.media.length} items with a total play time of <Duration seconds={library.media.map((m) => m.duration || 0).reduce((a, b) => a + b, 0)} />
-          </Typography>
+          <Card>
+            <CardContent>
+              {library.media.length} items with a total play time of <Duration seconds={library.media.map((m) => m.duration || 0).reduce((a, b) => a + b, 0)} />
+            </CardContent>
+          </Card>
         </>
       ) : (
-        <>
-          <Typography gutterBottom>No media yet.</Typography>
+        <Card>
+          <CardContent>No media yet.</CardContent>
           <Button variant="contained" color="secondary" onClick={() => setCreateModalOpen(true)}>
             Upload your first medium
           </Button>
-        </>
+        </Card>
       )}
       <Fab color="secondary" className={classes.fab} onClick={() => setCreateModalOpen(true)}>
         <AddIcon />
@@ -45,7 +47,7 @@ function Library({ library, createMedium, deleteMedium }) {
   );
 }
 
-const useStyles = makeStyles(({ spacing }) => ({
+const useStyles = makeStyles(({ palette, spacing }) => ({
   grid: { marginBottom: spacing(2) },
   fab: {
     position: 'fixed',
@@ -53,7 +55,7 @@ const useStyles = makeStyles(({ spacing }) => ({
     right: spacing(2),
   },
   actionIcon: {
-    color: 'rgba(255, 255, 255, 0.54)',
+    color: palette.text.secondary,
   },
 }));
 

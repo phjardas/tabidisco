@@ -1,4 +1,4 @@
-import React from 'react';
+import { ApolloProvider as ApolloProviderImpl } from '@apollo/react-hooks';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { ApolloLink, split } from 'apollo-link';
@@ -6,7 +6,8 @@ import { onError } from 'apollo-link-error';
 import { WebSocketLink } from 'apollo-link-ws';
 import { createUploadLink } from 'apollo-upload-client';
 import { getMainDefinition } from 'apollo-utilities';
-import { ApolloProvider as ApolloProviderImpl } from '@apollo/react-hooks';
+import React from 'react';
+import { graphqlEndpoint } from '../config';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -14,7 +15,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.error(`[Network error]: ${networkError}`);
 });
 
-const endpoint = process.env.REACT_APP_GRAPHQL_ENDPOINT || 'http://localhost:3001/graphql';
+const endpoint = graphqlEndpoint;
 const wsEndpoint = endpoint.startsWith('http') ? endpoint.replace(/^http/, 'ws') : `ws://${window.location.host}/graphql`;
 
 console.info('GraphQL REST endpoint: %s', endpoint);

@@ -1,10 +1,10 @@
-import indigo from '@material-ui/core/colors/indigo';
-import pink from '@material-ui/core/colors/pink';
-import { createMuiTheme, ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
+import { indigo, pink } from '@material-ui/core/colors';
+import { createMuiTheme, makeStyles, ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import React from 'react';
 
 const theme = createMuiTheme({
   palette: {
+    type: 'dark',
     primary: pink,
     secondary: indigo,
   },
@@ -15,5 +15,22 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export function ThemeProvider({ children }) {
-  return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>;
+  return (
+    <MuiThemeProvider theme={theme}>
+      <Wrapper>{children}</Wrapper>
+    </MuiThemeProvider>
+  );
+}
+
+const useStyles = makeStyles(({ palette }) => ({
+  '@global': {
+    body: {
+      background: palette.background.default,
+    },
+  },
+}));
+
+function Wrapper({ children }) {
+  useStyles();
+  return children;
 }

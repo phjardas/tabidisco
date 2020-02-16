@@ -9,7 +9,6 @@ const MediumFragment = gql`
     id
     title
     duration
-    image
     playCount
   }
 `;

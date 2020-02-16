@@ -4,7 +4,7 @@ import { port } from './config';
 import { getMedia } from './library';
 
 const endpoint = `http://${getExternalIp()}:${port}/media`;
-const groupName = 'Wohnzimmer + 1';
+const groupName = 'Wohnzimmer + 2';
 let playback = null;
 
 const listeners = [];
@@ -84,7 +84,7 @@ async function getSonosGroup(groupName) {
         if (settled) return;
         settled = true;
         const group = groups.find((group) => group.Name === groupName);
-        if (!group) return reject(new Error(`Sonos group not found: "${groupName}"`));
+        if (!group) return reject(new Error(`Sonos group not found: "${groupName}", available groups: ${groups.map((g) => g.Name).join(', ')}`));
 
         const coordinator = group.CoordinatorDevice();
         coordinator.on('AVTransport', async ({ TransportState, CurrentTrackURI }) => {

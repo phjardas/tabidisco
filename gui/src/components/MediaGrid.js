@@ -1,6 +1,7 @@
 import { Button, GridListTileBar, makeStyles, Paper } from '@material-ui/core';
 import React, { useCallback, useMemo } from 'react';
 import Duration from '../components/Duration';
+import { serverBaseUrl } from '../config';
 
 export default function MediaGrid({ media, onClick, createActionIcon, className }) {
   const classes = useStyles();
@@ -23,7 +24,7 @@ function MediumTile({ medium, onClick, createActionIcon }) {
   const Tile = onClick ? Button : Paper;
 
   return (
-    <Tile className={classes.tile} style={{ backgroundImage: `url(${medium.image})` }} onClick={onClick}>
+    <Tile className={classes.tile} style={{ backgroundImage: `url(${serverBaseUrl}/media/${medium.id}/cover)` }} onClick={onClick}>
       <GridListTileBar
         title={medium.title}
         subtitle={

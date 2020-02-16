@@ -1,12 +1,11 @@
-import { Fab, LinearProgress, makeStyles, Paper, Typography } from '@material-ui/core';
+import { Fab, makeStyles, Paper } from '@material-ui/core';
 import PauseIcon from '@material-ui/icons/Pause';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import React, { useMemo } from 'react';
-import Duration from '../components/Duration';
 import { useLibrary } from '../data';
 
-export default function Playback({ playback: { medium, elapsedSeconds, paused }, pause, resume, stop }) {
+export default function Playback({ playback: { medium, paused }, pause, resume, stop }) {
   const classes = useStyles();
   const { data } = useLibrary();
   const mediumData = useMemo(() => data && data.media.find((m) => m.id === medium.id), [data, medium]);
@@ -29,26 +28,8 @@ export default function Playback({ playback: { medium, elapsedSeconds, paused },
           </Fab>
         </div>
         <div>{medium.title}</div>
-        {medium.duration && (
-          <div className={classes.progress}>
-            <LinearProgress variant="determinate" value={(elapsedSeconds / medium.duration) * 100} color="secondary" />
-            <div className={classes.progressText}>
-              <DurationInfo seconds={elapsedSeconds} />
-              <DurationInfo seconds={medium.duration - elapsedSeconds} />
-              <DurationInfo seconds={medium.duration} />
-            </div>
-          </div>
-        )}
       </Paper>
     </div>
-  );
-}
-
-function DurationInfo({ seconds, ...rest }) {
-  return (
-    <Typography variant="caption" {...rest}>
-      <Duration seconds={seconds} />
-    </Typography>
   );
 }
 
@@ -65,23 +46,15 @@ const useStyles = makeStyles(({ spacing }) => ({
   controls: {
     position: 'absolute',
     bottom: spacing(4),
-    left: spacing(4),
-    right: spacing(4),
-    padding: spacing(2),
+    left: '50%',
+    transform: 'translateX(-50%)',
+    padding: spacing(4),
     textAlign: 'center',
   },
   buttons: {
-    margin: `${spacing(2)}px ${spacing(4)}px ${spacing(2)}px`,
+    margin: `0 ${spacing(4)}px ${spacing(2)}px`,
   },
   stopButton: {
     marginLeft: spacing(4),
-  },
-  progress: {
-    marginTop: spacing(2),
-  },
-  progressText: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: spacing(1),
   },
 }));

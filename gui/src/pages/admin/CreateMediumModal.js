@@ -33,7 +33,7 @@ export default function CreateMediumModal({ open, createMedium, handleClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullScreen={fullScreen}>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth fullScreen={fullScreen}>
       <Formik initialValues={initialValues} validationSchema={schema} onSubmit={onSubmit}>
         {({ isValid, dirty, isSubmitting }) => (
           <Form>
