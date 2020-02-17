@@ -5,6 +5,10 @@ import { getMedia } from './library';
 
 const endpoint = `http://${getExternalIp()}:${port}/media`;
 const groupName = 'Wohnzimmer + 2';
+
+console.log('[sonos] endpoint: %s', endpoint);
+console.log('[sonos] group name: %s', groupName);
+
 let playback = null;
 
 const listeners = [];
@@ -23,6 +27,7 @@ export async function play(medium) {
   const g = await group;
   const mediumUrl = getMediumUrl(medium);
   const coverUrl = getMediumCoverUrl(medium);
+  console.log('[sonos] playing medium from %s', mediumUrl);
   // FIXME Sonos does not seem to accept our metadata
   const metadata = Helpers.GenerateCustomMetadata(mediumUrl, medium.id, getDuration(medium.duration), medium.title, undefined, undefined, coverUrl);
   await g.CoordinatorDevice().setAVTransportURI({ uri: mediumUrl, metadata });
@@ -32,16 +37,19 @@ export async function play(medium) {
 
 export async function stop() {
   const g = await group;
+  console.log('[sonos] stopping playback');
   await g.CoordinatorDevice().stop();
 }
 
 export async function pause() {
   const g = await group;
+  console.log('[sonos] pausing playback');
   await g.CoordinatorDevice().pause();
 }
 
 export async function resume() {
   const g = await group;
+  console.log('[sonos] resuming playback');
   await g.CoordinatorDevice().play();
 }
 
@@ -89,10 +97,12 @@ async function getSonosGroup(groupName) {
         const coordinator = group.CoordinatorDevice();
         coordinator.on('AVTransport', async ({ TransportState, CurrentTrackURI }) => {
           if (['PLAYING', 'PAUSED_PLAYBACK', 'TRANSITIONING'].includes(TransportState) && CurrentTrackURI.startsWith(endpoint)) {
+            console.log('[sonos] received update: %s %s', TransportState, CurrentTrackURI);
             const media = await getMedia();
             const medium = media.find((m) => getMediumUrl(m) === CurrentTrackURI);
             if (medium) {
               const track = await coordinator.currentTrack();
+              console.log('[sonos] current track: %s', track.uri);
               if (track.uri === CurrentTrackURI) {
                 playback = {
                   elapsedSeconds: track.position,
