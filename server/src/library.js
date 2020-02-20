@@ -1,10 +1,10 @@
 import AsyncLock from 'async-lock';
 import fs from 'fs-extra';
+import getMp3Duration from 'mp3-duration';
 import path from 'path';
 import { ulid } from 'ulid';
-import getMp3Duration from 'mp3-duration';
+import { dataDir } from './config';
 
-const dataDir = process.env.TABIDISCO_DATA_DIR || path.resolve(__dirname, '..', 'data');
 const dataFile = path.resolve(dataDir, 'data.json');
 const lock = new AsyncLock();
 const locked = (task) => lock.acquire('data', task);

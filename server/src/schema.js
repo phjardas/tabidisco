@@ -2,7 +2,7 @@ import { PubSub } from 'graphql-subscriptions';
 import gql from 'graphql-tag';
 import { makeExecutableSchema } from 'graphql-tools';
 import * as library from './library';
-import * as player from './sonos';
+import * as sonos from './sonos';
 
 const typeDefs = gql`
   scalar Upload
@@ -10,6 +10,7 @@ const typeDefs = gql`
   type Query {
     media: [Medium!]!
     playback: Playback
+    sonosGroups: SonosGroups!
   }
 
   type Mutation {
@@ -19,11 +20,13 @@ const typeDefs = gql`
     resume: PlaybackResult!
     createMedium(title: String!, file: Upload!, image: Upload!): MediumResult!
     deleteMedium(id: ID!): MediumResult!
+    setSonosGroup(id: ID!): SonosGroups!
   }
 
   type Subscription {
     playback: Playback
     media: MediumEvent!
+    sonosGroups: SonosGroups!
   }
 
   type Medium {
@@ -35,7 +38,6 @@ const typeDefs = gql`
 
   type Playback {
     medium: Medium!
-    elapsedSeconds: Int!
     paused: Boolean!
   }
 
@@ -63,25 +65,38 @@ const typeDefs = gql`
     type: String!
     medium: Medium!
   }
+
+  type SonosGroups {
+    id: ID!
+    groups: [SonosGroup!]!
+    selectedGroup: ID
+  }
+
+  type SonosGroup {
+    id: ID!
+    label: String!
+  }
 `;
 
 const pubsub = new PubSub();
 pubsub.publish('playback', { playback: null });
 
-player.registerListener((playback) => pubsub.publish('playback', { playback }));
+sonos.on('playback', (playback) => pubsub.publish('playback', { playback }));
+sonos.on('groups', (sonosGroups) => pubsub.publish('sonosGroups', { sonosGroups }));
 library.registerListener((event) => pubsub.publish('media', { media: event }));
 
 const resolvers = {
   Query: {
     media: () => library.getMedia(),
-    playback: () => player.getPlayback(),
+    playback: () => sonos.getPlayback(),
+    sonosGroups: () => sonos.getGroups(),
   },
   Mutation: {
     play: async (_, { mediumId }) => {
       try {
         const medium = await library.findMedium(mediumId);
         if (!medium) throw new Error(`Medium nicht gefunden: ${mediumId}`);
-        const playback = await player.play(medium);
+        const playback = await sonos.play(medium);
         return { success: true, playback };
       } catch (error) {
         return { success: false, message: error.message, stack: error.stack };
@@ -89,7 +104,7 @@ const resolvers = {
     },
     stop: async () => {
       try {
-        await player.stop();
+        await sonos.stop();
         return { success: true };
       } catch (error) {
         return { success: false, message: error.message, stack: error.stack };
@@ -97,7 +112,7 @@ const resolvers = {
     },
     pause: async () => {
       try {
-        const playback = await player.pause();
+        const playback = await sonos.pause();
         return { success: true, playback };
       } catch (error) {
         return { success: false, message: error.message, stack: error.stack };
@@ -105,7 +120,7 @@ const resolvers = {
     },
     resume: async () => {
       try {
-        const playback = await player.resume();
+        const playback = await sonos.resume();
         return { success: true, playback };
       } catch (error) {
         return { success: false, message: error.message, stack: error.stack };
@@ -127,6 +142,7 @@ const resolvers = {
         return { success: false, message: error.message, stack: error.stack };
       }
     },
+    setSonosGroup: (_, { id }) => sonos.setSonosGroup(id),
   },
   Subscription: {
     playback: {
@@ -134,6 +150,9 @@ const resolvers = {
     },
     media: {
       subscribe: () => pubsub.asyncIterator(['media']),
+    },
+    sonosGroups: {
+      subscribe: () => pubsub.asyncIterator(['sonosGroups']),
     },
   },
 };

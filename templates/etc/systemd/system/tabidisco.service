@@ -12,6 +12,8 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=tabidisco
 EnvironmentFile=/etc/default/tabidisco
+User=pi
+Group=pi
 
 [Install]
 WantedBy=multi-user.target

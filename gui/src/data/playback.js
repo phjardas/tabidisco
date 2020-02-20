@@ -41,7 +41,6 @@ const playbackFragment = gql`
       title
       duration
     }
-    elapsedSeconds
     paused
   }
 `;
