@@ -182,7 +182,7 @@ function getSonosGroups() {
 
   DeviceDiscovery(async (device) => {
     const sonosGroups = await device.getAllGroups();
-    const groups = sonosGroups.map((g) => ({ id: g.ID, label: g.Name, _group: g })).sort((a, b) => a.label.localeCompare(b.label));
+    const groups = sonosGroups.map((g) => ({ id: g.ID, label: g.Name.replace(/ \+ \d+$/, ''), _group: g })).sort((a, b) => a.label.localeCompare(b.label));
 
     current = {
       ...current,
