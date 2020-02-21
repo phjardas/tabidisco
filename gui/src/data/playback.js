@@ -61,12 +61,8 @@ const playMutation = gql`
       success
       message
       stack
-      playback {
-        ...PlaybackData
-      }
     }
   }
-  ${playbackFragment}
 `;
 
 const stopMutation = gql`
@@ -85,12 +81,8 @@ const pauseMutation = gql`
       success
       message
       stack
-      playback {
-        ...PlaybackData
-      }
     }
   }
-  ${playbackFragment}
 `;
 
 const resumeMutation = gql`
@@ -99,10 +91,6 @@ const resumeMutation = gql`
       success
       message
       stack
-      playback {
-        ...PlaybackData
-      }
     }
   }
-  ${playbackFragment}
 `;

@@ -31,8 +31,8 @@ export async function play(medium) {
   const mediumUrl = getMediumUrl(medium);
   const coverUrl = getMediumCoverUrl(medium);
   console.log('[sonos] playing medium from %s', mediumUrl);
-  // FIXME Sonos does not seem to accept our metadata
   const metadata = Helpers.GenerateCustomMetadata(mediumUrl, medium.id, getDuration(medium.duration), medium.title, undefined, undefined, coverUrl);
+  console.log('[sonos] metadata:', metadata);
   await c.setAVTransportURI({ uri: mediumUrl, metadata });
   playback = { paused: false, medium };
   emitPlayback();
@@ -95,9 +95,45 @@ export function getGroups() {
   return groups.current;
 }
 
+function attachCoordinatorListener(coordinator) {
+  const listener = async ({ TransportState, CurrentTrackURI }) => {
+    if (CurrentTrackURI.startsWith(endpoint)) {
+      console.log('[sonos] received update: %s %s', TransportState, CurrentTrackURI);
+      const media = await getMedia();
+      const medium = media.find((m) => getMediumUrl(m) === CurrentTrackURI);
+      if (medium) {
+        const track = await coordinator.currentTrack();
+        console.log('[sonos] current track: %s', track.uri);
+
+        if (track.uri === CurrentTrackURI) {
+          playback =
+            TransportState === 'STOPPED'
+              ? null
+              : {
+                  paused: TransportState === 'PAUSED_PLAYBACK',
+                  medium,
+                };
+          emitPlayback();
+          return;
+        }
+      }
+    }
+  };
+
+  console.log('[sonos] adding listener to coordinator %s:%s', coordinator.host, coordinator.port);
+  coordinator.on('AVTransport', listener);
+
+  return () => {
+    console.log('[sonos] removing listener from coordinator %s:%s', coordinator.host, coordinator.port);
+    coordinator.off('AVTransport', listener);
+  };
+}
+
 function getSonosGroups() {
   const listeners = {};
   const emit = (type, ...args) => (listeners[type] || []).forEach((listener) => listener(...args));
+
+  let coordinatorListener = null;
 
   let current = {
     id: 'sonos',
@@ -106,16 +142,37 @@ function getSonosGroups() {
     coordinator: null,
   };
 
+  const selectCoordinator = async (groups, groupId) => {
+    const group = groups.find((g) => g.id === groupId);
+
+    if (group) {
+      const coordinator = await group._group.CoordinatorDevice();
+
+      if (current.coordinator) {
+        if (current.coordinator.host === coordinator.host && current.coordinator.port === coordinator.port) {
+          return current.coordinator;
+        }
+
+        coordinatorListener && coordinatorListener();
+      }
+
+      coordinatorListener = attachCoordinatorListener(coordinator);
+      return coordinator;
+    } else if (coordinatorListener) {
+      coordinatorListener();
+      coordinatorListener = null;
+    }
+  };
+
   const setSelectedGroup = async (id, skipConfigWrite) => {
     console.log('[sonos] set group: %s', id);
-    const group = current.groups.find((g) => g.id === id);
-    const coordinator = group ? await group._group.CoordinatorDevice() : null;
 
     current = {
       ...current,
-      coordinator,
       selectedGroup: id,
+      coordinator: await selectCoordinator(current.groups, id),
     };
+
     if (!skipConfigWrite) await updateConfig('sonosGroupId', id);
     emit('change', current);
     return current;
@@ -126,13 +183,11 @@ function getSonosGroups() {
   DeviceDiscovery(async (device) => {
     const sonosGroups = await device.getAllGroups();
     const groups = sonosGroups.map((g) => ({ id: g.ID, label: g.Name, _group: g })).sort((a, b) => a.label.localeCompare(b.label));
-    const group = groups.find((g) => g.id === current.selectedGroup);
-    const coordinator = group ? await group._group.CoordinatorDevice() : null;
 
     current = {
       ...current,
       groups,
-      coordinator,
+      coordinator: await selectCoordinator(groups, current.selectedGroup),
     };
     emit('change', current);
   });
@@ -160,31 +215,7 @@ async function getConfig() {
 }
 
 async function updateConfig(key, value) {
-  const config = await readJSON(configFile);
+  const config = await getConfig();
   config[key] = value;
   writeJSON(configFile, config);
-}
-
-function subscribeCoordinator(coordinator) {
-  const listener = async ({ TransportState, CurrentTrackURI }) => {
-    if (['PLAYING', 'PAUSED_PLAYBACK', 'TRANSITIONING'].includes(TransportState) && CurrentTrackURI.startsWith(endpoint)) {
-      console.log('[sonos] received update: %s %s', TransportState, CurrentTrackURI);
-      const media = await getMedia();
-      const medium = media.find((m) => getMediumUrl(m) === CurrentTrackURI);
-      if (medium) {
-        const track = await coordinator.currentTrack();
-        console.log('[sonos] current track: %s', track.uri);
-        if (track.uri === CurrentTrackURI) {
-          playback = {
-            paused: TransportState === 'PAUSED_PLAYBACK',
-            medium,
-          };
-          emitPlayback();
-          return;
-        }
-      }
-    }
-  };
-
-  coordinator.on('AVTransport', listener);
 }
