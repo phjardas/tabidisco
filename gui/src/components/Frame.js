@@ -1,4 +1,4 @@
-import { AppBar, makeStyles, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, makeStyles, Toolbar, Link } from '@material-ui/core';
 import React from 'react';
 import SonosGroupSelector from './SonosGroupSelector';
 
@@ -11,7 +11,9 @@ export default function Frame({ children }) {
     <>
       <AppBar position="sticky">
         <Toolbar>
-          <Typography variant="h6">Tabidisco</Typography>
+          <Link href="/" variant="h6" color="inherit">
+            Tabidisco
+          </Link>
           <SonosGroupSelector className={classes.sonos} />
         </Toolbar>
       </AppBar>

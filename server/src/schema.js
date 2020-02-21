@@ -18,7 +18,7 @@ const typeDefs = gql`
     stop: SimpleResult!
     pause: PlaybackResult!
     resume: PlaybackResult!
-    createMedium(title: String!, file: Upload!, image: Upload!): MediumResult!
+    createMedium(title: String!, artist: String, file: Upload!, image: Upload!): MediumResult!
     deleteMedium(id: ID!): MediumResult!
     setSonosGroup(id: ID!): SonosGroups!
   }
@@ -31,6 +31,7 @@ const typeDefs = gql`
 
   type Medium {
     id: ID!
+    artist: String
     title: String!
     duration: Int
     playCount: Int

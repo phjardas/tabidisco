@@ -55,14 +55,14 @@ async function increasePlayCount(mediumId) {
   });
 }
 
-export async function createMedium({ title, file, image }) {
+export async function createMedium({ title, artist, file, image }) {
   return locked(async () => {
     const db = await readDatabase();
     const id = ulid();
     const fileData = await writeFile(id, await file);
     const imageData = await writeFile(id, await image);
     const duration = await getDuration(fileData);
-    const medium = { id, title, duration, file: fileData, image: imageData };
+    const medium = { id, title, artist, duration, file: fileData, image: imageData };
     await writeDatabase({ ...db, media: [...db.media, medium] });
     emit('created', medium);
 

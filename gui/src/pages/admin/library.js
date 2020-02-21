@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Fab, IconButton, makeStyles } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, Fab, IconButton, makeStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React, { useState } from 'react';
@@ -34,9 +34,11 @@ function Library({ library, createMedium, deleteMedium }) {
       ) : (
         <Card>
           <CardContent>No media yet.</CardContent>
-          <Button variant="contained" color="secondary" onClick={() => setCreateModalOpen(true)}>
-            Upload your first medium
-          </Button>
+          <CardActions>
+            <Button variant="contained" color="secondary" onClick={() => setCreateModalOpen(true)}>
+              Upload your first medium
+            </Button>
+          </CardActions>
         </Card>
       )}
       <Fab color="secondary" className={classes.fab} onClick={() => setCreateModalOpen(true)}>

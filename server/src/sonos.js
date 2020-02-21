@@ -31,7 +31,7 @@ export async function play(medium) {
   const mediumUrl = getMediumUrl(medium);
   const coverUrl = getMediumCoverUrl(medium);
   console.log('[sonos] playing medium from %s', mediumUrl);
-  const metadata = Helpers.GenerateCustomMetadata(mediumUrl, medium.id, getDuration(medium.duration), medium.title, undefined, undefined, coverUrl);
+  const metadata = Helpers.GenerateCustomMetadata(mediumUrl, medium.id, getDuration(medium.duration), medium.title, medium.artist, undefined, coverUrl);
   console.log('[sonos] metadata:', metadata);
   await c.setAVTransportURI({ uri: mediumUrl, metadata });
   playback = { paused: false, medium };

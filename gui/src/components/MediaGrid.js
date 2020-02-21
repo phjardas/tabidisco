@@ -5,7 +5,7 @@ import { serverBaseUrl } from '../config';
 
 export default function MediaGrid({ media, onClick, createActionIcon, className }) {
   const classes = useStyles();
-  const sortedMedia = useMemo(() => [...media].sort((a, b) => a.title.localeCompare(b.title)), [media]);
+  const sortedMedia = useMemo(() => [...media].sort((a, b) => `${a.artist || ''}${a.title}`.localeCompare(`${b.artist || ''}${b.title}`)), [media]);
   const handleClick = useCallback((medium) => onClick && (() => onClick(medium)), [onClick]);
 
   return (
@@ -28,12 +28,16 @@ function MediumTile({ medium, onClick, createActionIcon }) {
       <GridListTileBar
         title={medium.title}
         subtitle={
-          medium.duration && (
-            <>
-              <Duration seconds={medium.duration} />
-              {medium.playCount && `, ${medium.playCount} play${medium.playCount > 1 ? 's' : ''}`}
-            </>
-          )
+          <>
+            {medium.artist}
+            {medium.duration && (
+              <>
+                {medium.artist && ', '}
+                <Duration seconds={medium.duration} />
+                {medium.playCount && `, ${medium.playCount} play${medium.playCount > 1 ? 's' : ''}`}
+              </>
+            )}
+          </>
         }
         actionIcon={actionIcon}
         className={classes.title}

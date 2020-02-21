@@ -7,12 +7,14 @@ import { readMp3Tags } from '../../data/mp3';
 
 const initialValues = {
   title: '',
+  artist: '',
   file: '',
   image: '',
 };
 
 const schema = object().shape({
   title: string().required('Please enter a title'),
+  artist: string(),
   file: mixed().required('Please select an audio file'),
   image: mixed().required('Please select a cover image'),
 });
@@ -65,6 +67,7 @@ function CreateMediumForm() {
         <>
           <span>{values.file.name}</span>
           <Field name="title" label="Title" component={TextField} margin="normal" required fullWidth color="secondary" />
+          <Field name="artist" label="Artist" component={TextField} margin="normal" fullWidth color="secondary" />
           <ImageField />
         </>
       ) : (
@@ -83,12 +86,13 @@ function FileField() {
       const { files, name } = e.target;
       if (files.length) {
         const file = files[0];
-        const tags = await readMp3Tags(file);
         setFieldValue(name, file);
 
-        if (tags.common.title) {
-          setFieldValue('title', tags.common.title);
-        }
+        const tags = await readMp3Tags(file);
+        console.log('mp3 tags:', tags);
+
+        if (tags.common.title) setFieldValue('title', tags.common.title);
+        if (tags.common.artist) setFieldValue('artist', tags.common.artist);
 
         if (tags.common.picture && tags.common.picture.length) {
           const picture = tags.common.picture[0];

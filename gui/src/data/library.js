@@ -8,6 +8,7 @@ const MediumFragment = gql`
   fragment MediumFragment on Medium {
     id
     title
+    artist
     duration
     playCount
   }
@@ -23,8 +24,8 @@ const LibraryQuery = gql`
 `;
 
 const CreateMediumMutation = gql`
-  mutation CreateMedium($title: String!, $file: Upload!, $image: Upload!) {
-    createMedium(title: $title, file: $file, image: $image) {
+  mutation CreateMedium($title: String!, $artist: String, $file: Upload!, $image: Upload!) {
+    createMedium(title: $title, artist: $artist, file: $file, image: $image) {
       success
       message
       stack
